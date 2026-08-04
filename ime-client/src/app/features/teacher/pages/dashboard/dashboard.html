@@ -1,0 +1,148 @@
+<div class="dashboard">
+
+    <!-- Шапка преподавателя -->
+    <header class="teacher-card">
+        <div class="avatar">👨‍🏫</div>
+
+        <div class="teacher-info">
+            <h1 class="teacher-name">
+                {{ teacher()?.fullName || 'Загрузка...' }}
+            </h1>
+            <p class="teacher-email">
+                {{ teacher()?.email }}
+            </p>
+        </div>
+
+        @if (loading()) {
+        <div class="spinner"></div>
+        }
+    </header>
+
+
+    <!-- Мои занятия -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <span class="icon">📅</span>
+                Мои занятия
+            </h2>
+            <span class="badge">{{ lessons().length }} занятий</span>
+        </div>
+
+        @if (lessons().length === 0 && !loading()) {
+        <div class="empty-state">
+            Пока нет запланированных занятий
+        </div>
+        } @else {
+        <div class="lessons-grid">
+            @for (lesson of lessons(); track lesson.id || $index) {
+            <article class="lesson-card">
+                <h3 class="lesson-title">{{ lesson.title }}</h3>
+
+                <div class="lesson-meta">
+                    <div class="meta-item">
+                        <span class="meta-icon">📚</span>
+                        <span>{{ lesson.subject?.name || '—' }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon">👥</span>
+                        <span>{{ lesson.group?.name || '—' }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-icon">🕒</span>
+                        <span>{{ lesson.date | date:'dd.MM.yyyy HH:mm' }}</span>
+                    </div>
+                </div>
+            </article>
+            }
+        </div>
+        }
+    </section>
+
+
+
+    <!-- Домашние задания -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="icon">📝</span>
+                    Домашние задания
+                </h2>
+
+                <div class="section-actions">
+                    <span class="badge">{{ homeworks().length }} заданий</span>
+
+                    <button mat-flat-button color="primary" class="add-btn" (click)="createHomework()"
+                        [disabled]="loading() || lessons().length === 0">
+                        <mat-icon>add</mat-icon>
+                        Добавить задание
+                    </button>
+                </div>
+            </div>
+
+            @if (homeworks().length === 0 && !loading()) {
+            <div class="empty-state">
+                Домашних заданий пока нет
+            </div>
+            } @else {
+            <div class="homeworks-list">
+                @for (hw of homeworks(); track hw.id || $index) {
+                <article class="homework-card">
+                    <div class="homework-header">
+                        <div class="homework-info">
+                            <h3 class="homework-title">{{ hw.title }}</h3>
+                            @if (hw.description) {
+                            <p class="homework-description">{{ hw.description }}</p>
+                            }
+                        </div>
+                        <div class="submissions-count">
+                            {{ hw.submissions?.length || 0 }} работ
+                        </div>
+                    </div>
+
+                    @if (hw.submissions?.length) {
+                    <div class="submissions">
+                        @for (s of hw.submissions; track s.id || $index) {
+                        <div class="submission">
+                            <div class="submission-top">
+                                <strong class="student-name">
+                                    {{ s.student?.user?.fullName || 'Студент' }}
+                                </strong>
+
+                                @if (s.score != null) {
+                                <span class="score score-done">
+                                    Оценка: {{ s.score }}
+                                </span>
+                                } @else {
+                                <span class="score score-pending">
+                                    Не оценено
+                                </span>
+                                }
+                            </div>
+
+                            @if (s.content) {
+                            <p class="submission-content">{{ s.content }}</p>
+                            }
+                        </div>
+                        }
+                    </div>
+                    } @else {
+                    <div class="no-submissions">
+                        Пока никто не сдал работу
+                    </div>
+                    }
+
+                    <div class="homework-footer">
+                        <a mat-stroked-button color="primary" class="check-btn"
+                            [routerLink]="['/teacher/homeworks', hw.id]">
+                            <mat-icon>fact_check</mat-icon>
+                            Проверить работы
+                        </a>
+                    </div>
+                </article>
+                }
+            </div>
+            }
+        </section>
+
+</div>

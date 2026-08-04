@@ -1,0 +1,124 @@
+<section class="section">
+
+    <!-- Заголовок -->
+    <div class="section-header">
+        <h2 class="section-title">
+            <mat-icon>assignment</mat-icon>
+            Домашние задания
+        </h2>
+
+        <div class="header-actions">
+            @if (!loading()) {
+            <mat-chip class="count-chip" highlighted>
+                {{ homeworks().length }} {{ homeworks().length === 1 ? 'задание' : 'заданий' }}
+            </mat-chip>
+            }
+
+
+        </div>
+    </div>
+
+    <!-- Лоадер -->
+    @if (loading()) {
+    <div class="loader">
+        <mat-spinner diameter="48"></mat-spinner>
+        <p>Загружаем задания…</p>
+    </div>
+    }
+
+    <!-- Ошибка -->
+    @else if (error()) {
+    <mat-card class="error-card">
+        <mat-card-content>
+            <mat-icon color="warn">error_outline</mat-icon>
+            {{ error() }}
+        </mat-card-content>
+    </mat-card>
+    }
+
+    <!-- Список заданий -->
+    @else {
+    <div class="homeworks-list">
+
+        @for (hw of homeworks(); track hw.id) {
+        <mat-card class="homework-card" appearance="outlined">
+
+            <!-- Шапка задания -->
+            <mat-card-header>
+                <mat-card-title>{{ hw.title }}</mat-card-title>
+                <mat-card-subtitle>
+                    <mat-icon class="deadline-icon">event</mat-icon>
+                    Сдать до {{ hw.deadline | date:'dd.MM.yyyy' }}
+                </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+                <p class="description">{{ hw.description }}</p>
+
+                <mat-divider></mat-divider>
+
+                <!-- Работы студентов -->
+                <h4 class="submissions-title">
+                    <mat-icon>people</mat-icon>
+                    Работы студентов
+                </h4>
+
+                @if (hw.submissions?.length) {
+                <mat-list class="submissions-list">
+                    @for (s of hw.submissions; track s.id) {
+                    <mat-list-item class="submission-item">
+                        <div matListItemAvatar class="avatar">
+                            👨‍🎓
+                        </div>
+
+                        <div matListItemTitle>
+                            <strong>{{ s.student.user.fullName }}</strong>
+                        </div>
+                        <div matListItemLine>
+                            {{ s.student.user.email }}
+                        </div>
+
+                        <div matListItemMeta class="status">
+                            @if (s.score !== null && s.score !== undefined) {
+                            <mat-chip class="score-chip done">
+                                {{ s.score }} / {{ hw.maxScore }}
+                            </mat-chip>
+
+                            <button mat-stroked-button color="primary" class="edit-btn" (click)="grade(s, hw)">
+                                <mat-icon>edit</mat-icon>
+                                Изменить
+                            </button>
+                            } @else {
+                            <mat-chip class="score-chip waiting">
+                                Не оценено
+                            </mat-chip>
+
+                            <button mat-flat-button color="primary" class="grade-btn" (click)="grade(s, hw)">
+                                <mat-icon>grade</mat-icon>
+                                Оценить
+                            </button>
+                            }
+    </div>
+    </mat-list-item>
+    }
+    </mat-list>
+    } @else {
+    <div class="empty">
+        <mat-icon>inbox</mat-icon>
+        <p>Пока никто не сдал</p>
+    </div>
+    }
+    </mat-card-content>
+    </mat-card>
+    }
+
+    @empty {
+    <div class="empty-all">
+        <mat-icon>assignment_late</mat-icon>
+        <p>Домашних заданий пока нет</p>
+    </div>
+    }
+    </div>
+    }
+
+</section>

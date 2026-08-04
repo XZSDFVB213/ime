@@ -1,0 +1,52 @@
+<h2 mat-dialog-title class="dialog-title">
+    <mat-icon>add_task</mat-icon>
+    Новое домашнее задание
+</h2>
+
+<mat-dialog-content class="dialog-content">
+    <form [formGroup]="form" class="form">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Название</mat-label>
+            <input matInput formControlName="title" placeholder="Например: Лабораторная работа №3" />
+            @if (form.controls.title.hasError('required')) {
+            <mat-error>Обязательное поле</mat-error>
+            }
+            @if (form.controls.title.hasError('minlength')) {
+            <mat-error>Минимум 3 символа</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Описание</mat-label>
+            <textarea matInput formControlName="description" rows="3" placeholder="Что нужно сделать..."></textarea>
+        </mat-form-field>
+
+        <div class="row">
+            <mat-form-field appearance="outline" class="half">
+                <mat-label>Макс. баллов</mat-label>
+                <input matInput type="number" formControlName="maxScore" min="1" />
+                @if (form.controls.maxScore.invalid && form.controls.maxScore.touched) {
+                <mat-error>От 1 до 1000</mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half">
+                <mat-label>Срок сдачи</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="deadline" />
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                @if (form.controls.deadline.hasError('required')) {
+                <mat-error>Укажите дату</mat-error>
+                }
+            </mat-form-field>
+        </div>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button (click)="cancel()">Отмена</button>
+    <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="save()">
+        <mat-icon>add</mat-icon>
+        Создать
+    </button>
+</mat-dialog-actions>

@@ -1,0 +1,58 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>grade</mat-icon>
+  Оценка работы
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <div class="student-info">
+    <div class="avatar">👨‍🎓</div>
+    <div>
+      <div class="name">{{ data.studentName }}</div>
+      <div class="email">{{ data.studentEmail }}</div>
+    </div>
+  </div>
+
+  <form [formGroup]="form" class="grade-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Баллы</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="score"
+        [min]="0"
+        [max]="data.maxScore"
+        placeholder="0"
+      />
+      <span matTextSuffix>/ {{ data.maxScore }}</span>
+      @if (form.controls.score.hasError('required')) {
+        <mat-error>Укажите оценку</mat-error>
+      }
+      @if (form.controls.score.hasError('min') || form.controls.score.hasError('max')) {
+        <mat-error>Оценка должна быть от 0 до {{ data.maxScore }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Комментарий (необязательно)</mat-label>
+      <textarea
+        matInput
+        formControlName="comment"
+        rows="3"
+        placeholder="Обратная связь студенту..."
+      ></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="cancel()">Отмена</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid"
+    (click)="save()"
+  >
+    <mat-icon>check</mat-icon>
+    Сохранить
+  </button>
+</mat-dialog-actions>
