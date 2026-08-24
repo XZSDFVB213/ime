@@ -1,0 +1,401 @@
+<section class="create-page">
+  <a
+    class="back-link"
+    routerLink="/teacher/schedule"
+  >
+    <mat-icon>arrow_back</mat-icon>
+
+    Вернуться к расписанию
+  </a>
+
+  @if (loading()) {
+    <div class="page-state">
+      <mat-spinner diameter="48" />
+
+      <p>Загружаем занятие…</p>
+    </div>
+  } @else if (error()) {
+    <div class="page-state error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (lesson(); as lesson) {
+    <header class="create-hero">
+      <div class="hero-copy">
+        <span class="eyebrow">
+          Новое задание
+        </span>
+
+        <h1>
+          Создание домашнего задания
+        </h1>
+
+        <p>
+          Задание будет автоматически
+          привязано к выбранному занятию,
+          дисциплине и учебной группе.
+        </p>
+      </div>
+
+      <div class="hero-icon">
+        <mat-icon>
+          assignment_add
+        </mat-icon>
+      </div>
+    </header>
+
+    <div class="create-layout">
+      <form
+        class="form-card"
+        [formGroup]="form"
+        (ngSubmit)="submit()"
+      >
+        <header class="card-heading">
+          <div>
+            <h2>
+              Параметры задания
+            </h2>
+
+            <p>
+              Укажите содержание,
+              срок сдачи и максимальный балл.
+            </p>
+          </div>
+        </header>
+
+        <div class="field">
+          <label for="title">
+            Название задания
+            <span>*</span>
+          </label>
+
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            placeholder="Например: Нормализация базы данных"
+          />
+
+          <div class="field-footer">
+            @if (
+              form.controls.title.touched &&
+              form.controls.title.hasError(
+                'required'
+              )
+            ) {
+              <span class="field-error">
+                Укажите название задания
+              </span>
+            } @else if (
+              form.controls.title.touched &&
+              form.controls.title.hasError(
+                'minlength'
+              )
+            ) {
+              <span class="field-error">
+                Минимум 3 символа
+              </span>
+            }
+
+            <small>
+              {{
+                form.controls.title.value
+                  .length
+              }}
+              / 150
+            </small>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="description">
+            Описание задания
+            <span>*</span>
+          </label>
+
+          <textarea
+            id="description"
+            rows="8"
+            formControlName="description"
+            placeholder="Опишите, что должен выполнить обучающийся…"
+          ></textarea>
+
+          @if (
+            form.controls.description.touched &&
+            form.controls.description.invalid
+          ) {
+            <span class="field-error">
+              Добавьте описание задания
+            </span>
+          }
+        </div>
+
+        <div class="fields-row">
+          <div class="field">
+            <label for="deadline">
+              Срок сдачи
+              <span>*</span>
+            </label>
+
+            <div class="input-with-icon">
+              <mat-icon>
+                event
+              </mat-icon>
+
+              <input
+                id="deadline"
+                type="datetime-local"
+                formControlName="deadline"
+              />
+            </div>
+
+            @if (
+              form.controls.deadline.touched &&
+              form.controls.deadline.invalid
+            ) {
+              <span class="field-error">
+                Укажите срок сдачи
+              </span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="maxScore">
+              Максимальный балл
+              <span>*</span>
+            </label>
+
+            <div class="input-with-icon">
+              <mat-icon>
+                grade
+              </mat-icon>
+
+              <input
+                id="maxScore"
+                type="number"
+                min="1"
+                max="1000"
+                formControlName="maxScore"
+              />
+            </div>
+
+            @if (
+              form.controls.maxScore.touched &&
+              form.controls.maxScore.invalid
+            ) {
+              <span class="field-error">
+                Укажите корректный балл
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="form-notice">
+          <mat-icon>
+            info_outline
+          </mat-icon>
+
+          <div>
+            <strong>
+              После публикации
+            </strong>
+
+            <p>
+              Задание станет доступно
+              обучающимся группы
+              {{ lesson.group?.name }}
+              в разделе домашних заданий.
+            </p>
+          </div>
+        </div>
+
+        <footer class="form-actions">
+          <a
+            routerLink="/teacher/schedule"
+            class="cancel-button"
+          >
+            Отмена
+          </a>
+
+          <button
+            type="submit"
+            class="create-button"
+            [disabled]="
+              form.invalid ||
+              submitting()
+            "
+          >
+            @if (submitting()) {
+              <mat-spinner
+                diameter="20"
+              />
+
+              Создаём…
+            } @else {
+              <mat-icon>
+                add_task
+              </mat-icon>
+
+              Создать задание
+            }
+          </button>
+        </footer>
+      </form>
+
+      <aside class="lesson-sidebar">
+        <section class="lesson-card">
+          <header>
+            <div class="lesson-icon">
+              <mat-icon>
+                menu_book
+              </mat-icon>
+            </div>
+
+            <div>
+              <span>
+                Выбранное занятие
+              </span>
+
+              <h2>
+                {{
+                  lesson.subject?.name
+                }}
+              </h2>
+            </div>
+          </header>
+
+          <div class="lesson-title">
+            <span>
+              {{
+                lessonType(
+                  lesson.type
+                )
+              }}
+            </span>
+
+            <strong>
+              {{ lesson.title }}
+            </strong>
+          </div>
+
+          <div class="lesson-information">
+            <div>
+              <mat-icon>
+                groups
+              </mat-icon>
+
+              <span>
+                Учебная группа
+              </span>
+
+              <strong>
+                {{
+                  lesson.group?.name ||
+                  'Не указана'
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <mat-icon>
+                event
+              </mat-icon>
+
+              <span>
+                Дата занятия
+              </span>
+
+              <strong>
+                {{
+                  lesson.date
+                    | date:
+                      'dd MMMM yyyy'
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <mat-icon>
+                schedule
+              </mat-icon>
+
+              <span>
+                Время
+              </span>
+
+              <strong>
+                {{
+                  lesson.date
+                    | date:'HH:mm'
+                }}
+                —
+                {{
+                  lessonEndTime(
+                    lesson
+                  )
+                    | date:'HH:mm'
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <mat-icon>
+                meeting_room
+              </mat-icon>
+
+              <span>
+                Аудитория
+              </span>
+
+              <strong>
+                {{
+                  lesson.location ||
+                  'Не указана'
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <mat-icon>
+                calendar_month
+              </mat-icon>
+
+              <span>
+                Семестр
+              </span>
+
+              <strong>
+                {{
+                  lesson.semester?.name ||
+                  'Не указан'
+                }}
+              </strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="binding-card">
+          <mat-icon>
+            link
+          </mat-icon>
+
+          <div>
+            <strong>
+              Привязка автоматическая
+            </strong>
+
+            <p>
+              Дисциплина и группа
+              определяются по выбранному
+              занятию и не могут быть
+              изменены здесь.
+            </p>
+          </div>
+        </section>
+      </aside>
+    </div>
+  }
+</section>

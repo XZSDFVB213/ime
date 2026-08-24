@@ -1,0 +1,200 @@
+<section class="subjects-page">
+  <header class="subjects-hero">
+    <div>
+      <span class="eyebrow">
+        Образовательная программа
+      </span>
+
+      <h1>Мои дисциплины</h1>
+
+      <p>
+        Все учебные дисциплины, занятия,
+        преподаватели и домашние задания
+        в одном разделе
+      </p>
+    </div>
+
+    <div class="hero-decoration">
+      <mat-icon>menu_book</mat-icon>
+    </div>
+  </header>
+
+  <div class="subjects-toolbar">
+    <label class="subjects-search">
+      <mat-icon>search</mat-icon>
+
+      <input
+        type="search"
+        placeholder="Найти дисциплину или преподавателя"
+        [value]="search()"
+        (input)="setSearch($event)"
+      />
+    </label>
+
+    <div class="subjects-count">
+      <mat-icon>school</mat-icon>
+
+      <span>
+        Дисциплин:
+        <strong>{{ subjects().length }}</strong>
+      </span>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="subjects-state">
+      <mat-spinner diameter="46" />
+      <p>Загружаем дисциплины…</p>
+    </div>
+  } @else if (error()) {
+    <div class="subjects-state error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <div class="subjects-grid">
+      @for (
+        subject of filteredSubjects();
+        track subject.id;
+        let index = $index
+      ) {
+        <article class="subject-card">
+          <div
+            class="subject-cover"
+            [class]="subjectClass(index)"
+          >
+            <div class="subject-icon">
+              <mat-icon>
+                {{ subjectIcon(index) }}
+              </mat-icon>
+            </div>
+
+            @if (subject.code) {
+              <span class="subject-code">
+                {{ subject.code }}
+              </span>
+            }
+          </div>
+
+          <div class="subject-content">
+            <h2>{{ subject.name }}</h2>
+
+            <div class="teacher">
+              @if (subject.teacherAvatar) {
+                <img
+                  [src]="subject.teacherAvatar"
+                  [alt]="subject.teacherName"
+                />
+              } @else {
+                <div class="teacher-avatar">
+                  <mat-icon>person</mat-icon>
+                </div>
+              }
+
+              <div>
+                <span>Преподаватель</span>
+                <strong>
+                  {{ subject.teacherName }}
+                </strong>
+              </div>
+            </div>
+
+            <div class="subject-statistics">
+              <div>
+                <mat-icon>calendar_month</mat-icon>
+
+                <span>
+                  <strong>
+                    {{ subject.lessonsCount }}
+                  </strong>
+
+                  занятий
+                </span>
+              </div>
+
+              <div>
+                <mat-icon>assignment</mat-icon>
+
+                <span>
+                  <strong>
+                    {{ subject.homeworksCount }}
+                  </strong>
+
+                  заданий
+                </span>
+              </div>
+            </div>
+
+            @if (subject.homeworksCount) {
+              <div class="subject-progress">
+                <div class="progress-heading">
+                  <span>Выполнение заданий</span>
+
+                  <strong>
+                    {{ homeworkProgress(subject) }}%
+                  </strong>
+                </div>
+
+                <div class="progress-track">
+                  <span
+                    [style.width.%]="
+                      homeworkProgress(subject)
+                    "
+                  ></span>
+                </div>
+              </div>
+            }
+
+            @if (subject.nextLesson) {
+              <div class="next-lesson">
+                <mat-icon>schedule</mat-icon>
+
+                <div>
+                  <span>Следующее занятие</span>
+
+                  <strong>
+                    {{
+                      subject.nextLesson.date
+                        | date:'dd MMMM, HH:mm'
+                    }}
+                  </strong>
+                </div>
+              </div>
+            } @else {
+              <div class="next-lesson empty">
+                <mat-icon>event_available</mat-icon>
+
+                <div>
+                  <span>Следующее занятие</span>
+                  <strong>Не запланировано</strong>
+                </div>
+              </div>
+            }
+
+            <a
+              class="subject-button"
+              [routerLink]="[
+                '/student/subjects',
+                subject.id
+              ]"
+            >
+              Открыть дисциплину
+
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </div>
+        </article>
+      } @empty {
+        <div class="subjects-state">
+          <mat-icon>search_off</mat-icon>
+
+          <h2>Ничего не найдено</h2>
+
+          <p>
+            Попробуйте изменить поисковый запрос
+          </p>
+        </div>
+      }
+    </div>
+  }
+</section>

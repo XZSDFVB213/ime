@@ -1,0 +1,661 @@
+<section class="materials-page">
+  <header class="materials-hero">
+    <div>
+      <span class="eyebrow">
+        Учебный процесс
+      </span>
+
+      <h1>
+        Учебные материалы
+      </h1>
+
+      <p>
+        Загружайте методические материалы,
+        презентации, документы и полезные
+        ссылки для обучающихся.
+      </p>
+    </div>
+
+    <div class="hero-icon">
+      <mat-icon>
+        folder_open
+      </mat-icon>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="page-state">
+      <mat-spinner
+        diameter="48"
+      />
+
+      <p>
+        Загружаем материалы…
+      </p>
+    </div>
+  } @else if (error()) {
+    <div class="page-state error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <section class="statistics-grid">
+      <article>
+        <div class="stat-icon blue">
+          <mat-icon>
+            folder_open
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ materials().length }}
+          </strong>
+
+          <span>
+            Всего материалов
+          </span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon red">
+          <mat-icon>
+            description
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ fileCount() }}
+          </strong>
+
+          <span>
+            Файлов
+          </span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon purple">
+          <mat-icon>link</mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ linkCount() }}
+          </strong>
+
+          <span>
+            Ссылок
+          </span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon green">
+          <mat-icon>
+            hard_drive
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{
+              formatSize(
+                totalSize()
+              )
+            }}
+          </strong>
+
+          <span>
+            Занято файлами
+          </span>
+        </div>
+      </article>
+    </section>
+
+    <div class="materials-layout">
+      <section class="create-card">
+        <header class="card-heading">
+          <div>
+            <h2>
+              Добавить материал
+            </h2>
+
+            <p>
+              Выберите файл или добавьте
+              внешнюю ссылку.
+            </p>
+          </div>
+        </header>
+
+        <nav class="mode-switch">
+          <button
+            type="button"
+            [class.active]="
+              mode() === 'FILE'
+            "
+            (click)="
+              setMode('FILE')
+            "
+          >
+            <mat-icon>
+              upload_file
+            </mat-icon>
+
+            Файл
+          </button>
+
+          <button
+            type="button"
+            [class.active]="
+              mode() === 'LINK'
+            "
+            (click)="
+              setMode('LINK')
+            "
+          >
+            <mat-icon>
+              link
+            </mat-icon>
+
+            Ссылка
+          </button>
+        </nav>
+
+        <form
+          [formGroup]="form"
+          (ngSubmit)="submit()"
+        >
+          <div class="field">
+            <label>
+              Название
+              <span>*</span>
+            </label>
+
+            <input
+              type="text"
+              formControlName="title"
+              placeholder="Название материала"
+            />
+          </div>
+
+          <div class="field">
+            <label>
+              Дисциплина
+              <span>*</span>
+            </label>
+
+            <select
+              formControlName="subjectId"
+            >
+              <option value="">
+                Выберите дисциплину
+              </option>
+
+              @for (
+                subject of subjects();
+                track subject.id
+              ) {
+                <option
+                  [value]="subject.id"
+                >
+                  {{ subject.name }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="field">
+            <label>
+              Занятие
+            </label>
+
+            <select
+              formControlName="lessonId"
+              [disabled]="
+                !form.controls.subjectId.value
+              "
+            >
+              <option value="">
+                Вся дисциплина
+              </option>
+
+              @for (
+                lesson of
+                  availableLessons();
+                track lesson.id
+              ) {
+                <option
+                  [value]="lesson.id"
+                >
+                  {{
+                    lesson.title
+                  }}
+                  —
+                  {{
+                    lesson.group?.name
+                  }}
+                </option>
+              }
+            </select>
+
+            <small>
+              Если занятие не выбрано,
+              материал будет общим
+              для дисциплины.
+            </small>
+          </div>
+
+          <div class="field">
+            <label>
+              Описание
+            </label>
+
+            <textarea
+              rows="4"
+              formControlName="description"
+              placeholder="Краткое описание материала"
+            ></textarea>
+          </div>
+
+          @if (
+            mode() === 'FILE'
+          ) {
+            <div class="field">
+              <label>
+                Файл
+                <span>*</span>
+              </label>
+
+              <label
+                class="upload-zone"
+                [class.selected]="
+                  selectedFile()
+                "
+              >
+                <input
+                  #fileInput
+                  type="file"
+                  hidden
+                  (change)="
+                    onFileSelected(
+                      $event
+                    )
+                  "
+                />
+
+                @if (
+                  selectedFile();
+                  as file
+                ) {
+                  <mat-icon>
+                    task_alt
+                  </mat-icon>
+
+                  <strong>
+                    {{ file.name }}
+                  </strong>
+
+                  <span>
+                    {{
+                      formatSize(
+                        file.size
+                      )
+                    }}
+                  </span>
+
+                  <small>
+                    Нажмите,
+                    чтобы выбрать
+                    другой файл
+                  </small>
+                } @else {
+                  <mat-icon>
+                    cloud_upload
+                  </mat-icon>
+
+                  <strong>
+                    Выберите файл
+                  </strong>
+
+                  <span>
+                    PDF, Word,
+                    PowerPoint,
+                    изображения,
+                    ZIP
+                  </span>
+
+                  <small>
+                    Максимум 50 МБ
+                  </small>
+                }
+              </label>
+            </div>
+          } @else {
+            <div class="field">
+              <label>
+                Ссылка
+                <span>*</span>
+              </label>
+
+              <div class="input-icon">
+                <mat-icon>
+                  link
+                </mat-icon>
+
+                <input
+                  type="url"
+                  formControlName="url"
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+          }
+
+          <button
+            class="submit-button"
+            type="submit"
+            [disabled]="
+              saving() ||
+              form.invalid
+            "
+          >
+            @if (saving()) {
+              <mat-spinner
+                diameter="20"
+              />
+
+              Сохраняем…
+            } @else {
+              <mat-icon>
+                {{
+                  mode() === 'FILE'
+                    ? 'upload'
+                    : 'add_link'
+                }}
+              </mat-icon>
+
+              {{
+                mode() === 'FILE'
+                  ? 'Загрузить материал'
+                  : 'Добавить ссылку'
+              }}
+            }
+          </button>
+        </form>
+      </section>
+
+      <section class="materials-content">
+        <div class="materials-toolbar">
+          <label class="search-box">
+            <mat-icon>
+              search
+            </mat-icon>
+
+            <input
+              type="search"
+              placeholder="Поиск материалов"
+              [value]="search()"
+              (input)="
+                setSearch($event)
+              "
+            />
+          </label>
+
+          <nav class="filters">
+            <button
+              type="button"
+              [class.active]="
+                filter() === 'ALL'
+              "
+              (click)="
+                setFilter('ALL')
+              "
+            >
+              Все
+            </button>
+
+            <button
+              type="button"
+              [class.active]="
+                filter() === 'FILE'
+              "
+              (click)="
+                setFilter('FILE')
+              "
+            >
+              Файлы
+            </button>
+
+            <button
+              type="button"
+              [class.active]="
+                filter() === 'LINK'
+              "
+              (click)="
+                setFilter('LINK')
+              "
+            >
+              Ссылки
+            </button>
+          </nav>
+        </div>
+
+        <div class="materials-list">
+          @for (
+            material of
+              filteredMaterials();
+            track material.id
+          ) {
+            <article class="material-card">
+              <button
+                type="button"
+                class="material-icon"
+                [class.link]="
+                  material.type ===
+                  'LINK'
+                "
+                (click)="
+                  openMaterial(
+                    material
+                  )
+                "
+              >
+                <mat-icon>
+                  {{
+                    materialIcon(
+                      material
+                    )
+                  }}
+                </mat-icon>
+              </button>
+
+              <div class="material-main">
+                <div class="material-badges">
+                  <span
+                    class="type"
+                    [class.link]="
+                      material.type ===
+                      'LINK'
+                    "
+                  >
+                    {{
+                      materialTypeLabel(
+                        material
+                      )
+                    }}
+                  </span>
+
+                  <span class="subject">
+                    {{
+                      material.subject
+                        ?.name
+                    }}
+                  </span>
+                </div>
+
+                <h3>
+                  {{ material.title }}
+                </h3>
+
+                @if (
+                  material.description
+                ) {
+                  <p>
+                    {{
+                      material.description
+                    }}
+                  </p>
+                }
+
+                <div class="material-meta">
+                  @if (
+                    material.lesson
+                  ) {
+                    <span>
+                      <mat-icon>
+                        school
+                      </mat-icon>
+
+                      {{
+                        material.lesson
+                          .title
+                      }}
+                    </span>
+
+                    <span>
+                      <mat-icon>
+                        groups
+                      </mat-icon>
+
+                      {{
+                        material.lesson
+                          .group?.name
+                      }}
+                    </span>
+                  } @else {
+                    <span>
+                      <mat-icon>
+                        menu_book
+                      </mat-icon>
+
+                      Для всей дисциплины
+                    </span>
+                  }
+
+                  <span>
+                    <mat-icon>
+                      event
+                    </mat-icon>
+
+                    {{
+                      material.createdAt
+                        | date:
+                          'dd MMM yyyy, HH:mm'
+                    }}
+                  </span>
+                </div>
+
+                @if (
+                  material.type ===
+                  'FILE'
+                ) {
+                  <div class="file-info">
+                    <span>
+                      {{
+                        material.fileName
+                      }}
+                    </span>
+
+                    <strong>
+                      {{
+                        formatSize(
+                          material.size
+                        )
+                      }}
+                    </strong>
+                  </div>
+                }
+              </div>
+
+              <div class="material-actions">
+                <button
+                  type="button"
+                  class="open"
+                  (click)="
+                    openMaterial(
+                      material
+                    )
+                  "
+                >
+                  <mat-icon>
+                    {{
+                      material.type ===
+                      'LINK'
+                        ? 'open_in_new'
+                        : 'download'
+                    }}
+                  </mat-icon>
+
+                  {{
+                    material.type ===
+                    'LINK'
+                      ? 'Открыть'
+                      : 'Файл'
+                  }}
+                </button>
+
+                <button
+                  type="button"
+                  class="delete"
+                  [disabled]="
+                    deletingId() ===
+                    material.id
+                  "
+                  (click)="
+                    deleteMaterial(
+                      material
+                    )
+                  "
+                >
+                  @if (
+                    deletingId() ===
+                    material.id
+                  ) {
+                    <mat-spinner
+                      diameter="18"
+                    />
+                  } @else {
+                    <mat-icon>
+                      delete_outline
+                    </mat-icon>
+                  }
+                </button>
+              </div>
+            </article>
+          } @empty {
+            <div class="empty-state">
+              <mat-icon>
+                folder_off
+              </mat-icon>
+
+              <h2>
+                Материалы не найдены
+              </h2>
+
+              <p>
+                Добавьте первый материал
+                или измените фильтр.
+              </p>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  }
+</section>

@@ -1,0 +1,368 @@
+<section class="schedule-page">
+  <header class="schedule-hero">
+    <div>
+      <span class="eyebrow">
+        Учебный процесс
+      </span>
+
+      <h1>
+        Расписание занятий
+      </h1>
+
+      <p>
+        Ваши лекции, практические
+        занятия и учебные группы.
+      </p>
+    </div>
+
+    <div class="hero-icon">
+      <mat-icon>
+        calendar_month
+      </mat-icon>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="page-state">
+      <mat-spinner
+        diameter="48"
+      />
+
+      <p>
+        Загружаем расписание…
+      </p>
+    </div>
+  } @else if (error()) {
+    <div class="page-state error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <section class="statistics-grid">
+      <article>
+        <div class="stat-icon blue">
+          <mat-icon>
+            calendar_month
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ lessons().length }}
+          </strong>
+
+          <span>
+            Всего занятий
+          </span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon green">
+          <mat-icon>
+            upcoming
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ upcomingCount() }}
+          </strong>
+
+          <span>
+            Предстоящих
+          </span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon purple">
+          <mat-icon>
+            menu_book
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ totalSubjects() }}
+          </strong>
+
+          <span>
+            Дисциплин
+          </span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon orange">
+          <mat-icon>
+            groups
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ totalGroups() }}
+          </strong>
+
+          <span>
+            Учебных групп
+          </span>
+        </div>
+      </article>
+    </section>
+
+    <nav class="schedule-filters">
+      <button
+        type="button"
+        [class.active]="
+          activeFilter() === 'TODAY'
+        "
+        (click)="
+          setFilter('TODAY')
+        "
+      >
+        Сегодня
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          activeFilter() === 'WEEK'
+        "
+        (click)="
+          setFilter('WEEK')
+        "
+      >
+        Эта неделя
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          activeFilter() === 'UPCOMING'
+        "
+        (click)="
+          setFilter('UPCOMING')
+        "
+      >
+        Предстоящие
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          activeFilter() === 'ALL'
+        "
+        (click)="
+          setFilter('ALL')
+        "
+      >
+        Все занятия
+      </button>
+    </nav>
+
+    <div class="days-list">
+      @for (
+        group of groupedLessons();
+        track group.key
+      ) {
+        <section class="day-card">
+          <header class="day-heading">
+            <div class="date-box">
+              <strong>
+                {{
+                  group.date
+                    | date:'dd'
+                }}
+              </strong>
+
+              <span>
+                {{
+                  group.date
+                    | date:'MMM'
+                }}
+              </span>
+            </div>
+
+            <div>
+              <h2>
+                {{ group.label }}
+              </h2>
+
+              <p>
+                {{
+                  group.lessons.length
+                }}
+                занятий
+              </p>
+            </div>
+
+            @if (
+              isToday(
+                group.date
+              )
+            ) {
+              <span class="today-badge">
+                Сегодня
+              </span>
+            }
+          </header>
+
+          <div class="lessons-list">
+            @for (
+              lesson of group.lessons;
+              track lesson.id
+            ) {
+              <article
+                class="lesson-card"
+                [class.passed]="
+                  isPassed(lesson)
+                "
+              >
+                <div class="time">
+                  <strong>
+                    {{
+                      lesson.date
+                        | date:'HH:mm'
+                    }}
+                  </strong>
+
+                  <span>
+                    {{
+                      lessonEndTime(
+                        lesson
+                      )
+                        | date:'HH:mm'
+                    }}
+                  </span>
+                </div>
+
+                <div
+                  class="type-marker"
+                  [class]="
+                    lessonTypeClass(
+                      lesson.type
+                    )
+                  "
+                ></div>
+
+                <div class="lesson-content">
+                  <div class="lesson-title">
+                    <span
+                      class="type-badge"
+                      [class]="
+                        lessonTypeClass(
+                          lesson.type
+                        )
+                      "
+                    >
+                      {{
+                        lessonType(
+                          lesson.type
+                        )
+                      }}
+                    </span>
+
+                    <h3>
+                      {{
+                        lesson.subject?.name
+                      }}
+                    </h3>
+
+                    <p>
+                      {{ lesson.title }}
+                    </p>
+                  </div>
+
+                  <div class="lesson-meta">
+                    <span>
+                      <mat-icon>
+                        groups
+                      </mat-icon>
+
+                      {{
+                        lesson.group?.name ||
+                        'Группа не указана'
+                      }}
+                    </span>
+
+                    <span>
+                      <mat-icon>
+                        meeting_room
+                      </mat-icon>
+
+                      Аудитория
+                      {{
+                        lesson.location ||
+                        'не указана'
+                      }}
+                    </span>
+
+                    <span>
+                      <mat-icon>
+                        schedule
+                      </mat-icon>
+
+                      {{
+                        lesson.duration
+                      }}
+                      мин.
+                    </span>
+
+                    <span>
+                      <mat-icon>
+                        event_note
+                      </mat-icon>
+
+                      {{
+                        lesson.semester?.name ||
+                        'Семестр не указан'
+                      }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="lesson-actions">
+                  <button
+                    type="button"
+                    class="create-homework"
+                    (click)="
+                      openCreateHomework(
+                        lesson.id
+                      )
+                    "
+                  >
+                    <mat-icon>
+                      add_task
+                    </mat-icon>
+
+                    Создать задание
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      } @empty {
+        <div class="page-state compact">
+          <mat-icon>
+            event_available
+          </mat-icon>
+
+          <h2>
+            Занятий нет
+          </h2>
+
+          <p>
+            На выбранный период
+            расписание отсутствует.
+          </p>
+        </div>
+      }
+    </div>
+  }
+</section>

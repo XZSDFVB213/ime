@@ -1,124 +1,530 @@
-<section class="section">
+<section class="details-page">
+  <a
+    class="back-link"
+    routerLink="/teacher/homeworks"
+  >
+    <mat-icon>arrow_back</mat-icon>
+    Домашние задания
+  </a>
 
-    <!-- Заголовок -->
-    <div class="section-header">
-        <h2 class="section-title">
-            <mat-icon>assignment</mat-icon>
-            Домашние задания
-        </h2>
+  @if (loading()) {
+    <div class="page-state">
+      <mat-spinner diameter="48" />
 
-        <div class="header-actions">
-            @if (!loading()) {
-            <mat-chip class="count-chip" highlighted>
-                {{ homeworks().length }} {{ homeworks().length === 1 ? 'задание' : 'заданий' }}
-            </mat-chip>
-            }
+      <p>Загружаем задание…</p>
+    </div>
+  } @else if (error()) {
+    <div class="page-state error">
+      <mat-icon>error_outline</mat-icon>
 
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (homework(); as hw) {
+    <header class="homework-hero">
+      <div class="hero-main">
+        <span class="subject-badge">
+          {{ hw.subject?.code }}
+          ·
+          {{ hw.subject?.name }}
+        </span>
 
+        <h1>{{ hw.title }}</h1>
+
+        <p>{{ hw.description }}</p>
+
+        <div class="hero-meta">
+          <span>
+            <mat-icon>groups</mat-icon>
+
+            {{
+              hw.lesson?.group?.name ||
+              'Группа не указана'
+            }}
+          </span>
+
+          <span>
+            <mat-icon>event</mat-icon>
+
+            До
+            {{
+              hw.deadline
+                | date:'dd MMMM yyyy, HH:mm'
+            }}
+          </span>
+
+          <span>
+            <mat-icon>grade</mat-icon>
+
+            Максимум {{ hw.maxScore }}
+          </span>
         </div>
-    </div>
+      </div>
 
-    <!-- Лоадер -->
-    @if (loading()) {
-    <div class="loader">
-        <mat-spinner diameter="48"></mat-spinner>
-        <p>Загружаем задания…</p>
-    </div>
-    }
+      <div class="hero-score">
+        <span>Сдали</span>
 
-    <!-- Ошибка -->
-    @else if (error()) {
-    <mat-card class="error-card">
-        <mat-card-content>
-            <mat-icon color="warn">error_outline</mat-icon>
-            {{ error() }}
-        </mat-card-content>
-    </mat-card>
-    }
+        <strong>
+          {{ submissionPercent() }}%
+        </strong>
 
-    <!-- Список заданий -->
-    @else {
-    <div class="homeworks-list">
+        <small>
+          {{ submissions().length }}
+          из
+          {{ students().length }}
+        </small>
+      </div>
+    </header>
 
-        @for (hw of homeworks(); track hw.id) {
-        <mat-card class="homework-card" appearance="outlined">
+    <section class="statistics-grid">
+      <article>
+        <div class="stat-icon blue">
+          <mat-icon>groups</mat-icon>
+        </div>
 
-            <!-- Шапка задания -->
-            <mat-card-header>
-                <mat-card-title>{{ hw.title }}</mat-card-title>
-                <mat-card-subtitle>
-                    <mat-icon class="deadline-icon">event</mat-icon>
-                    Сдать до {{ hw.deadline | date:'dd.MM.yyyy' }}
-                </mat-card-subtitle>
-            </mat-card-header>
+        <div>
+          <strong>
+            {{ students().length }}
+          </strong>
 
-            <mat-card-content>
-                <p class="description">{{ hw.description }}</p>
+          <span>Обучающихся</span>
+        </div>
+      </article>
 
-                <mat-divider></mat-divider>
+      <article>
+        <div class="stat-icon orange">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
 
-                <!-- Работы студентов -->
-                <h4 class="submissions-title">
-                    <mat-icon>people</mat-icon>
-                    Работы студентов
-                </h4>
+        <div>
+          <strong>
+            {{ pendingSubmissions().length }}
+          </strong>
 
-                @if (hw.submissions?.length) {
-                <mat-list class="submissions-list">
-                    @for (s of hw.submissions; track s.id) {
-                    <mat-list-item class="submission-item">
-                        <div matListItemAvatar class="avatar">
-                            👨‍🎓
-                        </div>
+          <span>На проверке</span>
+        </div>
+      </article>
 
-                        <div matListItemTitle>
-                            <strong>{{ s.student.user.fullName }}</strong>
-                        </div>
-                        <div matListItemLine>
-                            {{ s.student.user.email }}
-                        </div>
+      <article>
+        <div class="stat-icon green">
+          <mat-icon>task_alt</mat-icon>
+        </div>
 
-                        <div matListItemMeta class="status">
-                            @if (s.score !== null && s.score !== undefined) {
-                            <mat-chip class="score-chip done">
-                                {{ s.score }} / {{ hw.maxScore }}
-                            </mat-chip>
+        <div>
+          <strong>
+            {{ gradedSubmissions().length }}
+          </strong>
 
-                            <button mat-stroked-button color="primary" class="edit-btn" (click)="grade(s, hw)">
-                                <mat-icon>edit</mat-icon>
-                                Изменить
-                            </button>
-                            } @else {
-                            <mat-chip class="score-chip waiting">
-                                Не оценено
-                            </mat-chip>
+          <span>Проверено</span>
+        </div>
+      </article>
 
-                            <button mat-flat-button color="primary" class="grade-btn" (click)="grade(s, hw)">
-                                <mat-icon>grade</mat-icon>
-                                Оценить
-                            </button>
-                            }
-    </div>
-    </mat-list-item>
-    }
-    </mat-list>
+      <article>
+        <div class="stat-icon purple">
+          <mat-icon>analytics</mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ averageScore() }}
+          </strong>
+
+          <span>Средний балл</span>
+        </div>
+      </article>
+    </section>
+
+    <nav class="submission-tabs">
+      <button
+        type="button"
+        [class.active]="
+          activeTab() === 'ALL'
+        "
+        (click)="setTab('ALL')"
+      >
+        Все работы
+
+        <span>
+          {{ submissions().length }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          activeTab() === 'PENDING'
+        "
+        (click)="setTab('PENDING')"
+      >
+        На проверке
+
+        <span>
+          {{ pendingSubmissions().length }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          activeTab() === 'GRADED'
+        "
+        (click)="setTab('GRADED')"
+      >
+        Проверено
+
+        <span>
+          {{ gradedSubmissions().length }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          activeTab() === 'MISSING'
+        "
+        (click)="setTab('MISSING')"
+      >
+        Не сдали
+
+        <span>
+          {{ missingStudents().length }}
+        </span>
+      </button>
+    </nav>
+
+    @if (activeTab() === 'MISSING') {
+      <section class="missing-card">
+        <header class="section-heading">
+          <div>
+            <h2>Не сдали работу</h2>
+
+            <p>
+              Обучающиеся, от которых
+              ещё нет отправленной работы
+            </p>
+          </div>
+        </header>
+
+        <div class="missing-list">
+          @for (
+            student of missingStudents();
+            track student.id
+          ) {
+            <article class="missing-row">
+              <div class="student-avatar">
+                @if (
+                  student.user?.avatarUrl
+                ) {
+                  <img
+                    [src]="
+                      student.user.avatarUrl
+                    "
+                    [alt]="
+                      student.user.fullName
+                    "
+                  />
+                } @else {
+                  <span>
+                    {{
+                      studentInitials(
+                        student
+                      )
+                    }}
+                  </span>
+                }
+              </div>
+
+              <div>
+                <strong>
+                  {{
+                    student.user?.fullName
+                  }}
+                </strong>
+
+                <span>
+                  {{ student.user?.email }}
+                </span>
+              </div>
+
+              <span class="missing-status">
+                Не сдано
+              </span>
+            </article>
+          } @empty {
+            <div class="empty-state">
+              <mat-icon>done_all</mat-icon>
+
+              <h3>Все сдали работу</h3>
+            </div>
+          }
+        </div>
+      </section>
     } @else {
-    <div class="empty">
-        <mat-icon>inbox</mat-icon>
-        <p>Пока никто не сдал</p>
-    </div>
-    }
-    </mat-card-content>
-    </mat-card>
-    }
+      <div class="checking-layout">
+        <section class="submissions-card">
+          <header class="section-heading">
+            <div>
+              <h2>Работы обучающихся</h2>
 
-    @empty {
-    <div class="empty-all">
-        <mat-icon>assignment_late</mat-icon>
-        <p>Домашних заданий пока нет</p>
-    </div>
-    }
-    </div>
-    }
+              <p>
+                Выберите работу для просмотра
+                и проверки
+              </p>
+            </div>
+          </header>
 
+          <div class="submission-list">
+            @for (
+              submission of filteredSubmissions();
+              track submission.id
+            ) {
+              <button
+                type="button"
+                class="submission-row"
+                [class.selected]="
+                  selectedSubmission()?.id ===
+                  submission.id
+                "
+                (click)="
+                  selectSubmission(
+                    submission
+                  )
+                "
+              >
+                <div class="student-avatar">
+                  @if (
+                    submission.student
+                      ?.user
+                      ?.avatarUrl
+                  ) {
+                    <img
+                      [src]="
+                        submission.student
+                          .user.avatarUrl
+                      "
+                      [alt]="
+                        submission.student
+                          .user.fullName
+                      "
+                    />
+                  } @else {
+                    <span>
+                      {{
+                        studentInitials(
+                          submission.student
+                        )
+                      }}
+                    </span>
+                  }
+                </div>
+
+                <div class="student-copy">
+                  <strong>
+                    {{
+                      submission.student
+                        ?.user
+                        ?.fullName
+                    }}
+                  </strong>
+
+                  <span>
+                    {{
+                      submission.submittedAt
+                        | date:
+                          'dd MMM, HH:mm'
+                    }}
+                  </span>
+                </div>
+
+                <span
+                  class="submission-status"
+                  [class]="
+                    statusClass(
+                      submission.status
+                    )
+                  "
+                >
+                  {{
+                    statusLabel(
+                      submission.status
+                    )
+                  }}
+                </span>
+
+                @if (
+                  submission.status ===
+                  'GRADED'
+                ) {
+                  <strong class="score">
+                    {{ submission.score }}
+                    /
+                    {{ hw.maxScore }}
+                  </strong>
+                }
+
+                <mat-icon>
+                  chevron_right
+                </mat-icon>
+              </button>
+            } @empty {
+              <div class="empty-state">
+                <mat-icon>
+                  assignment_turned_in
+                </mat-icon>
+
+                <h3>Работ нет</h3>
+
+                <p>
+                  Для выбранного фильтра
+                  ничего не найдено
+                </p>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="review-card">
+          @if (
+            selectedSubmission();
+            as submission
+          ) {
+            <header class="review-heading">
+              <div>
+                <span>
+                  Работа обучающегося
+                </span>
+
+                <h2>
+                  {{
+                    submission.student
+                      ?.user
+                      ?.fullName
+                  }}
+                </h2>
+              </div>
+
+              <span
+                class="submission-status"
+                [class]="
+                  statusClass(
+                    submission.status
+                  )
+                "
+              >
+                {{
+                  statusLabel(
+                    submission.status
+                  )
+                }}
+              </span>
+            </header>
+
+            <div class="student-email">
+              <mat-icon>mail_outline</mat-icon>
+
+              {{
+                submission.student
+                  ?.user
+                  ?.email
+              }}
+            </div>
+
+            <section class="answer-block">
+              <span>Ответ обучающегося</span>
+
+              <div class="answer-content">
+                {{
+                  submission.content ||
+                  'Текстовый ответ отсутствует'
+                }}
+              </div>
+            </section>
+
+            <section class="grade-form">
+              <div class="field">
+                <label>
+                  Оценка
+                </label>
+
+                <div class="score-input">
+                  <input
+                    type="number"
+                    min="0"
+                    [max]="hw.maxScore"
+                    [formControl]="
+                      scoreControl
+                    "
+                  />
+
+                  <span>
+                    / {{ hw.maxScore }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>
+                  Комментарий
+                  преподавателя
+                </label>
+
+                <textarea
+                  rows="6"
+                  placeholder="Комментарий к работе…"
+                  [formControl]="
+                    feedbackControl
+                  "
+                ></textarea>
+              </div>
+
+              <button
+                type="button"
+                class="save-button"
+                [disabled]="saving()"
+                (click)="gradeSubmission()"
+              >
+                @if (saving()) {
+                  Сохраняем…
+                } @else {
+                  <mat-icon>task_alt</mat-icon>
+
+                  @if (
+                    submission.status ===
+                    'GRADED'
+                  ) {
+                    Обновить оценку
+                  } @else {
+                    Проверить работу
+                  }
+                }
+              </button>
+            </section>
+
+            @if (submission.gradedAt) {
+              <div class="graded-info">
+                <mat-icon>history</mat-icon>
+
+                Последняя проверка:
+                {{
+                  submission.gradedAt
+                    | date:
+                      'dd MMMM yyyy, HH:mm'
+                }}
+              </div>
+            }
+          } @else {
+            <div class="review-empty">
+              <mat-icon>grading</mat-icon>
+
+              <h2>Выберите работу</h2>
+
+              <p>
+                Здесь появится ответ
+                обучающегося и форма оценки
+              </p>
+            </div>
+          }
+        </section>
+      </div>
+    }
+  }
 </section>

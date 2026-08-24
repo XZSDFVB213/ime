@@ -1,123 +1,436 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { DatePipe } from '@angular/common';
-import { TeacherService } from '../../services/teacher.service';
+import {
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chips';
+import { DatePipe } from '@angular/common';
+
+import {
+  ActivatedRoute,
+  RouterLink,
+} from '@angular/router';
+
+import {
+  FormControl,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatListModule } from '@angular/material/list';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatDialog } from '@angular/material/dialog';
+
 import {
-  GradeDialog,
-  GradeDialogData,
-  GradeDialogResult,
-} from '../../../../shared/ui/dialog/grade-dialog/grade-dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+  MatProgressSpinnerModule,
+} from '@angular/material/progress-spinner';
+
 import {
-  CreateHomeworkDialog,
-  CreateHomeworkDialogData,
-  CreateHomeworkResult,
-} from '../../../../shared/ui/dialog/create-homework-dialog/create-homework-dialog';
+  MatSnackBar,
+  MatSnackBarModule,
+} from '@angular/material/snack-bar';
+
+import {
+  TeacherService,
+} from '../../services/teacher.service';
+
+type SubmissionTab =
+  | 'ALL'
+  | 'PENDING'
+  | 'GRADED'
+  | 'MISSING';
 
 @Component({
+  selector: 'app-homework-details',
   standalone: true,
+
   imports: [
     DatePipe,
-    MatCardModule,
-    MatButtonModule,
-    MatChipsModule,
+    RouterLink,
+    ReactiveFormsModule,
+
     MatIconModule,
     MatProgressSpinnerModule,
-    MatDividerModule,
-    MatListModule,
-    MatBadgeModule,
+    MatSnackBarModule,
   ],
+
   templateUrl: './homework-details.html',
   styleUrl: './homework-details.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeworkDetails implements OnInit {
-  private readonly route = inject(ActivatedRoute);
-  private readonly service = inject(TeacherService);
+export class HomeworkDetails {
+  private readonly route =
+    inject(ActivatedRoute);
 
-  // Если API возвращает массив — оставляем any[]
-  // Если один объект — поменяй на signal<any | null>(null) и поправь шаблон
-  readonly homeworks = signal<any[]>([]);
+  private readonly teacherService =
+    inject(TeacherService);
+
+  private readonly snackBar =
+    inject(MatSnackBar);
+
+  readonly homework = signal<any | null>(null);
+
   readonly loading = signal(true);
-  readonly error = signal<string | null>(null);
+  readonly saving = signal(false);
 
-  ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id')!;
+  readonly error =
+    signal<string | null>(null);
 
-    this.service.getHomework(id).subscribe({
-      next: (res) => {
-        // Нормализуем: если пришёл один объект — делаем массив
-        const list = Array.isArray(res) ? res : [res];
-        this.homeworks.set(list);
-        this.loading.set(false);
+  readonly activeTab =
+    signal<SubmissionTab>('ALL');
+
+  readonly selectedSubmission =
+    signal<any | null>(null);
+
+  readonly scoreControl =
+    new FormControl<number | null>(
+      null,
+      {
+        validators: [
+          Validators.required,
+          Validators.min(0),
+        ],
       },
-      error: (err) => {
-        console.error(err);
-        this.error.set('Не удалось загрузить домашние задания');
-        this.loading.set(false);
-      },
+    );
+
+  readonly feedbackControl =
+    new FormControl('', {
+      nonNullable: true,
     });
+
+  readonly submissions = computed(() => {
+    return this.homework()?.submissions ?? [];
+  });
+
+  readonly pendingSubmissions = computed(() => {
+    return this.submissions().filter(
+      (submission: any) =>
+        submission.status === 'SUBMITTED',
+    );
+  });
+
+  readonly gradedSubmissions = computed(() => {
+    return this.submissions().filter(
+      (submission: any) =>
+        submission.status === 'GRADED',
+    );
+  });
+
+  readonly students = computed(() => {
+    return (
+      this.homework()
+        ?.lesson
+        ?.group
+        ?.students ?? []
+    );
+  });
+
+  readonly missingStudents = computed(() => {
+    const submittedStudentIds =
+      new Set(
+        this.submissions().map(
+          (submission: any) =>
+            submission.studentId,
+        ),
+      );
+
+    return this.students().filter(
+      (student: any) =>
+        !submittedStudentIds.has(student.id),
+    );
+  });
+
+  readonly filteredSubmissions =
+    computed(() => {
+      switch (this.activeTab()) {
+        case 'PENDING':
+          return this.pendingSubmissions();
+
+        case 'GRADED':
+          return this.gradedSubmissions();
+
+        default:
+          return this.submissions();
+      }
+    });
+
+  readonly submissionPercent = computed(() => {
+    const total = this.students().length;
+
+    if (!total) {
+      return 0;
+    }
+
+    return Math.round(
+      (this.submissions().length / total) *
+        100,
+    );
+  });
+
+  readonly averageScore = computed(() => {
+    const graded =
+      this.gradedSubmissions().filter(
+        (submission: any) =>
+          typeof submission.score ===
+          'number',
+      );
+
+    if (!graded.length) {
+      return 0;
+    }
+
+    return Math.round(
+      graded.reduce(
+        (sum: number, submission: any) =>
+          sum + submission.score,
+        0,
+      ) / graded.length,
+    );
+  });
+
+  constructor() {
+    this.loadHomework();
   }
 
-  private readonly dialog = inject(MatDialog);
+  setTab(tab: SubmissionTab): void {
+    this.activeTab.set(tab);
 
-  private readonly snackBar = inject(MatSnackBar);
+    if (tab === 'MISSING') {
+      this.selectedSubmission.set(null);
+      return;
+    }
 
-  // ========== ОЦЕНКА / ИЗМЕНЕНИЕ ОЦЕНКИ ==========
-  grade(submission: any, homework: any): void {
-    const data: GradeDialogData = {
-      submissionId: submission.id,
-      studentName: submission.student?.user?.fullName ?? 'Студент',
-      studentEmail: submission.student?.user?.email ?? '',
-      maxScore: homework.maxScore,
-      currentScore: submission.score,
-      currentComment: submission.comment ?? null,
-    };
+    const first =
+      tab === 'PENDING'
+        ? this.pendingSubmissions()[0]
+        : tab === 'GRADED'
+          ? this.gradedSubmissions()[0]
+          : this.submissions()[0];
 
-    const dialogRef = this.dialog.open(GradeDialog, {
-      width: '440px',
-      maxWidth: '95vw',
-      data,
-      disableClose: true,
-    });
+    if (first) {
+      this.selectSubmission(first);
+    } else {
+      this.selectedSubmission.set(null);
+    }
+  }
 
-    dialogRef.afterClosed().subscribe((result: GradeDialogResult | undefined) => {
-      if (!result) return;
+  selectSubmission(
+    submission: any,
+  ): void {
+    this.selectedSubmission.set(submission);
 
-      this.service.gradeSubmission(submission.id, result.score, result.comment).subscribe({
+    this.scoreControl.setValue(
+      submission.score ?? null,
+    );
+
+    this.feedbackControl.setValue(
+      submission.feedback ?? '',
+    );
+  }
+
+  gradeSubmission(): void {
+    const submission =
+      this.selectedSubmission();
+
+    const homework = this.homework();
+
+    if (!submission || !homework) {
+      return;
+    }
+
+    const score =
+      this.scoreControl.value;
+
+    if (score === null) {
+      this.scoreControl.markAsTouched();
+      return;
+    }
+
+    if (score < 0) {
+      this.snackBar.open(
+        'Оценка не может быть отрицательной',
+        'Закрыть',
+        {
+          duration: 3000,
+        },
+      );
+
+      return;
+    }
+
+    if (score > homework.maxScore) {
+      this.snackBar.open(
+        `Максимальная оценка — ${homework.maxScore}`,
+        'Закрыть',
+        {
+          duration: 3500,
+        },
+      );
+
+      return;
+    }
+
+    this.saving.set(true);
+
+    this.teacherService
+      .gradeSubmission(
+        submission.id,
+        {
+          score,
+          feedback:
+            this.feedbackControl.value.trim(),
+        },
+      )
+      .subscribe({
         next: () => {
-          // Иммутабельное обновление сигнала
-          this.homeworks.update((list) =>
-            list.map((hw) => {
-              if (hw.id !== homework.id) return hw;
+          this.saving.set(false);
 
-              return {
-                ...hw,
-                submissions: hw.submissions.map((s: any) =>
-                  s.id === submission.id
-                    ? { ...s, score: result.score, comment: result.comment }
-                    : s,
-                ),
-              };
-            }),
+          this.snackBar.open(
+            'Оценка сохранена',
+            'Закрыть',
+            {
+              duration: 2500,
+            },
           );
 
-          this.snackBar.open('Оценка сохранена', 'OK', { duration: 2500 });
+          this.loadHomework(
+            submission.id,
+          );
         },
-        error: () => {
-          this.snackBar.open('Ошибка при сохранении оценки', 'Закрыть', { duration: 4000 });
+
+        error: (error) => {
+          console.error(error);
+
+          this.saving.set(false);
+
+          this.snackBar.open(
+            error.error?.message ??
+              'Не удалось сохранить оценку',
+            'Закрыть',
+            {
+              duration: 4000,
+            },
+          );
         },
       });
-    });
+  }
+
+  statusLabel(status: string): string {
+    switch (status) {
+      case 'SUBMITTED':
+        return 'На проверке';
+
+      case 'GRADED':
+        return 'Проверено';
+
+      case 'DRAFT':
+        return 'Черновик';
+
+      default:
+        return status;
+    }
+  }
+
+  statusClass(status: string): string {
+    switch (status) {
+      case 'SUBMITTED':
+        return 'pending';
+
+      case 'GRADED':
+        return 'graded';
+
+      case 'DRAFT':
+        return 'draft';
+
+      default:
+        return 'default';
+    }
+  }
+
+  studentInitials(
+    student: any,
+  ): string {
+    const fullName =
+      student?.user?.fullName ?? '';
+
+    return fullName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(
+        (part: string) =>
+          part[0]?.toUpperCase(),
+      )
+      .join('');
+  }
+
+  private loadHomework(
+    selectedId?: string,
+  ): void {
+    const id =
+      this.route.snapshot.paramMap.get('id');
+
+    if (!id) {
+      this.error.set(
+        'Не указан ID задания',
+      );
+
+      this.loading.set(false);
+
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.teacherService
+      .getHomework(id)
+      .subscribe({
+        next: (homework) => {
+          this.homework.set(homework);
+
+          this.loading.set(false);
+
+          let submission = null;
+
+          if (selectedId) {
+            submission =
+              homework.submissions?.find(
+                (item: any) =>
+                  item.id === selectedId,
+              );
+          }
+
+          submission ??=
+            homework.submissions?.find(
+              (item: any) =>
+                item.status ===
+                'SUBMITTED',
+            );
+
+          submission ??=
+            homework.submissions?.[0];
+
+          if (submission) {
+            this.selectSubmission(
+              submission,
+            );
+          } else {
+            this.selectedSubmission.set(
+              null,
+            );
+          }
+        },
+
+        error: (error) => {
+          console.error(error);
+
+          this.loading.set(false);
+
+          this.error.set(
+            error.error?.message ??
+              'Не удалось загрузить задание',
+          );
+        },
+      });
   }
 }

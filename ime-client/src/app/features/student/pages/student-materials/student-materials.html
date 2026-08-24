@@ -1,0 +1,674 @@
+<section class="materials-page">
+
+  <header class="materials-hero">
+
+    <div>
+      <span class="eyebrow">
+        Обучение
+      </span>
+
+      <h1>
+        Учебные материалы
+      </h1>
+
+      <p>
+        Методические пособия,
+        презентации, документы
+        и полезные ссылки
+        от преподавателей.
+      </p>
+    </div>
+
+    <div class="hero-icon">
+      <mat-icon>
+        auto_stories
+      </mat-icon>
+    </div>
+
+  </header>
+
+
+  @if (loading()) {
+
+    <div class="page-state">
+
+      <mat-spinner
+        diameter="48"
+      />
+
+      <p>
+        Загружаем материалы…
+      </p>
+
+    </div>
+
+  } @else if (error()) {
+
+    <div class="page-state error">
+
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <p>
+        {{ error() }}
+      </p>
+
+    </div>
+
+  } @else {
+
+    <section class="statistics-grid">
+
+      <article>
+
+        <div class="stat-icon blue">
+          <mat-icon>
+            folder_open
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ materials().length }}
+          </strong>
+
+          <span>
+            Материалов
+          </span>
+        </div>
+
+      </article>
+
+
+      <article>
+
+        <div class="stat-icon red">
+          <mat-icon>
+            description
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ fileCount() }}
+          </strong>
+
+          <span>
+            Файлов
+          </span>
+        </div>
+
+      </article>
+
+
+      <article>
+
+        <div class="stat-icon purple">
+          <mat-icon>
+            link
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ linkCount() }}
+          </strong>
+
+          <span>
+            Ссылок
+          </span>
+        </div>
+
+      </article>
+
+
+      <article>
+
+        <div class="stat-icon green">
+          <mat-icon>
+            new_releases
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ recentCount() }}
+          </strong>
+
+          <span>
+            Новых за неделю
+          </span>
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <section class="toolbar">
+
+      <label class="search-box">
+
+        <mat-icon>
+          search
+        </mat-icon>
+
+        <input
+          type="search"
+          placeholder="Найти материал..."
+          [value]="search()"
+          (input)="setSearch($event)"
+        />
+
+      </label>
+
+
+      <nav class="type-filter">
+
+        <button
+          type="button"
+          [class.active]="
+            filter() === 'ALL'
+          "
+          (click)="
+            setFilter('ALL')
+          "
+        >
+          Все
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            filter() === 'FILE'
+          "
+          (click)="
+            setFilter('FILE')
+          "
+        >
+          <mat-icon>
+            description
+          </mat-icon>
+
+          Файлы
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            filter() === 'LINK'
+          "
+          (click)="
+            setFilter('LINK')
+          "
+        >
+          <mat-icon>
+            link
+          </mat-icon>
+
+          Ссылки
+        </button>
+
+      </nav>
+
+    </section>
+
+
+    @if (
+      subjects().length > 1
+    ) {
+
+      <nav class="subject-filter">
+
+        <button
+          type="button"
+          [class.active]="
+            selectedSubject() ===
+            'ALL'
+          "
+          (click)="
+            setSubject('ALL')
+          "
+        >
+          Все дисциплины
+        </button>
+
+
+        @for (
+          subject of subjects();
+          track subject.id
+        ) {
+
+          <button
+            type="button"
+            [class.active]="
+              selectedSubject() ===
+              subject.id
+            "
+            (click)="
+              setSubject(
+                subject.id
+              )
+            "
+          >
+
+            @if (subject.code) {
+              <span>
+                {{ subject.code }}
+              </span>
+            }
+
+            {{ subject.name }}
+
+          </button>
+
+        }
+
+      </nav>
+
+    }
+
+
+    <div class="materials-layout">
+
+      <section class="materials-list">
+
+        <header class="section-heading">
+
+          <div>
+
+            <h2>
+              Доступные материалы
+            </h2>
+
+            <p>
+              Найдено:
+              {{
+                filteredMaterials()
+                  .length
+              }}
+            </p>
+
+          </div>
+
+        </header>
+
+
+        @for (
+          material of
+            filteredMaterials();
+          track material.id
+        ) {
+
+          <article
+            class="material-card"
+            (click)="
+              openMaterial(
+                material
+              )
+            "
+          >
+
+            <div
+              class="material-icon"
+              [class.link]="
+                material.type ===
+                'LINK'
+              "
+            >
+
+              <mat-icon>
+                {{
+                  materialIcon(
+                    material
+                  )
+                }}
+              </mat-icon>
+
+            </div>
+
+
+            <div class="material-content">
+
+              <div class="badges">
+
+                <span
+                  class="type"
+                  [class.link]="
+                    material.type ===
+                    'LINK'
+                  "
+                >
+                  {{
+                    materialLabel(
+                      material
+                    )
+                  }}
+                </span>
+
+                <span class="subject">
+                  {{
+                    material.subject
+                      ?.name
+                  }}
+                </span>
+
+              </div>
+
+
+              <h3>
+                {{ material.title }}
+              </h3>
+
+
+              @if (
+                material.description
+              ) {
+
+                <p>
+                  {{
+                    material.description
+                  }}
+                </p>
+
+              }
+
+
+              <div class="meta">
+
+                @if (
+                  material.lesson
+                ) {
+
+                  <span>
+
+                    <mat-icon>
+                      school
+                    </mat-icon>
+
+                    {{
+                      material.lesson
+                        .title
+                    }}
+
+                  </span>
+
+
+                  <span>
+
+                    <mat-icon>
+                      groups
+                    </mat-icon>
+
+                    {{
+                      material.lesson
+                        .group?.name
+                    }}
+
+                  </span>
+
+                } @else {
+
+                  <span>
+
+                    <mat-icon>
+                      menu_book
+                    </mat-icon>
+
+                    Материал дисциплины
+
+                  </span>
+
+                }
+
+
+                <span>
+
+                  <mat-icon>
+                    event
+                  </mat-icon>
+
+                  {{
+                    material.createdAt
+                      | date:
+                        'dd MMM yyyy'
+                  }}
+
+                </span>
+
+
+                @if (
+                  material.teacher
+                    ?.user?.fullName
+                ) {
+
+                  <span>
+
+                    <mat-icon>
+                      person
+                    </mat-icon>
+
+                    {{
+                      material.teacher
+                        .user.fullName
+                    }}
+
+                  </span>
+
+                }
+
+              </div>
+
+
+              @if (
+                material.type ===
+                  'FILE' &&
+                material.fileName
+              ) {
+
+                <div class="file-name">
+
+                  <mat-icon>
+                    attach_file
+                  </mat-icon>
+
+                  <span>
+                    {{
+                      material.fileName
+                    }}
+                  </span>
+
+                  @if (
+                    material.size
+                  ) {
+
+                    <small>
+                      {{
+                        formatSize(
+                          material.size
+                        )
+                      }}
+                    </small>
+
+                  }
+
+                </div>
+
+              }
+
+            </div>
+
+
+            <div class="open-button">
+
+              <mat-icon>
+                {{
+                  material.type ===
+                  'LINK'
+                    ? 'open_in_new'
+                    : 'download'
+                }}
+              </mat-icon>
+
+              <span>
+                {{
+                  material.type ===
+                  'LINK'
+                    ? 'Открыть'
+                    : 'Открыть файл'
+                }}
+              </span>
+
+            </div>
+
+          </article>
+
+        } @empty {
+
+          <div class="empty-state">
+
+            <mat-icon>
+              folder_off
+            </mat-icon>
+
+            <h2>
+              Материалов нет
+            </h2>
+
+            <p>
+              По выбранным параметрам
+              ничего не найдено.
+            </p>
+
+          </div>
+
+        }
+
+      </section>
+
+
+      <aside class="sidebar">
+
+        <section class="info-card">
+
+          <div class="info-icon">
+            <mat-icon>
+              info
+            </mat-icon>
+          </div>
+
+          <div>
+
+            <h3>
+              Учебные материалы
+            </h3>
+
+            <p>
+              Здесь отображаются файлы
+              и ссылки, опубликованные
+              преподавателями для вашей
+              группы.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        @if (
+          subjects().length
+        ) {
+
+          <section class="subjects-card">
+
+            <header>
+              <h3>
+                По дисциплинам
+              </h3>
+            </header>
+
+
+            @for (
+              subject of subjects();
+              track subject.id
+            ) {
+
+              <button
+                type="button"
+                [class.active]="
+                  selectedSubject() ===
+                  subject.id
+                "
+                (click)="
+                  setSubject(
+                    subject.id
+                  )
+                "
+              >
+
+                <div>
+
+                  <mat-icon>
+                    menu_book
+                  </mat-icon>
+
+                  <span>
+                    {{ subject.name }}
+                  </span>
+
+                </div>
+
+                <strong>
+                  {{
+                    subjectMaterialCount(
+                      subject.id
+                    )
+                  }}
+                </strong>
+
+              </button>
+
+            }
+
+
+            @if (
+              selectedSubject() !==
+              'ALL'
+            ) {
+
+              <button
+                type="button"
+                class="show-all"
+                (click)="
+                  setSubject('ALL')
+                "
+              >
+
+                <div>
+
+                  <mat-icon>
+                    apps
+                  </mat-icon>
+
+                  <span>
+                    Показать все
+                  </span>
+
+                </div>
+
+              </button>
+
+            }
+
+          </section>
+
+        }
+
+      </aside>
+
+    </div>
+
+  }
+
+</section>

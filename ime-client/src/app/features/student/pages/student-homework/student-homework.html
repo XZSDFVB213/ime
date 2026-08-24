@@ -1,0 +1,143 @@
+<section class="homeworks-page">
+  <header class="page-header">
+    <div>
+      <span class="page-eyebrow">Учебный процесс</span>
+      <h1>Мои задания</h1>
+      <p>Выполняйте задания и отслеживайте результаты проверки</p>
+    </div>
+  </header>
+
+  <nav class="homework-tabs">
+    <button
+      type="button"
+      [class.active]="activeTab() === 'CURRENT'"
+      (click)="setTab('CURRENT')"
+    >
+      Текущие
+      <span>{{ currentHomeworks().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab() === 'REVIEW'"
+      (click)="setTab('REVIEW')"
+    >
+      На проверке
+      <span>{{ reviewHomeworks().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeTab() === 'COMPLETED'"
+      (click)="setTab('COMPLETED')"
+    >
+      Выполненные
+      <span>{{ completedHomeworks().length }}</span>
+    </button>
+  </nav>
+
+  @if (loading()) {
+    <div class="state-card">
+      <mat-spinner diameter="44" />
+      <p>Загружаем задания…</p>
+    </div>
+  } @else if (error()) {
+    <div class="state-card error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <div class="homeworks-grid">
+      @for (homework of visibleHomeworks(); track homework.id) {
+        <mat-card class="homework-card" appearance="outlined">
+          <mat-card-content>
+            <div class="card-top">
+              <div class="homework-icon">
+                <mat-icon>description</mat-icon>
+              </div>
+
+              @if (!submission(homework)) {
+                <mat-chip class="status current">
+                  Нужно выполнить
+                </mat-chip>
+              } @else if (submission(homework)?.status === 'SUBMITTED') {
+                <mat-chip class="status review">
+                  На проверке
+                </mat-chip>
+              } @else {
+                <mat-chip class="status completed">
+                  Проверено
+                </mat-chip>
+              }
+            </div>
+
+            <span class="subject-name">
+              {{ homework.subject?.name || 'Дисциплина' }}
+            </span>
+
+            <h2>{{ homework.title }}</h2>
+
+            <p class="description">
+              {{ homework.description || 'Описание задания отсутствует' }}
+            </p>
+
+            <div class="homework-meta">
+              <div>
+                <mat-icon>event</mat-icon>
+
+                <span>
+                  До {{ homework.deadline | date:'dd MMMM yyyy' }}
+                </span>
+              </div>
+
+              <div>
+                <mat-icon>military_tech</mat-icon>
+
+                <span>
+                  Максимум: {{ homework.maxScore }} баллов
+                </span>
+              </div>
+            </div>
+
+            @if (submission(homework)?.status === 'GRADED') {
+              <div class="grade-result">
+                <div>
+                  <span>Оценка</span>
+
+                  <strong>
+                    {{ submission(homework)?.score }}
+                    / {{ homework.maxScore }}
+                  </strong>
+                </div>
+
+                @if (submission(homework)?.feedback) {
+                  <p>{{ submission(homework)?.feedback }}</p>
+                }
+              </div>
+            }
+
+            <a
+              mat-flat-button
+              class="open-button"
+              [routerLink]="['/student/homeworks', homework.id]"
+            >
+              @if (!submission(homework)) {
+                Открыть задание
+              } @else {
+                Подробнее
+              }
+
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </mat-card-content>
+        </mat-card>
+      } @empty {
+        <div class="state-card">
+          <mat-icon>assignment_turned_in</mat-icon>
+          <h2>Здесь пока пусто</h2>
+          <p>В этой категории нет заданий</p>
+        </div>
+      }
+    </div>
+  }
+</section>

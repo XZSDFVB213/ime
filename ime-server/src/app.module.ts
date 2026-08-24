@@ -21,11 +21,19 @@ import { SubjectTeachersModule } from './subject-teachers/subject-teachers.modul
 import { SemesterModule } from './semester/semester.module';
 import { AcademicYearModule } from './academic-year/academic-year.module';
 import { HomeworkModule } from './homework/homework.module';
+import { MaterialsModule } from './materials/materials.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
+import { join } from 'path';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+
+      serveRoot: '/uploads',
     }),
     AuthModule,
     UsersModule,
@@ -47,6 +55,7 @@ import { HomeworkModule } from './homework/homework.module';
     SemesterModule,
     AcademicYearModule,
     HomeworkModule,
+    MaterialsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

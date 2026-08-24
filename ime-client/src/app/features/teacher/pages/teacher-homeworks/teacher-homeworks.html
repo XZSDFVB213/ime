@@ -1,0 +1,347 @@
+<section class="homeworks-page">
+  <header class="homeworks-hero">
+    <div class="hero-copy">
+      <span class="eyebrow">
+        Учебный процесс
+      </span>
+
+      <h1>Домашние задания</h1>
+
+      <p>
+        Управляйте заданиями,
+        отслеживайте сдачу работ и
+        проверяйте ответы обучающихся.
+      </p>
+    </div>
+
+    <div class="hero-icon">
+      <mat-icon>assignment</mat-icon>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="page-state">
+      <mat-spinner diameter="48" />
+
+      <p>
+        Загружаем домашние задания…
+      </p>
+    </div>
+  } @else if (error()) {
+    <div class="page-state error">
+      <mat-icon>error_outline</mat-icon>
+
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <section class="statistics-grid">
+      <article>
+        <div class="stat-icon blue">
+          <mat-icon>assignment</mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ homeworks().length }}
+          </strong>
+
+          <span>Всего заданий</span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon green">
+          <mat-icon>schedule</mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ activeHomeworksCount() }}
+          </strong>
+
+          <span>Активных</span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon orange">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ pendingSubmissions() }}
+          </strong>
+
+          <span>Работ на проверке</span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon purple">
+          <mat-icon>task_alt</mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ gradedSubmissions() }}
+          </strong>
+
+          <span>Проверено работ</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="toolbar">
+      <div class="search-box">
+        <mat-icon>search</mat-icon>
+
+        <input
+          type="search"
+          placeholder="Найти задание, дисциплину или группу"
+          [value]="search()"
+          (input)="setSearch($event)"
+        />
+      </div>
+
+      <nav class="filters">
+        <button
+          type="button"
+          [class.active]="
+            activeFilter() === 'ALL'
+          "
+          (click)="setFilter('ALL')"
+        >
+          Все
+
+          <span>
+            {{ homeworks().length }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            activeFilter() === 'ACTIVE'
+          "
+          (click)="setFilter('ACTIVE')"
+        >
+          Активные
+
+          <span>
+            {{ activeHomeworksCount() }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            activeFilter() === 'PENDING'
+          "
+          (click)="setFilter('PENDING')"
+        >
+          На проверке
+
+          <span>
+            {{ pendingSubmissions() }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          [class.active]="
+            activeFilter() === 'OVERDUE'
+          "
+          (click)="setFilter('OVERDUE')"
+        >
+          Просроченные
+
+          <span>
+            {{ overdueHomeworksCount() }}
+          </span>
+        </button>
+      </nav>
+    </section>
+
+    <div class="homeworks-list">
+      @for (
+        homework of filteredHomeworks();
+        track homework.id
+      ) {
+        <article class="homework-card">
+          <div class="homework-main">
+            <div class="homework-top">
+              <div class="subject-info">
+                <div class="subject-icon">
+                  <mat-icon>menu_book</mat-icon>
+                </div>
+
+                <div>
+                  <span>
+                    {{
+                      homework.subject?.code ||
+                      'Дисциплина'
+                    }}
+                  </span>
+
+                  <strong>
+                    {{
+                      homework.subject?.name ||
+                      'Без дисциплины'
+                    }}
+                  </strong>
+                </div>
+              </div>
+
+              <span
+                class="status"
+                [class]="
+                  homeworkStatusClass(homework)
+                "
+              >
+                {{
+                  homeworkStatus(homework)
+                }}
+              </span>
+            </div>
+
+            <div class="homework-content">
+              <h2>
+                {{ homework.title }}
+              </h2>
+
+              <p>
+                {{ homework.description }}
+              </p>
+            </div>
+
+            <div class="homework-meta">
+              <span>
+                <mat-icon>groups</mat-icon>
+
+                {{
+                  homework.lesson?.group?.name ||
+                  'Группа не указана'
+                }}
+              </span>
+
+              <span>
+                <mat-icon>event</mat-icon>
+
+                Срок:
+                {{
+                  homework.deadline
+                    | date:'dd MMMM yyyy, HH:mm'
+                }}
+              </span>
+
+              <span>
+                <mat-icon>grade</mat-icon>
+
+                Максимум:
+                {{ homework.maxScore }}
+              </span>
+            </div>
+          </div>
+
+          <div class="homework-statistics">
+            <div class="submission-overview">
+              <div>
+                <span>Отправлено</span>
+
+                <strong>
+                  {{
+                    submissionsCount(homework)
+                  }}
+                </strong>
+              </div>
+
+              <div>
+                <span>На проверке</span>
+
+                <strong class="pending-value">
+                  {{
+                    pendingCount(homework)
+                  }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Проверено</span>
+
+                <strong class="graded-value">
+                  {{
+                    gradedCount(homework)
+                  }}
+                </strong>
+              </div>
+            </div>
+
+            <div class="progress-block">
+              <div class="progress-heading">
+                <span>
+                  Проверка работ
+                </span>
+
+                <strong>
+                  {{
+                    completionPercent(
+                      homework
+                    )
+                  }}%
+                </strong>
+              </div>
+
+              <div class="progress-track">
+                <span
+                  [style.width.%]="
+                    completionPercent(
+                      homework
+                    )
+                  "
+                ></span>
+              </div>
+            </div>
+
+            <a
+              class="open-button"
+              [routerLink]="[
+                '/teacher/homeworks',
+                homework.id
+              ]"
+            >
+              Открыть задание
+
+              @if (
+                pendingCount(homework) > 0
+              ) {
+                <span class="pending-badge">
+                  {{
+                    pendingCount(homework)
+                  }}
+                </span>
+              }
+
+              <mat-icon>
+                arrow_forward
+              </mat-icon>
+            </a>
+          </div>
+        </article>
+      } @empty {
+        <div class="page-state compact">
+          <mat-icon>assignment_turned_in</mat-icon>
+
+          <h2>
+            Заданий не найдено
+          </h2>
+
+          <p>
+            Попробуйте изменить фильтр
+            или поисковый запрос.
+          </p>
+        </div>
+      }
+    </div>
+  }
+</section>

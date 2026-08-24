@@ -1,0 +1,159 @@
+<div class="notification-wrapper">
+
+  <button
+    type="button"
+    class="bell-button"
+    [class.active]="opened()"
+    (click)="toggle()"
+  >
+    <mat-icon
+      [matBadge]="unreadCount() > 99 ? '99+' : unreadCount()"
+      [matBadgeHidden]="!hasUnread()"
+      matBadgeColor="warn"
+      matBadgeSize="small"
+    >
+      notifications_none
+    </mat-icon>
+  </button>
+
+
+  @if (opened()) {
+
+    <div class="notification-dropdown">
+
+      <header class="notification-header">
+
+        <div>
+          <h3>Уведомления</h3>
+
+          @if (unreadCount() > 0) {
+            <span>
+              {{ unreadCount() }} непрочитанных
+            </span>
+          } @else {
+            <span>
+              Новых уведомлений нет
+            </span>
+          }
+        </div>
+
+
+        @if (unreadCount() > 0) {
+          <button
+            type="button"
+            class="mark-all"
+            (click)="markAll()"
+          >
+            Прочитать все
+          </button>
+        }
+
+      </header>
+
+
+      <div class="notification-list">
+
+        @if (notifications().length === 0) {
+
+          <div class="empty-state">
+
+            <div class="empty-icon">
+              <mat-icon>
+                notifications_none
+              </mat-icon>
+            </div>
+
+            <strong>
+              Пока тихо
+            </strong>
+
+            <span>
+              Новые уведомления появятся здесь
+            </span>
+
+          </div>
+
+        } @else {
+
+          @for (
+            notification of notifications();
+            track notification.id
+          ) {
+
+            <button
+              type="button"
+              class="notification-item"
+              [class.unread]="!notification.isRead"
+              (click)="openNotification(notification)"
+            >
+
+              <div
+                class="notification-icon"
+                [attr.data-type]="notification.type"
+              >
+                <mat-icon>
+                  {{ notificationIcon(notification) }}
+                </mat-icon>
+              </div>
+
+
+              <div class="notification-content">
+
+                <div class="notification-title-row">
+
+                  <strong>
+                    {{ notification.title }}
+                  </strong>
+
+                  @if (!notification.isRead) {
+                    <span class="unread-dot"></span>
+                  }
+
+                </div>
+
+
+                <p>
+                  {{ notification.message }}
+                </p>
+
+
+                <div class="notification-meta">
+
+                  <span>
+                    {{ formatDate(notification.createdAt) }}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="delete-notification"
+                title="Удалить"
+                (click)="
+                  remove(
+                    $event,
+                    notification
+                  )
+                "
+              >
+                <mat-icon>
+                  close
+                </mat-icon>
+              </button>
+
+            </button>
+
+          }
+
+        }
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

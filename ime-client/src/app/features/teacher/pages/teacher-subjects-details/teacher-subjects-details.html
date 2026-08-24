@@ -1,0 +1,879 @@
+<section class="subject-page">
+  <a
+    class="back-link"
+    routerLink="/teacher/subjects"
+  >
+    <mat-icon>arrow_back</mat-icon>
+    Мои дисциплины
+  </a>
+
+  @if (loading()) {
+    <div class="page-state">
+      <mat-spinner diameter="48" />
+
+      <p>Загружаем дисциплину…</p>
+    </div>
+  } @else if (error()) {
+    <div class="page-state error">
+      <mat-icon>error_outline</mat-icon>
+
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (subject(); as subject) {
+    <header class="subject-hero">
+      <div class="hero-main">
+        <span class="subject-code">
+          {{
+            subject.code ||
+            'Дисциплина'
+          }}
+        </span>
+
+        <h1>
+          {{ subject.name }}
+        </h1>
+
+        <p>
+          {{
+            subject.description ||
+            'Описание дисциплины не указано'
+          }}
+        </p>
+
+        <div class="hero-meta">
+          @if (subject.credits) {
+            <span>
+              <mat-icon>
+                workspace_premium
+              </mat-icon>
+
+              {{ subject.credits }}
+              зачётных единиц
+            </span>
+          }
+
+          <span>
+            <mat-icon>groups</mat-icon>
+
+            {{ groups().length }}
+            учебных групп
+          </span>
+
+          <span>
+            <mat-icon>
+              calendar_month
+            </mat-icon>
+
+            {{ subjectLessons().length }}
+            занятий
+          </span>
+        </div>
+      </div>
+
+      <div class="hero-result">
+        <span>
+          Средний результат
+        </span>
+
+        <strong>
+          {{ averagePercent() }}%
+        </strong>
+
+        <small>
+          {{
+            performanceLabel(
+              averagePercent()
+            )
+          }}
+        </small>
+      </div>
+    </header>
+
+    <section class="statistics-grid">
+      <article>
+        <div class="stat-icon blue">
+          <mat-icon>
+            calendar_month
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{
+              subjectLessons().length
+            }}
+          </strong>
+
+          <span>Занятий</span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon purple">
+          <mat-icon>
+            assignment
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{
+              subjectHomeworks().length
+            }}
+          </strong>
+
+          <span>
+            Домашних заданий
+          </span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon orange">
+          <mat-icon>
+            pending_actions
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ pendingCount() }}
+          </strong>
+
+          <span>
+            Работ на проверке
+          </span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon green">
+          <mat-icon>
+            task_alt
+          </mat-icon>
+        </div>
+
+        <div>
+          <strong>
+            {{ gradedCount() }}
+          </strong>
+
+          <span>
+            Проверено работ
+          </span>
+        </div>
+      </article>
+    </section>
+
+    <nav class="subject-tabs">
+      <button
+        type="button"
+        [class.active]="
+          activeTab() === 'OVERVIEW'
+        "
+        (click)="
+          setTab('OVERVIEW')
+        "
+      >
+        <mat-icon>dashboard</mat-icon>
+        Обзор
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          activeTab() === 'LESSONS'
+        "
+        (click)="
+          setTab('LESSONS')
+        "
+      >
+        <mat-icon>
+          calendar_month
+        </mat-icon>
+
+        Занятия
+
+        <span>
+          {{ subjectLessons().length }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          activeTab() === 'HOMEWORKS'
+        "
+        (click)="
+          setTab('HOMEWORKS')
+        "
+      >
+        <mat-icon>assignment</mat-icon>
+
+        Задания
+
+        <span>
+          {{ subjectHomeworks().length }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        [class.active]="
+          activeTab() === 'PERFORMANCE'
+        "
+        (click)="
+          setTab('PERFORMANCE')
+        "
+      >
+        <mat-icon>analytics</mat-icon>
+        Успеваемость
+      </button>
+    </nav>
+
+    @if (
+      activeTab() === 'OVERVIEW'
+    ) {
+      <div class="overview-grid">
+        <section class="content-card">
+          <header class="card-heading">
+            <div>
+              <h2>
+                Учебные группы
+              </h2>
+
+              <p>
+                Группы, у которых вы
+                ведёте эту дисциплину
+              </p>
+            </div>
+          </header>
+
+          <div class="groups-list">
+            @for (
+              group of groups();
+              track group.id
+            ) {
+              <article class="group-row">
+                <div class="group-icon">
+                  <mat-icon>
+                    groups
+                  </mat-icon>
+                </div>
+
+                <div>
+                  <strong>
+                    {{ group.name }}
+                  </strong>
+
+                  <span>
+                    Учебная группа
+                  </span>
+                </div>
+              </article>
+            } @empty {
+              <div class="empty-block">
+                Группы не найдены
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="content-card">
+          <header class="card-heading">
+            <div>
+              <h2>
+                Следующее занятие
+              </h2>
+
+              <p>
+                Ближайшее занятие
+                по дисциплине
+              </p>
+            </div>
+          </header>
+
+          @if (
+            nextLesson();
+            as lesson
+          ) {
+            <article class="next-lesson">
+              <div class="next-date">
+                <strong>
+                  {{
+                    lesson.date
+                      | date:'dd'
+                  }}
+                </strong>
+
+                <span>
+                  {{
+                    lesson.date
+                      | date:'MMM'
+                  }}
+                </span>
+              </div>
+
+              <div class="next-copy">
+                <span>
+                  {{
+                    lessonType(
+                      lesson.type
+                    )
+                  }}
+                </span>
+
+                <h3>
+                  {{ lesson.title }}
+                </h3>
+
+                <div class="next-meta">
+                  <span>
+                    <mat-icon>
+                      schedule
+                    </mat-icon>
+
+                    {{
+                      lesson.date
+                        | date:'HH:mm'
+                    }}
+                    —
+                    {{
+                      lessonEndTime(
+                        lesson
+                      )
+                        | date:'HH:mm'
+                    }}
+                  </span>
+
+                  <span>
+                    <mat-icon>
+                      groups
+                    </mat-icon>
+
+                    {{
+                      lesson.group?.name
+                    }}
+                  </span>
+
+                  <span>
+                    <mat-icon>
+                      meeting_room
+                    </mat-icon>
+
+                    Ауд.
+                    {{
+                      lesson.location ||
+                      '—'
+                    }}
+                  </span>
+                </div>
+              </div>
+
+              <a
+                class="small-action"
+                [routerLink]="[
+                  '/teacher/homeworks/create',
+                  lesson.id
+                ]"
+              >
+                <mat-icon>add_task</mat-icon>
+                Создать задание
+              </a>
+            </article>
+          } @else {
+            <div class="empty-block large">
+              <mat-icon>
+                event_available
+              </mat-icon>
+
+              <strong>
+                Предстоящих занятий нет
+              </strong>
+            </div>
+          }
+        </section>
+
+        <section class="content-card wide">
+          <header class="card-heading">
+            <div>
+              <h2>
+                Последние задания
+              </h2>
+
+              <p>
+                Домашние задания
+                по дисциплине
+              </p>
+            </div>
+
+            <button
+              type="button"
+              (click)="
+                setTab('HOMEWORKS')
+              "
+            >
+              Все задания
+              <mat-icon>
+                arrow_forward
+              </mat-icon>
+            </button>
+          </header>
+
+          <div class="recent-homeworks">
+            @for (
+              homework of
+                subjectHomeworks().slice(
+                  0,
+                  4
+                );
+              track homework.id
+            ) {
+              <a
+                class="homework-row"
+                [routerLink]="[
+                  '/teacher/homeworks',
+                  homework.id
+                ]"
+              >
+                <div class="homework-icon">
+                  <mat-icon>
+                    description
+                  </mat-icon>
+                </div>
+
+                <div class="homework-copy">
+                  <strong>
+                    {{ homework.title }}
+                  </strong>
+
+                  <span>
+                    {{
+                      homework.lesson
+                        ?.group?.name
+                    }}
+                  </span>
+                </div>
+
+                <div class="deadline">
+                  <span>
+                    Срок сдачи
+                  </span>
+
+                  <strong>
+                    {{
+                      homework.deadline
+                        | date:
+                          'dd MMM yyyy'
+                    }}
+                  </strong>
+                </div>
+
+                <div class="work-stat">
+                  <span>
+                    На проверке
+                  </span>
+
+                  <strong>
+                    {{
+                      homeworkPendingCount(
+                        homework
+                      )
+                    }}
+                  </strong>
+                </div>
+
+                <mat-icon>
+                  chevron_right
+                </mat-icon>
+              </a>
+            } @empty {
+              <div class="empty-block">
+                Заданий пока нет
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+    }
+
+    @if (
+      activeTab() === 'LESSONS'
+    ) {
+      <section class="content-card">
+        <header class="card-heading">
+          <div>
+            <h2>
+              Все занятия
+            </h2>
+
+            <p>
+              Расписание занятий
+              по дисциплине
+            </p>
+          </div>
+        </header>
+
+        <div class="lessons-list">
+          @for (
+            lesson of subjectLessons();
+            track lesson.id
+          ) {
+            <article class="lesson-row">
+              <div class="lesson-date">
+                <strong>
+                  {{
+                    lesson.date
+                      | date:'dd'
+                  }}
+                </strong>
+
+                <span>
+                  {{
+                    lesson.date
+                      | date:'MMM'
+                  }}
+                </span>
+              </div>
+
+              <div class="lesson-main">
+                <span class="lesson-type">
+                  {{
+                    lessonType(
+                      lesson.type
+                    )
+                  }}
+                </span>
+
+                <h3>
+                  {{ lesson.title }}
+                </h3>
+
+                <div class="lesson-meta">
+                  <span>
+                    <mat-icon>
+                      schedule
+                    </mat-icon>
+
+                    {{
+                      lesson.date
+                        | date:'HH:mm'
+                    }}
+                    —
+                    {{
+                      lessonEndTime(
+                        lesson
+                      )
+                        | date:'HH:mm'
+                    }}
+                  </span>
+
+                  <span>
+                    <mat-icon>
+                      groups
+                    </mat-icon>
+
+                    {{
+                      lesson.group?.name
+                    }}
+                  </span>
+
+                  <span>
+                    <mat-icon>
+                      meeting_room
+                    </mat-icon>
+
+                    {{
+                      lesson.location ||
+                      'Аудитория не указана'
+                    }}
+                  </span>
+                </div>
+              </div>
+
+              <a
+                class="create-homework"
+                [routerLink]="[
+                  '/teacher/homeworks/create',
+                  lesson.id
+                ]"
+              >
+                <mat-icon>
+                  add_task
+                </mat-icon>
+
+                Создать задание
+              </a>
+            </article>
+          } @empty {
+            <div class="empty-block large">
+              Занятий пока нет
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    @if (
+      activeTab() === 'HOMEWORKS'
+    ) {
+      <section class="content-card">
+        <header class="card-heading">
+          <div>
+            <h2>
+              Домашние задания
+            </h2>
+
+            <p>
+              Все задания
+              по дисциплине
+            </p>
+          </div>
+        </header>
+
+        <div class="homeworks-grid">
+          @for (
+            homework of subjectHomeworks();
+            track homework.id
+          ) {
+            <article class="homework-card">
+              <header>
+                <span
+                  class="status"
+                  [class]="
+                    homeworkStatusClass(
+                      homework
+                    )
+                  "
+                >
+                  {{
+                    homeworkStatus(
+                      homework
+                    )
+                  }}
+                </span>
+
+                <span class="group">
+                  {{
+                    homework.lesson
+                      ?.group?.name
+                  }}
+                </span>
+              </header>
+
+              <h3>
+                {{ homework.title }}
+              </h3>
+
+              <p>
+                {{ homework.description }}
+              </p>
+
+              <div class="homework-info">
+                <span>
+                  <mat-icon>event</mat-icon>
+
+                  {{
+                    homework.deadline
+                      | date:
+                        'dd MMMM yyyy'
+                  }}
+                </span>
+
+                <span>
+                  <mat-icon>grade</mat-icon>
+
+                  {{ homework.maxScore }}
+                  баллов
+                </span>
+              </div>
+
+              <div class="submission-summary">
+                <div>
+                  <span>
+                    Получено
+                  </span>
+
+                  <strong>
+                    {{
+                      homework.submissions
+                        ?.length || 0
+                    }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    На проверке
+                  </span>
+
+                  <strong class="orange">
+                    {{
+                      homeworkPendingCount(
+                        homework
+                      )
+                    }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>
+                    Проверено
+                  </span>
+
+                  <strong class="green">
+                    {{
+                      homeworkGradedCount(
+                        homework
+                      )
+                    }}
+                  </strong>
+                </div>
+              </div>
+
+              <a
+                [routerLink]="[
+                  '/teacher/homeworks',
+                  homework.id
+                ]"
+              >
+                Открыть задание
+
+                <mat-icon>
+                  arrow_forward
+                </mat-icon>
+              </a>
+            </article>
+          } @empty {
+            <div class="empty-block large">
+              Домашних заданий пока нет
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    @if (
+      activeTab() === 'PERFORMANCE'
+    ) {
+      <section class="content-card">
+        <header class="card-heading">
+          <div>
+            <h2>
+              Успеваемость
+            </h2>
+
+            <p>
+              Результаты по уже
+              проверенным работам
+            </p>
+          </div>
+        </header>
+
+        <div class="performance-table">
+          <div class="table-header">
+            <span>
+              Обучающийся
+            </span>
+
+            <span>
+              Работ
+            </span>
+
+            <span>
+              Проверено
+            </span>
+
+            <span>
+              Баллы
+            </span>
+
+            <span>
+              Результат
+            </span>
+          </div>
+
+          @for (
+            student of
+              studentPerformance();
+            track student.studentId
+          ) {
+            <article class="student-row">
+              <div class="student">
+                <div class="avatar">
+                  {{
+                    studentInitials(
+                      student.fullName
+                    )
+                  }}
+                </div>
+
+                <div>
+                  <strong>
+                    {{ student.fullName }}
+                  </strong>
+
+                  <span>
+                    {{
+                      student.email ||
+                      'Email не указан'
+                    }}
+                  </span>
+                </div>
+              </div>
+
+              <strong>
+                {{ student.submissions }}
+              </strong>
+
+              <strong>
+                {{ student.graded }}
+              </strong>
+
+              <strong>
+                {{ student.totalScore }}
+                /
+                {{
+                  student.totalMaxScore
+                }}
+              </strong>
+
+              <div class="result">
+                <strong
+                  [class]="
+                    performanceClass(
+                      student.percent
+                    )
+                  "
+                >
+                  {{ student.percent }}%
+                </strong>
+
+                <div class="progress-track">
+                  <span
+                    [class]="
+                      performanceClass(
+                        student.percent
+                      )
+                    "
+                    [style.width.%]="
+                      student.percent
+                    "
+                  ></span>
+                </div>
+              </div>
+            </article>
+          } @empty {
+            <div class="empty-block large">
+              <mat-icon>analytics</mat-icon>
+
+              <strong>
+                Оценок пока нет
+              </strong>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</section>

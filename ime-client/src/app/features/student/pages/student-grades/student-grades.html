@@ -1,0 +1,322 @@
+<section class="grades-page">
+  <header class="grades-hero">
+    <div class="hero-copy">
+      <span class="eyebrow">
+        Учебные результаты
+      </span>
+
+      <h1>Мои оценки</h1>
+
+      <p>
+        Следите за успеваемостью,
+        результатами выполненных заданий
+        и комментариями преподавателей
+      </p>
+    </div>
+
+    <div class="hero-result">
+      <span>Средний результат</span>
+
+      <strong>{{ averagePercent() }}%</strong>
+
+      <small>
+        {{ gradeLabel(averagePercent()) }}
+      </small>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="grades-state">
+      <mat-spinner diameter="48" />
+      <p>Загружаем оценки…</p>
+    </div>
+  } @else if (error()) {
+    <div class="grades-state error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <section class="statistics-grid">
+      <article>
+        <div class="stat-icon blue">
+          <mat-icon>analytics</mat-icon>
+        </div>
+
+        <div>
+          <strong>{{ averagePercent() }}%</strong>
+          <span>Средний результат</span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon green">
+          <mat-icon>emoji_events</mat-icon>
+        </div>
+
+        <div>
+          <strong>{{ highestPercent() }}%</strong>
+          <span>Лучший результат</span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon purple">
+          <mat-icon>task_alt</mat-icon>
+        </div>
+
+        <div>
+          <strong>{{ grades().length }}</strong>
+          <span>Проверено работ</span>
+        </div>
+      </article>
+
+      <article>
+        <div class="stat-icon orange">
+          <mat-icon>star</mat-icon>
+        </div>
+
+        <div>
+          <strong>{{ excellentCount() }}</strong>
+          <span>Отличных результатов</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="subjects-section">
+      <div class="section-heading">
+        <div>
+          <h2>Успеваемость по дисциплинам</h2>
+
+          <p>
+            Средний результат по каждой дисциплине
+          </p>
+        </div>
+      </div>
+
+      <div class="subjects-grid">
+        @for (
+          subject of subjectSummaries();
+          track subject.id
+        ) {
+          <a
+            class="subject-result"
+            [routerLink]="[
+              '/student/subjects',
+              subject.id
+            ]"
+          >
+            <div class="subject-heading">
+              <div class="subject-icon">
+                <mat-icon>menu_book</mat-icon>
+              </div>
+
+              <div>
+                <h3>{{ subject.name }}</h3>
+
+                <span>
+                  {{ subject.gradesCount }}
+                  {{
+                    subject.gradesCount === 1
+                      ? 'оценка'
+                      : 'оценок'
+                  }}
+                </span>
+              </div>
+
+              <strong>
+                {{ subject.averagePercent }}%
+              </strong>
+            </div>
+
+            <div class="progress-track">
+              <span
+                [class]="
+                  gradeClass(
+                    subject.averagePercent
+                  )
+                "
+                [style.width.%]="
+                  subject.averagePercent
+                "
+              ></span>
+            </div>
+
+            <div class="subject-footer">
+              <span>
+                Средний балл:
+                <strong>
+                  {{ subject.averageScore }}
+                </strong>
+              </span>
+
+              <small
+                [class]="
+                  gradeClass(
+                    subject.averagePercent
+                  )
+                "
+              >
+                {{
+                  gradeLabel(
+                    subject.averagePercent
+                  )
+                }}
+              </small>
+            </div>
+          </a>
+        } @empty {
+          <div class="empty-subjects">
+            Результатов по дисциплинам пока нет
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="grades-list-section">
+      <div class="section-heading grades-list-heading">
+        <div>
+          <h2>История оценок</h2>
+
+          <p>
+            Все проверенные домашние задания
+          </p>
+        </div>
+
+        <nav class="grade-filters">
+          <button
+            type="button"
+            [class.active]="
+              activeFilter() === 'ALL'
+            "
+            (click)="setFilter('ALL')"
+          >
+            Все
+            <span>{{ grades().length }}</span>
+          </button>
+
+          <button
+            type="button"
+            [class.active]="
+              activeFilter() === 'EXCELLENT'
+            "
+            (click)="setFilter('EXCELLENT')"
+          >
+            Отлично
+            <span>{{ excellentCount() }}</span>
+          </button>
+
+          <button
+            type="button"
+            [class.active]="
+              activeFilter() === 'GOOD'
+            "
+            (click)="setFilter('GOOD')"
+          >
+            Хорошо
+          </button>
+
+          <button
+            type="button"
+            [class.active]="
+              activeFilter() === 'LOW'
+            "
+            (click)="setFilter('LOW')"
+          >
+            Требуют внимания
+          </button>
+        </nav>
+      </div>
+
+      <div class="grades-list">
+        @for (
+          grade of filteredGrades();
+          track grade.id
+        ) {
+          <article class="grade-card">
+            <div
+              class="grade-score"
+              [class]="gradeClass(grade.percent)"
+            >
+              <strong>{{ grade.score }}</strong>
+              <span>/ {{ grade.maxScore }}</span>
+            </div>
+
+            <div class="grade-main">
+              <span class="subject-name">
+                {{ grade.subjectName }}
+              </span>
+
+              <h3>{{ grade.homeworkTitle }}</h3>
+
+              <div class="grade-meta">
+                <span>
+                  <mat-icon>person_outline</mat-icon>
+                  {{ grade.teacherName }}
+                </span>
+
+                @if (grade.gradedAt) {
+                  <span>
+                    <mat-icon>event</mat-icon>
+
+                    {{
+                      grade.gradedAt
+                        | date:'dd MMMM yyyy'
+                    }}
+                  </span>
+                }
+              </div>
+
+              @if (grade.feedback) {
+                <div class="teacher-feedback">
+                  <mat-icon>format_quote</mat-icon>
+
+                  <div>
+                    <span>
+                      Комментарий преподавателя
+                    </span>
+
+                    <p>{{ grade.feedback }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="grade-side">
+              <span
+                class="grade-label"
+                [class]="
+                  gradeClass(grade.percent)
+                "
+              >
+                {{ gradeLabel(grade.percent) }}
+              </span>
+
+              <strong>{{ grade.percent }}%</strong>
+
+              <a
+                [routerLink]="[
+                  '/student/homeworks',
+                  grade.homeworkId
+                ]"
+              >
+                Открыть работу
+                <mat-icon>arrow_forward</mat-icon>
+              </a>
+            </div>
+          </article>
+        } @empty {
+          <div class="grades-state compact">
+            <mat-icon>grading</mat-icon>
+
+            <h2>Оценок пока нет</h2>
+
+            <p>
+              Здесь появятся результаты
+              проверенных заданий
+            </p>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</section>

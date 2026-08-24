@@ -8,9 +8,6 @@ export class CreateHomeworkDto {
   subjectId!: string;
 
   @IsString()
-  teacherId!: string;
-
-  @IsString()
   title!: string;
 
   @IsString()

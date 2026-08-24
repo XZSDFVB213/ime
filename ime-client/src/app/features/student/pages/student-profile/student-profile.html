@@ -1,0 +1,197 @@
+<section class="profile-page">
+  <header class="profile-hero">
+    <div class="hero-background"></div>
+
+    <div class="profile-avatar">
+      @if (user()?.avatarUrl) {
+        <img
+          [src]="user().avatarUrl"
+          [alt]="session.fullName()"
+        />
+      } @else {
+        <span>{{ session.initials() }}</span>
+      }
+    </div>
+
+    <div class="profile-main">
+      <span class="role-badge">
+        <mat-icon>school</mat-icon>
+        {{ roleName() }}
+      </span>
+
+      <h1>{{ session.fullName() }}</h1>
+
+      <p>{{ session.email() }}</p>
+
+      <div class="profile-meta">
+        <span>
+          <mat-icon>groups</mat-icon>
+          {{ session.groupName() }}
+        </span>
+
+        <span>
+          <mat-icon>account_balance</mat-icon>
+          {{ session.departmentName() }}
+        </span>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="refresh-button"
+      [disabled]="session.loading()"
+      (click)="refresh()"
+    >
+      <mat-icon>refresh</mat-icon>
+
+      @if (session.loading()) {
+        Обновляем…
+      } @else {
+        Обновить данные
+      }
+    </button>
+  </header>
+
+  <div class="profile-grid">
+    <section class="profile-card personal-card">
+      <header class="card-heading">
+        <div class="heading-icon blue">
+          <mat-icon>person_outline</mat-icon>
+        </div>
+
+        <div>
+          <h2>Личные данные</h2>
+          <p>Основная информация учётной записи</p>
+        </div>
+      </header>
+
+      <div class="information-list">
+        <div class="information-row">
+          <span>ФИО</span>
+          <strong>{{ session.fullName() }}</strong>
+        </div>
+
+        <div class="information-row">
+          <span>Электронная почта</span>
+          <strong>{{ session.email() }}</strong>
+        </div>
+
+        <div class="information-row">
+          <span>Роль в системе</span>
+          <strong>{{ roleName() }}</strong>
+        </div>
+
+        <div class="information-row">
+          <span>Статус аккаунта</span>
+
+          <strong class="account-status">
+            <span></span>
+            Активен
+          </strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-card academic-card">
+      <header class="card-heading">
+        <div class="heading-icon purple">
+          <mat-icon>school</mat-icon>
+        </div>
+
+        <div>
+          <h2>Обучение</h2>
+          <p>Информация об образовательной программе</p>
+        </div>
+      </header>
+
+      <div class="information-list">
+        <div class="information-row">
+          <span>Учебная группа</span>
+          <strong>
+            {{ group()?.name || 'Не указана' }}
+          </strong>
+        </div>
+
+        <div class="information-row">
+          <span>Подразделение</span>
+          <strong>
+            {{
+              department()?.name ||
+              'Не указано'
+            }}
+          </strong>
+        </div>
+
+        <div class="information-row">
+          <span>Идентификатор обучающегося</span>
+
+          <strong class="technical-value">
+            {{
+              user()?.student?.id ||
+              'Не указан'
+            }}
+          </strong>
+        </div>
+
+        <div class="information-row">
+          <span>Форма обучения</span>
+          <strong>Очная</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-card account-card">
+      <header class="card-heading">
+        <div class="heading-icon green">
+          <mat-icon>verified_user</mat-icon>
+        </div>
+
+        <div>
+          <h2>Учётная запись</h2>
+          <p>Безопасность и управление сессией</p>
+        </div>
+      </header>
+
+      <div class="account-information">
+        <div class="security-block">
+          <div class="security-icon">
+            <mat-icon>lock_outline</mat-icon>
+          </div>
+
+          <div>
+            <strong>Пароль установлен</strong>
+
+            <span>
+              Для входа используется защищённая
+              учётная запись
+            </span>
+          </div>
+        </div>
+
+        <div class="security-block">
+          <div class="security-icon">
+            <mat-icon>shield</mat-icon>
+          </div>
+
+          <div>
+            <strong>Сессия активна</strong>
+
+            <span>
+              Вы авторизованы как
+              {{ session.email() }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="logout-profile-button"
+        (click)="logout()"
+      >
+        <mat-icon>logout</mat-icon>
+        Выйти из учётной записи
+      </button>
+    </section>
+  </div>
+</section>

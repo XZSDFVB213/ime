@@ -1,0 +1,301 @@
+<div
+  class="student-dashboard"
+  [class.loading]="loading()"
+>
+  <section class="hero-card">
+    <div class="hero-copy">
+      <span>Добро пожаловать,</span>
+
+      <h2>{{ firstName() }}!</h2>
+
+      <blockquote>
+        “Образование — это не подготовка к жизни.
+        Образование и есть жизнь.”
+      </blockquote>
+
+      <small>Джон Дьюи</small>
+    </div>
+
+    <div class="hero-decoration">
+      <div class="hero-circle circle-one"></div>
+      <div class="hero-circle circle-two"></div>
+
+      <div class="hero-books">
+        <div class="book book-one"></div>
+        <div class="book book-two"></div>
+        <div class="book book-three"></div>
+
+        <div class="graduation-cap">🎓</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dashboard-card learning-card">
+    <div class="card-heading">
+      <h3>Моё обучение</h3>
+      <button type="button">Подробнее</button>
+    </div>
+
+    <div class="progress-copy">
+      <strong>Ваш прогресс</strong>
+      <span>{{ progress() }}%</span>
+    </div>
+
+    <mat-progress-bar
+      mode="determinate"
+      [value]="progress()"
+    />
+
+    <div class="learning-stats">
+      <div class="learning-stat">
+        <div class="stat-icon purple">
+          <mat-icon>menu_book</mat-icon>
+        </div>
+
+        <div>
+          <strong>{{ subjectsCount() }}</strong>
+          <span>Дисциплин доступно</span>
+        </div>
+      </div>
+
+      <div class="learning-stat">
+        <div class="stat-icon blue">
+          <mat-icon>star_outline</mat-icon>
+        </div>
+
+        <div>
+          <strong>{{ averageScore() }}</strong>
+          <span>Средний балл</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dashboard-card schedule-card">
+    <div class="card-heading">
+      <h3>Ближайшие занятия</h3>
+      <button type="button">Всё расписание</button>
+    </div>
+
+    <div class="schedule-list">
+      @for (
+        lesson of upcomingLessons();
+        track lesson.id
+      ) {
+        <article class="schedule-item">
+          <div class="schedule-time">
+            <strong>
+              {{ lesson.date | date:'HH:mm' }}
+            </strong>
+
+            <span>
+              {{ lessonEndTime(lesson) | date:'HH:mm' }}
+            </span>
+          </div>
+
+          <div class="schedule-content">
+            <div>
+              <strong>
+                {{ lesson.subject?.name || lesson.title }}
+              </strong>
+
+              <span>
+                {{
+                  lesson.type === 'LECTURE'
+                    ? 'Лекция'
+                    : 'Практическое занятие'
+                }}
+              </span>
+            </div>
+
+            <div class="schedule-location">
+              <span>
+                Ауд. {{ lesson.location || '—' }}
+              </span>
+
+              <small>
+                {{ lesson.group?.name || 'Группа' }}
+              </small>
+            </div>
+          </div>
+        </article>
+      } @empty {
+        <div class="empty-card">
+          Ближайших занятий пока нет
+        </div>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="card-footer-button"
+    >
+      <mat-icon>calendar_month</mat-icon>
+      Добавить в календарь
+    </button>
+  </section>
+
+  <section class="dashboard-card tasks-card">
+    <div class="card-heading">
+      <h3>Мои задания</h3>
+      <button type="button">Все задания</button>
+    </div>
+
+    <div class="task-tabs">
+      <button type="button" class="active">
+        Текущие
+        <span>{{ currentHomeworks().length }}</span>
+      </button>
+
+      <button type="button">
+        На проверке
+      </button>
+
+      <button type="button">
+        Выполненные
+      </button>
+    </div>
+
+    <div class="tasks-list">
+      @for (
+        homework of currentHomeworks();
+        track homework.id
+      ) {
+        <article class="task-item">
+          <div class="task-icon">
+            <mat-icon>description</mat-icon>
+          </div>
+
+          <div class="task-copy">
+            <strong>{{ homework.title }}</strong>
+
+            <span>
+              {{ homework.subject?.name || 'Дисциплина' }}
+            </span>
+          </div>
+
+          <time [class]="deadlineClass(homework)">
+            {{ homework.deadline | date:'dd MMM' }}
+          </time>
+        </article>
+      } @empty {
+        <div class="empty-card">
+          Текущих заданий нет
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="dashboard-card announcements-card">
+    <div class="card-heading">
+      <h3>Объявления</h3>
+      <button type="button">Все объявления</button>
+    </div>
+
+    <div class="announcements-list">
+      @for (
+        item of announcements();
+        track item.title
+      ) {
+        <article class="announcement">
+          <span
+            class="announcement-dot"
+            [class.important]="item.important"
+          ></span>
+
+          <div>
+            <strong>{{ item.title }}</strong>
+            <p>{{ item.text }}</p>
+            <time>{{ item.date }}</time>
+          </div>
+        </article>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="card-footer-button"
+    >
+      Смотреть все
+    </button>
+  </section>
+
+  <section class="dashboard-card grades-card">
+    <div class="card-heading">
+      <h3>Мои оценки</h3>
+      <button type="button">Ведомость</button>
+    </div>
+
+    <div class="grades-list">
+      @for (
+        grade of grades().slice(0, 5);
+        track grade.id
+      ) {
+        <article class="grade-item">
+          <span>
+            {{ grade.homework?.subject?.code || '—' }}
+          </span>
+
+          <strong>{{ grade.score }}</strong>
+
+          <small>
+            {{ grade.score >= 80 ? 'отл.' : 'хор.' }}
+          </small>
+        </article>
+      } @empty {
+        <div class="empty-card">
+          Оценок пока нет
+        </div>
+      }
+    </div>
+
+    <div class="average-card">
+      <span>Средний балл:</span>
+
+      <strong>{{ averageScore() }}</strong>
+
+      <em>
+        {{ averageScore() >= 80 ? 'Отлично' : 'Хорошо' }}
+      </em>
+    </div>
+  </section>
+
+  <section class="dashboard-card quick-card">
+    <div class="card-heading">
+      <h3>Быстрые ссылки</h3>
+    </div>
+
+    <div class="quick-links">
+      @for (
+        link of quickLinks();
+        track link.label
+      ) {
+        <button type="button" class="quick-link">
+          <span [class]="link.className">
+            <mat-icon>{{ link.icon }}</mat-icon>
+          </span>
+
+          <small>{{ link.label }}</small>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="dashboard-card calendar-card">
+    <div class="card-heading">
+      <h3>Календарь</h3>
+    </div>
+
+    <mat-calendar
+      [selected]="selectedDate()"
+      (selectedChange)="selectedDate.set($event)"
+    />
+
+    <button
+      type="button"
+      class="card-footer-button"
+    >
+      Полный календарь
+    </button>
+  </section>
+</div>

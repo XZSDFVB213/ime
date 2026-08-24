@@ -1,0 +1,789 @@
+<section class="student-page">
+    <a class="back-link" routerLink="/teacher/students">
+        <mat-icon>arrow_back</mat-icon>
+        Мои студенты
+    </a>
+
+    @if (loading()) {
+    <div class="page-state">
+        <mat-spinner diameter="48" />
+
+        <p>
+            Загружаем данные обучающегося…
+        </p>
+    </div>
+    } @else if (error()) {
+    <div class="page-state error">
+        <mat-icon>
+            error_outline
+        </mat-icon>
+
+        <p>{{ error() }}</p>
+    </div>
+    } @else if (student(); as student) {
+    <header class="student-hero">
+        <div class="student-profile">
+            <div class="hero-avatar">
+                @if (student.user?.avatarUrl) {
+                <img [src]="student.user.avatarUrl" [alt]="student.user.fullName" />
+                } @else {
+                <span>
+                    {{
+                    initials(
+                    student.user?.fullName ||
+                    ''
+                    )
+                    }}
+                </span>
+                }
+            </div>
+
+            <div class="hero-copy">
+                <span class="eyebrow">
+                    Обучающийся
+                </span>
+
+                <h1>
+                    {{ student.user?.fullName }}
+                </h1>
+
+                <p>
+                    {{ student.user?.email }}
+                </p>
+
+                <div class="hero-meta">
+                    <span>
+                        <mat-icon>groups</mat-icon>
+
+                        {{ student.group.name }}
+                    </span>
+
+                    @if (student.admissionYear) {
+                    <span>
+                        <mat-icon>
+                            school
+                        </mat-icon>
+
+                        Год поступления:
+                        {{ student.admissionYear }}
+                    </span>
+                    }
+
+                    @if (student.studentCode) {
+                    <span>
+                        <mat-icon>
+                            badge
+                        </mat-icon>
+
+                        {{ student.studentCode }}
+                    </span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-performance">
+            <span>
+                Успеваемость
+            </span>
+
+            <strong>
+                {{ averagePercent() }}%
+            </strong>
+
+            <small>
+                {{
+                performanceLabel(
+                averagePercent()
+                )
+                }}
+            </small>
+        </div>
+    </header>
+
+    <section class="statistics-grid">
+        <article>
+            <div class="stat-icon blue">
+                <mat-icon>
+                    assignment
+                </mat-icon>
+            </div>
+
+            <div>
+                <strong>
+                    {{
+                    studentHomeworks().length
+                    }}
+                </strong>
+
+                <span>
+                    Всего заданий
+                </span>
+            </div>
+        </article>
+
+        <article>
+            <div class="stat-icon green">
+                <mat-icon>
+                    task_alt
+                </mat-icon>
+            </div>
+
+            <div>
+                <strong>
+                    {{ gradedCount() }}
+                </strong>
+
+                <span>
+                    Проверено
+                </span>
+            </div>
+        </article>
+
+        <article>
+            <div class="stat-icon orange">
+                <mat-icon>
+                    pending_actions
+                </mat-icon>
+            </div>
+
+            <div>
+                <strong>
+                    {{ pendingCount() }}
+                </strong>
+
+                <span>
+                    На проверке
+                </span>
+            </div>
+        </article>
+
+        <article>
+            <div class="stat-icon red">
+                <mat-icon>
+                    assignment_late
+                </mat-icon>
+            </div>
+
+            <div>
+                <strong>
+                    {{ missingCount() }}
+                </strong>
+
+                <span>
+                    Не отправлено
+                </span>
+            </div>
+        </article>
+    </section>
+
+    <nav class="student-tabs">
+        <button type="button" [class.active]="
+          activeTab() === 'OVERVIEW'
+        " (click)="
+          setTab('OVERVIEW')
+        ">
+            <mat-icon>
+                dashboard
+            </mat-icon>
+
+            Обзор
+        </button>
+
+        <button type="button" [class.active]="
+          activeTab() === 'HOMEWORKS'
+        " (click)="
+          setTab('HOMEWORKS')
+        ">
+            <mat-icon>
+                assignment
+            </mat-icon>
+
+            Задания
+
+            <span>
+                {{
+                studentHomeworks().length
+                }}
+            </span>
+        </button>
+
+        <button type="button" [class.active]="
+          activeTab() === 'SUBJECTS'
+        " (click)="
+          setTab('SUBJECTS')
+        ">
+            <mat-icon>
+                menu_book
+            </mat-icon>
+
+            Дисциплины
+
+            <span>
+                {{ subjects().length }}
+            </span>
+        </button>
+    </nav>
+
+    @if (
+    activeTab() === 'OVERVIEW'
+    ) {
+    <div class="overview-grid">
+        <section class="content-card">
+            <header class="card-heading">
+                <div>
+                    <h2>
+                        Общая успеваемость
+                    </h2>
+
+                    <p>
+                        По проверенным работам
+                    </p>
+                </div>
+            </header>
+
+            <div class="big-performance">
+                <div class="performance-circle" [class]="
+                performanceClass(
+                  averagePercent()
+                )
+              ">
+                    <strong>
+                        {{ averagePercent() }}%
+                    </strong>
+
+                    <span>
+                        результат
+                    </span>
+                </div>
+
+                <div class="performance-copy">
+                    <strong>
+                        {{ totalScore() }}
+                        /
+                        {{ totalMaxScore() }}
+                    </strong>
+
+                    <span>
+                        баллов получено
+                    </span>
+
+                    <div class="progress-track">
+                        <span [class]="
+                    performanceClass(
+                      averagePercent()
+                    )
+                  " [style.width.%]="
+                    averagePercent()
+                  "></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submission-progress">
+                <header>
+                    <span>
+                        Сдано заданий
+                    </span>
+
+                    <strong>
+                        {{ submissionPercent() }}%
+                    </strong>
+                </header>
+
+                <div class="progress-track">
+                    <span class="blue" [style.width.%]="
+                  submissionPercent()
+                "></span>
+                </div>
+
+                <small>
+                    {{ submittedCount() }}
+                    из
+                    {{
+                    studentHomeworks().length
+                    }}
+                </small>
+            </div>
+        </section>
+
+        <section class="content-card">
+            <header class="card-heading">
+                <div>
+                    <h2>
+                        Следующее занятие
+                    </h2>
+
+                    <p>
+                        По дисциплинам преподавателя
+                    </p>
+                </div>
+            </header>
+
+            @if (
+            nextLesson();
+            as lesson
+            ) {
+            <article class="next-lesson">
+                <div class="next-date">
+                    <strong>
+                        {{
+                        lesson.date
+                        | date:'dd'
+                        }}
+                    </strong>
+
+                    <span>
+                        {{
+                        lesson.date
+                        | date:'MMM'
+                        }}
+                    </span>
+                </div>
+
+                <div class="next-copy">
+                    <span>
+                        {{ lesson.subject?.name }}
+                    </span>
+
+                    <h3>
+                        {{ lesson.title }}
+                    </h3>
+
+                    <div>
+                        <span>
+                            <mat-icon>
+                                schedule
+                            </mat-icon>
+
+                            {{
+                            lesson.date
+                            | date:'HH:mm'
+                            }}
+                            —
+                            {{
+                            lessonEndTime(
+                            lesson
+                            )
+                            | date:'HH:mm'
+                            }}
+                        </span>
+
+                        <span>
+                            <mat-icon>
+                                meeting_room
+                            </mat-icon>
+
+                            Ауд.
+                            {{
+                            lesson.location ||
+                            '—'
+                            }}
+                        </span>
+                    </div>
+                </div>
+            </article>
+            } @else {
+            <div class="empty-block">
+                <mat-icon>
+                    event_available
+                </mat-icon>
+
+                <strong>
+                    Занятий нет
+                </strong>
+            </div>
+            }
+        </section>
+
+        @if (
+        overdueMissingCount() > 0
+        ) {
+        <section class="warning-card">
+            <div class="warning-icon">
+                <mat-icon>
+                    warning_amber
+                </mat-icon>
+            </div>
+
+            <div>
+                <strong>
+                    Есть просроченные задания
+                </strong>
+
+                <p>
+                    Обучающийся не сдал
+                    {{ overdueMissingCount() }}
+                    заданий с истёкшим сроком.
+                </p>
+            </div>
+
+            <button type="button" (click)="
+                setTab('HOMEWORKS')
+              ">
+                Посмотреть
+            </button>
+        </section>
+        }
+
+        <section class="content-card wide">
+            <header class="card-heading">
+                <div>
+                    <h2>
+                        Результаты по дисциплинам
+                    </h2>
+
+                    <p>
+                        Текущая успеваемость
+                        обучающегося
+                    </p>
+                </div>
+
+                <button type="button" (click)="
+                setTab('SUBJECTS')
+              ">
+                    Все дисциплины
+
+                    <mat-icon>
+                        arrow_forward
+                    </mat-icon>
+                </button>
+            </header>
+
+            <div class="subject-summary">
+                @for (
+                subject of
+                subjectStats();
+                track subject.id
+                ) {
+                <article>
+                    <div class="subject-main">
+                        <div class="subject-icon">
+                            <mat-icon>
+                                menu_book
+                            </mat-icon>
+                        </div>
+
+                        <div>
+                            <span>
+                                {{
+                                subject.code ||
+                                'Дисциплина'
+                                }}
+                            </span>
+
+                            <strong>
+                                {{ subject.name }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="mini-stat">
+                        <span>
+                            Заданий
+                        </span>
+
+                        <strong>
+                            {{ subject.assigned }}
+                        </strong>
+                    </div>
+
+                    <div class="mini-stat">
+                        <span>
+                            Проверено
+                        </span>
+
+                        <strong>
+                            {{ subject.graded }}
+                        </strong>
+                    </div>
+
+                    <div class="subject-result">
+                        <div>
+                            <strong [class]="
+                        performanceClass(
+                          subject.percent
+                        )
+                      ">
+                                {{ subject.percent }}%
+                            </strong>
+
+                            <span>
+                                {{
+                                subject.score
+                                }}
+                                /
+                                {{
+                                subject.maxScore
+                                }}
+                            </span>
+                        </div>
+
+                        <div class="progress-track">
+                            <span [class]="
+                        performanceClass(
+                          subject.percent
+                        )
+                      " [style.width.%]="
+                        subject.percent
+                      "></span>
+                        </div>
+                    </div>
+
+                    <a [routerLink]="[
+                    '/teacher/subjects',
+                    subject.id
+                  ]">
+                        <mat-icon>
+                            chevron_right
+                        </mat-icon>
+                    </a>
+                </article>
+                }
+            </div>
+        </section>
+    </div>
+    }
+
+    @if (
+    activeTab() === 'HOMEWORKS'
+    ) {
+    <section class="content-card">
+        <header class="card-heading">
+            <div>
+                <h2>
+                    Домашние задания
+                </h2>
+
+                <p>
+                    Все задания преподавателя
+                    для группы
+                    {{ student.group.name }}
+                </p>
+            </div>
+        </header>
+
+        <div class="homeworks-list">
+            @for (
+            homework of
+            studentHomeworks();
+            track homework.id
+            ) {
+            <article class="homework-row">
+                <div class="homework-icon">
+                    <mat-icon>
+                        description
+                    </mat-icon>
+                </div>
+
+                <div class="homework-main">
+                    <span>
+                        {{
+                        homework.subject?.name
+                        }}
+                    </span>
+
+                    <h3>
+                        {{ homework.title }}
+                    </h3>
+
+                    <small>
+                        Срок:
+                        {{
+                        homework.deadline
+                        | date:
+                        'dd MMMM yyyy, HH:mm'
+                        }}
+                    </small>
+                </div>
+
+                <span class="submission-status" [class]="
+                  submissionStatusClass(
+                    homework
+                  )
+                ">
+                    {{
+                    submissionStatus(
+                    homework
+                    )
+                    }}
+                </span>
+
+                <div class="homework-score">
+                    @if (
+                    homework
+                    .studentSubmission
+                    ?.status ===
+                    'GRADED'
+                    ) {
+                    <strong>
+                        {{
+                        homework
+                        .studentSubmission
+                        .score
+                        }}
+                        /
+                        {{
+                        homework.maxScore
+                        }}
+                    </strong>
+
+                    <span>
+                        баллов
+                    </span>
+                    } @else {
+                    <strong>—</strong>
+
+                    <span>
+                        оценка
+                    </span>
+                    }
+                </div>
+
+                <a [routerLink]="[
+                  '/teacher/homeworks',
+                  homework.id
+                ]">
+                    <mat-icon>
+                        chevron_right
+                    </mat-icon>
+                </a>
+            </article>
+            } @empty {
+            <div class="empty-block large">
+                <mat-icon>
+                    assignment
+                </mat-icon>
+
+                <strong>
+                    Заданий пока нет
+                </strong>
+            </div>
+            }
+        </div>
+    </section>
+    }
+
+    @if (
+    activeTab() === 'SUBJECTS'
+    ) {@if (
+    activeTab() === 'SUBJECTS'
+    ) {
+    <div class="subjects-grid">
+        @for (
+        subject of subjectStats();
+        track subject.id
+        ) {
+        <article class="subject-card">
+            <header>
+                <div class="subject-icon">
+                    <mat-icon>
+                        menu_book
+                    </mat-icon>
+                </div>
+
+                <span>
+                    {{
+                    subject.code ||
+                    'Дисциплина'
+                    }}
+                </span>
+            </header>
+
+            <h2>
+                {{ subject.name }}
+            </h2>
+
+            <div class="subject-stat-grid">
+                <div>
+                    <span>
+                        Назначено
+                    </span>
+
+                    <strong>
+                        {{ subject.assigned }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>
+                        Сдано
+                    </span>
+
+                    <strong>
+                        {{ subject.submitted }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>
+                        Проверено
+                    </span>
+
+                    <strong>
+                        {{ subject.graded }}
+                    </strong>
+                </div>
+
+                <div>
+                    <span>
+                        Не сдано
+                    </span>
+
+                    <strong class="red">
+                        {{ subject.missing }}
+                    </strong>
+                </div>
+            </div>
+
+            <div class="subject-performance">
+                <header>
+                    <span>
+                        Результат
+                    </span>
+
+                    <strong [class]="
+                performanceClass(
+                  subject.percent
+                )
+              ">
+                        {{ subject.percent }}%
+                    </strong>
+                </header>
+
+                <div class="progress-track">
+                    <span [class]="
+                performanceClass(
+                  subject.percent
+                )
+              " [style.width.%]="
+                subject.percent
+              "></span>
+                </div>
+
+                <small>
+                    {{ subject.score }}
+                    /
+                    {{ subject.maxScore }}
+                    баллов
+                </small>
+            </div>
+
+            <a [routerLink]="[
+            '/teacher/subjects',
+            subject.id
+          ]">
+                Открыть дисциплину
+
+                <mat-icon>
+                    arrow_forward
+                </mat-icon>
+            </a>
+        </article>
+        }
+    </div>
+    }
+    }
+
+}
+</section>

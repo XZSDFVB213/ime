@@ -1,363 +1,812 @@
-.dashboard {
-  min-height: 100vh;
-  padding: 2rem 1.5rem;
-  background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #1e293b;
+:host {
+  display: block;
 }
 
-/* ========== Шапка преподавателя ========== */
-.teacher-card {
+.dashboard-page {
+  min-height: calc(100vh - var(--topbar-height));
+
+  color: #122140;
+}
+
+.welcome-card {
+  position: relative;
+
+  min-height: 220px;
+  padding: 36px 40px;
+
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  background: white;
-  border-radius: 1.25rem;
-  padding: 1.5rem 1.75rem;
-  margin-bottom: 2.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-}
+  justify-content: space-between;
+  gap: 30px;
 
-.avatar {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 1.1rem;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.9rem;
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
-  flex-shrink: 0;
-}
-
-.teacher-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.teacher-name {
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #0f172a;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+
+  color: #fff;
+
+  background:
+    radial-gradient(circle at 84% 24%, rgba(113, 185, 255, 0.5), transparent 29%),
+    linear-gradient(135deg, #174bb7 0%, #1267eb 100%);
+
+  border-radius: 20px;
+
+  box-shadow: 0 16px 40px rgba(18, 91, 209, 0.19);
 }
 
-.teacher-email {
-  margin: 0.25rem 0 0;
-  font-size: 0.9rem;
-  color: #64748b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.welcome-copy {
+  position: relative;
+  z-index: 1;
+
+  .welcome-date {
+    display: block;
+    margin-bottom: 9px;
+
+    color: rgba(255, 255, 255, 0.75);
+
+    font-size: var(--font-small);
+    font-weight: 500;
+  }
+
+  h1 {
+    margin: 0;
+
+    font-size: clamp(31px, 3vw, 44px);
+    font-weight: 750;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+
+  > p {
+    max-width: 690px;
+    margin: 14px 0 0;
+
+    color: rgba(255, 255, 255, 0.81);
+
+    font-size: 16px;
+    line-height: 1.65;
+  }
 }
 
-/* Спиннер */
-.spinner {
-  width: 1.4rem;
-  height: 1.4rem;
-  border: 2.5px solid #e2e8f0;
-  border-top-color: #6366f1;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
+.teacher-details {
+  margin-top: 21px;
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ========== Секции ========== */
-.section {
-  margin-bottom: 2.75rem;
-}
-
-
-.section-title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #0f172a;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  span {
+    min-height: 38px;
+    padding: 0 13px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    color: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.11);
+
+    font-size: var(--font-small);
+
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+
+    mat-icon {
+      width: 19px;
+      height: 19px;
+      font-size: 19px;
+    }
+  }
 }
 
-.section-title .icon {
-  font-size: 1.35rem;
-}
+.welcome-decoration {
+  position: relative;
+  z-index: 1;
 
-.badge {
-  font-size: 0.8rem;
-  color: #64748b;
-  background: white;
-  padding: 0.3rem 0.85rem;
-  border-radius: 999px;
-  border: 1px solid #e2e8f0;
-  font-weight: 500;
-}
+  flex: 0 0 120px;
 
-/* ========== Пустое состояние ========== */
-.empty-state {
-  background: white;
-  border: 1.5px dashed #cbd5e1;
-  border-radius: 1.25rem;
-  padding: 3rem 1.5rem;
-  text-align: center;
-  color: #94a3b8;
-  font-size: 0.95rem;
-}
+  width: 120px;
+  height: 120px;
 
-/* ========== Занятия ========== */
-.lessons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.1rem;
+  place-items: center;
+
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 31px;
+
+  transform: rotate(5deg);
+
+  mat-icon {
+    width: 69px;
+    height: 69px;
+    font-size: 69px;
+  }
 }
 
-.lesson-card {
-  background: white;
-  border-radius: 1.15rem;
-  padding: 1.35rem 1.4rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s ease;
-  cursor: default;
+.statistics-grid {
+  margin: 22px 0;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
 
-.lesson-card:hover {
-  border-color: #c7d2fe;
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.1);
-  transform: translateY(-2px);
+.stat-card {
+  min-height: 102px;
+  padding: 18px;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  background: #fff;
+
+  border: 1px solid #e5eaf2;
+  border-radius: 16px;
+
+  box-shadow: 0 8px 27px rgba(27, 52, 92, 0.05);
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: #172848;
+    font-size: 25px;
+  }
+
+  span {
+    margin-top: 4px;
+
+    color: #78859a;
+    font-size: var(--font-small);
+  }
 }
 
-.lesson-title {
-  margin: 0 0 1rem;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #0f172a;
-  line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.stat-icon {
+  flex: 0 0 52px;
+
+  width: 52px;
+  height: 52px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 14px;
+
+  &.blue {
+    color: #1767ec;
+    background: #eaf1ff;
+  }
+
+  &.purple {
+    color: #8345dc;
+    background: #f0e8ff;
+  }
+
+  &.orange {
+    color: #dc8408;
+    background: #fff1d8;
+  }
+
+  &.green {
+    color: #1f9953;
+    background: #e5f7ec;
+  }
 }
 
-.lesson-card:hover .lesson-title {
-  color: #4f46e5;
+.dashboard-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.55fr)
+    minmax(310px, 0.85fr);
+
+  align-items: start;
+  gap: 20px;
+}
+
+.dashboard-card {
+  padding: 24px;
+
+  background: #fff;
+
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+
+  box-shadow: 0 10px 32px rgba(27, 52, 92, 0.06);
+}
+
+.homeworks-card {
+  grid-column: 1 / -1;
+}
+
+.card-heading {
+  min-height: 50px;
+  margin-bottom: 20px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    color: #172848;
+    font-size: 21px;
+    font-weight: 700;
+  }
+
+  p {
+    margin-top: 6px;
+
+    color: #7b879c;
+    font-size: var(--font-small);
+  }
+
+  > a {
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #1767ec;
+
+    font-size: var(--font-small);
+    font-weight: 650;
+    text-decoration: none;
+
+    mat-icon {
+      width: 19px;
+      height: 19px;
+      font-size: 19px;
+    }
+  }
+}
+
+.lessons-list,
+.checking-list,
+.homeworks-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.lesson-row {
+  min-height: 112px;
+  padding: 16px 0;
+
+  display: grid;
+  grid-template-columns:
+    60px
+    4px
+    minmax(0, 1fr)
+    44px;
+
+  align-items: center;
+  gap: 15px;
+
+  border-bottom: 1px solid #edf0f5;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.lesson-date {
+  width: 60px;
+  height: 67px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  color: #1767ec;
+  background: #edf3ff;
+
+  border-radius: 13px;
+
+  strong {
+    font-size: 23px;
+    line-height: 1;
+  }
+
+  span {
+    margin-top: 5px;
+
+    font-size: var(--font-tiny);
+    font-weight: 650;
+  }
+}
+
+.lesson-marker {
+  align-self: stretch;
+
+  min-height: 67px;
+
+  border-radius: 999px;
+
+  &.lecture {
+    background: #1767ec;
+  }
+
+  &.practice {
+    background: #24a45a;
+  }
+
+  &.seminar {
+    background: #8849dc;
+  }
+
+  &.lab {
+    background: #eb920d;
+  }
+
+  &.default {
+    background: #8190a6;
+  }
+}
+
+.lesson-main {
+  min-width: 0;
+
+  h3 {
+    margin: 6px 0 10px;
+
+    color: #172848;
+
+    font-size: 17px;
+    line-height: 1.4;
+  }
+}
+
+.lesson-type {
+  display: inline-flex;
+  padding: 5px 9px;
+
+  font-size: var(--font-tiny);
+  font-weight: 650;
+
+  border-radius: 8px;
+
+  &.lecture {
+    color: #145bc7;
+    background: #e8f1ff;
+  }
+
+  &.practice {
+    color: #178148;
+    background: #e5f7ec;
+  }
+
+  &.seminar {
+    color: #7735cb;
+    background: #f0e8ff;
+  }
+
+  &.lab {
+    color: #a46100;
+    background: #fff1d6;
+  }
+
+  &.default {
+    color: #637086;
+    background: #edf0f5;
+  }
 }
 
 .lesson-meta {
   display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #475569;
-}
-
-.meta-icon {
-  font-size: 1rem;
-  width: 1.3rem;
-  text-align: center;
-}
-
-.homeworks-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.homework-card {
-  background: white;
-  border-radius: 1.25rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
-  overflow: hidden;
-}
-
-.homework-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.35rem 1.5rem;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.homework-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.homework-title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.homework-description {
-  margin: 0.45rem 0 0;
-  font-size: 0.875rem;
-  color: #64748b;
-  line-height: 1.5;
-}
-
-.submissions-count {
-  flex-shrink: 0;
-  background: #eef2ff;
-  color: #4f46e5;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.35rem 0.8rem;
-  border-radius: 0.7rem;
-}
-
-/* Список сдач */
-.submissions {
-  display: flex;
-  flex-direction: column;
-}
-
-.submission {
-  padding: 1.15rem 1.5rem;
-  border-bottom: 1px solid #f1f5f9;
-  transition: background 0.15s ease;
-}
-
-.submission:last-child {
-  border-bottom: none;
-}
-
-.submission:hover {
-  background: #f8fafc;
-}
-
-.submission-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.4rem;
-}
-
-.student-name {
-  font-size: 0.95rem;
-  color: #0f172a;
-}
-
-.score {
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.25rem 0.7rem;
-  border-radius: 0.55rem;
-}
-
-.score-done {
-  background: #ecfdf5;
-  color: #059669;
-}
-
-.score-pending {
-  background: #fffbeb;
-  color: #d97706;
-}
-
-.submission-content {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #475569;
-  line-height: 1.55;
-  white-space: pre-line;
-}
-
-.no-submissions {
-  padding: 1.75rem;
-  text-align: center;
-  color: #94a3b8;
-  font-size: 0.9rem;
-}
-/* ===== Шапка секции ===== */
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.15rem;
   flex-wrap: wrap;
+  gap: 13px;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #748198;
+    font-size: var(--font-small);
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+
+      color: #8391a6;
+      font-size: 18px;
+    }
+  }
 }
 
-.section-actions {
+.lesson-action {
+  width: 44px;
+  height: 44px;
+
+  display: grid;
+  place-items: center;
+
+  color: #1767ec;
+  background: #edf3ff;
+
+  border: 0;
+  border-radius: 11px;
+
+  cursor: pointer;
+
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+
+  &:hover {
+    color: #fff;
+    background: #1767ec;
+  }
+}
+
+.checking-row {
+  min-height: 83px;
+  padding: 13px 0;
+
+  display: grid;
+  grid-template-columns:
+    44px
+    minmax(0, 1fr)
+    auto
+    22px;
+
+  align-items: center;
+  gap: 12px;
+
+  color: inherit;
+  text-decoration: none;
+
+  border-bottom: 1px solid #edf0f5;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  > mat-icon {
+    color: #8190a5;
+  }
+}
+
+.checking-icon {
+  width: 44px;
+  height: 44px;
+
+  display: grid;
+  place-items: center;
+
+  color: #dd8308;
+  background: #fff1d8;
+
+  border-radius: 12px;
+}
+
+.checking-copy {
+  min-width: 0;
+
+  span,
+  strong,
+  small {
+    display: block;
+  }
+
+  span {
+    color: #1767ec;
+    font-size: var(--font-tiny);
+    font-weight: 650;
+  }
+
+  strong {
+    margin-top: 4px;
+
+    overflow: hidden;
+
+    color: #283a59;
+    font-size: var(--font-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    margin-top: 4px;
+
+    color: #7b879c;
+    font-size: var(--font-tiny);
+  }
+}
+
+.checking-count {
+  text-align: right;
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: #dd8308;
+    font-size: 21px;
+  }
+
+  span {
+    margin-top: 2px;
+
+    color: #8490a4;
+    font-size: var(--font-tiny);
+  }
+}
+
+.homework-row {
+  min-height: 87px;
+  padding: 14px 0;
+
+  display: grid;
+  grid-template-columns:
+    44px
+    minmax(180px, 1fr)
+    minmax(140px, 0.65fr)
+    90px
+    95px
+    90px
+    auto;
+
+  align-items: center;
+  gap: 14px;
+
+  border-bottom: 1px solid #edf0f5;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.homework-icon {
+  width: 44px;
+  height: 44px;
+
+  display: grid;
+  place-items: center;
+
+  color: #1767ec;
+  background: #edf3ff;
+
+  border-radius: 11px;
+}
+
+.homework-main {
+  min-width: 0;
+
+  span {
+    display: block;
+
+    color: #1767ec;
+    font-size: var(--font-tiny);
+    font-weight: 650;
+  }
+
+  h3 {
+    margin: 5px 0 0;
+
+    overflow: hidden;
+
+    color: #273a59;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.homework-deadline,
+.submission-stat {
+  span,
+  strong {
+    display: block;
+  }
+
+  span {
+    color: #8490a4;
+    font-size: var(--font-tiny);
+  }
+
+  strong {
+    margin-top: 5px;
+
+    color: #344764;
+    font-size: var(--font-small);
+  }
+}
+
+.submission-stat {
+  text-align: center;
+
+  strong {
+    font-size: 18px;
+  }
+
+  &.pending strong {
+    color: #df8508;
+  }
+
+  &.graded strong {
+    color: #1e9952;
+  }
+}
+
+.homework-action {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-}
+  gap: 6px;
 
-.add-btn {
+  color: #1767ec;
+
+  font-size: var(--font-small);
+  font-weight: 650;
+  text-decoration: none;
+
   mat-icon {
-    margin-right: 4px;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    width: 19px;
+    height: 19px;
+    font-size: 19px;
   }
 }
 
-/* ===== Футер карточки ДЗ ===== */
-.homework-footer {
-  padding: 1rem 1.5rem 1.25rem;
-  border-top: 1px solid #f1f5f9;
+.empty-block {
+  min-height: 220px;
+  padding: 25px;
+
   display: flex;
-  justify-content: flex-end;
-}
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
 
-.check-btn {
+  color: #7b879c;
+  text-align: center;
+
   mat-icon {
-    margin-right: 6px;
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    width: 54px;
+    height: 54px;
+
+    color: #8ba7d1;
+    font-size: 54px;
+  }
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    color: #304361;
+    font-size: 17px;
+  }
+
+  p {
+    font-size: var(--font-small);
+  }
+
+  &.compact {
+    min-height: 250px;
   }
 }
 
-/* Старая кнопка .btn больше не нужна */
-.btn {
-  display: none;
+.page-state {
+  min-height: 380px;
+  padding: 35px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 13px;
+
+  color: #78869c;
+  background: #fff;
+
+  text-align: center;
+
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+
+  &.error {
+    color: #a84646;
+    background: #fff7f7;
+    border-color: #edcccc;
+
+    > mat-icon {
+      width: 58px;
+      height: 58px;
+
+      color: #d64e4e;
+      font-size: 58px;
+    }
+  }
 }
-/* ========== Адаптив ========== */
-@media (max-width: 640px) {
-  .dashboard {
-    padding: 1.25rem 1rem;
+
+@media (max-width: 1200px) {
+  .statistics-grid {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .teacher-card {
-    padding: 1.15rem;
-  }
-
-  .avatar {
-    width: 3.4rem;
-    height: 3.4rem;
-    font-size: 1.6rem;
-  }
-
-  .teacher-name {
-    font-size: 1.2rem;
-  }
-
-  .lessons-grid {
+  .dashboard-grid {
     grid-template-columns: 1fr;
   }
 
-  .homework-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .homeworks-card {
+    grid-column: auto;
+  }
+
+  .homework-row {
+    grid-template-columns:
+      44px
+      minmax(170px, 1fr)
+      minmax(130px, 0.65fr)
+      80px
+      90px
+      auto;
+
+    .submission-stat.graded {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 760px) {
+  .welcome-card {
+    min-height: 240px;
+    padding: 28px 22px;
+  }
+
+  .welcome-decoration {
+    display: none;
+  }
+
+  .statistics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-card {
+    padding: 18px;
+  }
+
+  .lesson-row {
+    grid-template-columns:
+      55px
+      minmax(0, 1fr)
+      42px;
+
+    .lesson-marker {
+      display: none;
+    }
+  }
+
+  .homework-row {
+    padding: 17px 0;
+
+    grid-template-columns:
+      44px
+      minmax(0, 1fr)
+      auto;
+
+    .homework-deadline,
+    .submission-stat {
+      grid-column: 2;
+
+      text-align: left;
+    }
+
+    .homework-action {
+      grid-column: 3;
+      grid-row: 1;
+    }
   }
 }

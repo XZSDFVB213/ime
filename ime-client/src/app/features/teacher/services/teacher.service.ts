@@ -21,24 +21,53 @@ export class TeacherService {
   getHomeworks() {
     return this.http.get<any[]>(`${environment.api}/homeworks/teacher/my-homeworks`);
   }
+
   getHomework(id: string) {
-    return this.http.get<any>(`${environment.api}/homeworks/${id}`);
+    return this.http.get<any>(`${environment.api}/homeworks/teacher/${id}`);
   }
-  gradeSubmission(submissionId: number | string, score: number, comment: string) {
-    return this.http.patch(`${environment.api}/homeworks/submissions/${submissionId}/grade`, {
-      score,
-      comment,
-    });
+
+  gradeSubmission(
+    submissionId: string,
+    dto: {
+      score: number;
+      feedback: string;
+    },
+  ) {
+    return this.http.patch<any>(
+      `${environment.api}/homeworks/submissions/${submissionId}/grade`,
+      dto,
+    );
   }
+
   createHomework(dto: {
     lessonId: string;
     subjectId: string;
-    teacherId: string;
     title: string;
     description: string;
-    maxScore: number;
     deadline: string;
+    maxScore: number;
   }) {
-    return this.http.post<any>(`${environment.api}/homeworks`, dto); // путь поправь под свой
+    return this.http.post<any>(`${environment.api}/homeworks`, dto);
+  }
+  getMaterials() {
+    return this.http.get<any[]>(`${environment.api}/materials/teacher/my-materials`);
+  }
+
+  createLinkMaterial(dto: {
+    title: string;
+    description?: string;
+    subjectId: string;
+    lessonId?: string;
+    url: string;
+  }) {
+    return this.http.post<any>(`${environment.api}/materials/link`, dto);
+  }
+
+  uploadMaterial(formData: FormData) {
+    return this.http.post<any>(`${environment.api}/materials/upload`, formData);
+  }
+
+  deleteMaterial(id: string) {
+    return this.http.delete<any>(`${environment.api}/materials/${id}`);
   }
 }

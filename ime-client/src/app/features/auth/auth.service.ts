@@ -1,26 +1,94 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+
 import { HttpClient } from '@angular/common/http';
 
+import { Observable, tap } from 'rxjs';
+
+import { environment } from '../../environments/environment';
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  fullName: string;
+  status: string;
+
+  roles: string[];
+}
+
+export interface LoginResponse {
+  user: AuthUser;
+  accessToken: string;
+}
+
+export interface RefreshResponse {
+  accessToken: string;
+}
 
 @Injectable({
-  providedIn:'root'
+  providedIn: 'root',
 })
 export class AuthService {
+  private readonly http = inject(HttpClient);
 
- private http = inject(HttpClient);
+  login(dto: { email: string; password: string }): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.api}/auth/login`, dto, {
+        withCredentials: true,
+      })
+      .pipe(
+        tap((response) => {
+          this.setAccessToken(response.accessToken);
+        }),
+      );
+  }
 
- private api = 'http://localhost:3000/auth';
+  refresh(): Observable<RefreshResponse> {
+    return this.http
+      .post<RefreshResponse>(
+        `${environment.api}/auth/refresh`,
+        {},
+        {
+          withCredentials: true,
+        },
+      )
+      .pipe(
+        tap((response) => {
+          this.setAccessToken(response.accessToken);
+        }),
+      );
+  }
 
+  me() {
+    return this.http.get<any>(`${environment.api}/auth/me`, {
+      withCredentials: true,
+    });
+  }
 
- login(data:{
-   email:string;
-   password:string;
- }){
-   return this.http.post<any>(
-    `${this.api}/login`,
-    data
-   );
- }
+  logout() {
+    return this.http
+      .post(
+        `${environment.api}/auth/logout`,
+        {},
+        {
+          withCredentials: true,
+        },
+      )
+      .pipe(
+        tap(() => {
+          this.clearSession();
+        }),
+      );
+  }
 
+  getAccessToken(): string | null {
+    return localStorage.getItem('accessToken');
+  }
 
+  setAccessToken(token: string): void {
+    localStorage.setItem('accessToken', token);
+  }
+
+  clearSession(): void {
+    localStorage.removeItem('accessToken');
+  }
 }

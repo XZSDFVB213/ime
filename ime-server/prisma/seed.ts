@@ -18,7 +18,7 @@ async function main() {
 
       password,
 
-      fullName: 'Администратор ИМЭ',
+      fullName: 'Администратор ННОУ',
 
       roles: {
         create: {

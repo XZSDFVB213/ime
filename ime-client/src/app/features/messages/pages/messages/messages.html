@@ -1,0 +1,909 @@
+<section class="messages-page">
+
+    @if (loading()) {
+
+    <div class="page-loading">
+
+        <mat-spinner diameter="48" />
+
+        <span>
+            Загружаем сообщения…
+        </span>
+
+    </div>
+
+    } @else {
+
+    <div class="messenger">
+
+        <!-- LEFT -->
+
+        <aside class="chats-panel">
+
+            <header class="chats-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        Общение
+                    </span>
+
+                    <div class="title-row">
+
+                        <h1>
+                            Сообщения
+                        </h1>
+
+                        @if (
+                        totalUnread() > 0
+                        ) {
+
+                        <span class="total-unread">
+                            {{ totalUnread() }}
+                        </span>
+
+                        }
+
+                    </div>
+
+                </div>
+
+
+                <button type="button" class="new-chat-button" title="Новый диалог" (click)="openContacts()">
+                    <mat-icon>
+                        edit_square
+                    </mat-icon>
+                </button>
+
+            </header>
+
+
+            <label class="search">
+
+                <mat-icon>
+                    search
+                </mat-icon>
+
+                <input type="search" placeholder="Поиск диалогов" [value]="chatSearch()" (input)="
+              setChatSearch($event)
+            " />
+
+            </label>
+
+
+            <div class="chat-list">
+
+                @for (
+                chat of filteredChats();
+                track chat.id
+                ) {
+
+                @if (
+                getOtherUser(chat);
+                as user
+                ) {
+
+                <button type="button" class="chat-item" [class.active]="
+                  activeChatId() ===
+                  chat.id
+                " [class.unread]="
+                  chat.unreadCount > 0
+                " (click)="
+                  selectChat(chat)
+                ">
+
+                    <div class="avatar">
+
+                        @if (
+                        user.avatarUrl
+                        ) {
+
+                        <img [src]="user.avatarUrl" [alt]="user.fullName" />
+
+                        } @else {
+
+                        <span>
+                            {{
+                            initials(
+                            user.fullName
+                            )
+                            }}
+                        </span>
+
+                        }
+
+                    </div>
+
+
+                    <div class="chat-item-content">
+
+                        <div class="chat-item-top">
+
+                            <strong>
+                                {{ user.fullName }}
+                            </strong>
+
+                            @if (
+                            lastMessage(chat);
+                            as last
+                            ) {
+
+                            <time>
+                                {{
+                                last.createdAt
+                                | date:'HH:mm'
+                                }}
+                            </time>
+
+                            }
+
+                        </div>
+
+
+                        <div class="chat-item-bottom">
+
+                            @if (
+                            lastMessage(chat);
+                            as last
+                            ) {
+
+                            <p>
+
+                                @if (
+                                last.senderId ===
+                                me()?.id
+                                ) {
+                                <span>
+                                    Вы:
+                                </span>
+                                }
+
+                                {{
+                                last.text ||
+                                (
+                                last.attachments?.length
+                                ? '📎 Вложение'
+                                : 'Сообщение'
+                                )
+                                }}
+
+                            </p>
+
+                            } @else {
+
+                            <p class="empty-message">
+                                Диалог создан
+                            </p>
+
+                            }
+
+
+                            @if (
+                            chat.unreadCount > 0
+                            ) {
+
+                            <span class="unread-count">
+                                {{
+                                chat.unreadCount >
+                                99
+                                ? '99+'
+                                : chat.unreadCount
+                                }}
+                            </span>
+
+                            }
+
+                        </div>
+
+                    </div>
+
+                </button>
+
+                }
+
+                } @empty {
+
+                <div class="empty-chats">
+
+                    <mat-icon>
+                        forum
+                    </mat-icon>
+
+                    <strong>
+                        Диалогов пока нет
+                    </strong>
+
+                    <p>
+                        Начните общение
+                        с преподавателем
+                        или обучающимся.
+                    </p>
+
+                    <button type="button" (click)="
+                  openContacts()
+                ">
+                        Новый диалог
+                    </button>
+
+                </div>
+
+                }
+
+            </div>
+
+        </aside>
+
+
+        <!-- RIGHT -->
+
+        <main class="conversation">
+
+            @if (
+            activeChat();
+            as chat
+            ) {
+
+            @if (
+            otherUser();
+            as user
+            ) {
+
+            <header class="conversation-header">
+
+                <div class="conversation-user">
+
+                    <div class="avatar small">
+
+                        @if (
+                        user.avatarUrl
+                        ) {
+
+                        <img [src]="user.avatarUrl" [alt]="user.fullName" />
+
+                        } @else {
+
+                        <span>
+                            {{
+                            initials(
+                            user.fullName
+                            )
+                            }}
+                        </span>
+
+                        }
+
+                    </div>
+
+                    <div class="user-info">
+
+                        <strong>
+                            {{ user.fullName }}
+                        </strong>
+
+                        <span>
+                            {{ roleLabel(user) }}
+                        </span>
+
+                        <small class="presence" [class.online]="
+      otherUserOnline()
+    ">
+
+                            <i></i>
+
+                            {{
+                            otherUserOnline()
+                            ? 'В сети'
+                            : 'Не в сети'
+                            }}
+                            @if (
+                            otherUserTyping()
+                            ) {
+
+                            <div class="typing-row">
+
+                                <div class="typing-bubble">
+
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+
+                                </div>
+
+                                <small>
+                                    {{ user.fullName }}
+                                    печатает...
+                                </small>
+
+                            </div>
+
+                            }
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <button type="button" class="more-button">
+                    <mat-icon>
+                        more_vert
+                    </mat-icon>
+                </button>
+
+            </header>
+
+
+            <div #messagesContainer class="messages-container">
+
+                @if (
+                messagesLoading()
+                ) {
+
+                <div class="messages-loading">
+
+                    <mat-spinner diameter="38" />
+
+                </div>
+
+                } @else {
+
+                <div class="conversation-start">
+
+                    <div class="avatar large">
+
+                        @if (
+                        user.avatarUrl
+                        ) {
+
+                        <img [src]="user.avatarUrl" [alt]="user.fullName" />
+
+                        } @else {
+
+                        <span>
+                            {{
+                            initials(
+                            user.fullName
+                            )
+                            }}
+                        </span>
+
+                        }
+
+                    </div>
+
+                    <strong>
+                        {{ user.fullName }}
+                    </strong>
+
+                    <span>
+                        {{ roleLabel(user) }}
+                    </span>
+
+                    <small>
+                        Начало переписки
+                    </small>
+
+                </div>
+
+
+                @for (
+                message of messages();
+                track message.id
+                ) {
+
+                <div class="message-row" [class.own]="
+                      messageOwn(
+                        message
+                      )
+                    ">
+
+                    @if (
+                    !messageOwn(
+                    message
+                    )
+                    ) {
+
+                    <div class="message-avatar">
+
+                        @if (
+                        message.sender
+                        ?.avatarUrl
+                        ) {
+
+                        <img [src]="
+                              message.sender
+                                .avatarUrl
+                            " [alt]="
+                              message.sender
+                                .fullName
+                            " />
+
+                        } @else {
+
+                        <span>
+                            {{
+                            initials(
+                            message.sender
+                            ?.fullName
+                            )
+                            }}
+                        </span>
+
+                        }
+
+                    </div>
+
+                    }
+
+
+                    <div class="message-block">
+
+                        @if (
+                        !messageOwn(
+                        message
+                        )
+                        ) {
+
+                        <span class="sender-name">
+                            {{
+                            message.sender
+                            ?.fullName
+                            }}
+                        </span>
+
+                        }
+
+
+                        <div class="message-bubble">
+                            @if (
+                            message.attachments
+                            ?.length
+                            ) {
+                            <div class="message-attachments">
+
+                                @for (
+                                attachment of
+                                message.attachments;
+                                track attachment.id
+                                ) {
+
+                                @if (
+                                attachmentIsImage(
+                                attachment
+                                )
+                                ) {
+
+                                <a class="image-attachment" [href]="
+            attachmentUrl(
+              attachment
+            )
+          " target="_blank" rel="noopener">
+                                    <img [src]="
+              attachmentUrl(
+                attachment
+              )
+            " [alt]="
+              attachment.fileName
+            " />
+                                </a>
+
+                                } @else {
+
+                                <a class="file-attachment" [href]="
+            attachmentUrl(
+              attachment
+            )
+          " target="_blank" rel="noopener">
+
+                                    <div>
+                                        <mat-icon>
+                                            {{
+                                            attachmentIcon(
+                                            attachment
+                                            )
+                                            }}
+                                        </mat-icon>
+                                    </div>
+
+                                    <section>
+
+                                        <strong>
+                                            {{
+                                            attachment.fileName
+                                            }}
+                                        </strong>
+
+                                        <span>
+                                            {{
+                                            formatFileSize(
+                                            attachment.size
+                                            )
+                                            }}
+                                        </span>
+
+                                    </section>
+
+                                    <mat-icon class="download">
+                                        download
+                                    </mat-icon>
+
+                                </a>
+
+                                }
+
+                                }
+
+                            </div>
+                            }
+                            @if (message.text) {
+                            <p>
+                                {{ message.text }}
+                            </p>
+                            }
+
+                            <div class="message-meta">
+
+                                @if (
+                                message.isEdited
+                                ) {
+                                <span>
+                                    изм.
+                                </span>
+                                }
+
+                                <time>
+                                    {{
+                                    message.createdAt
+                                    | date:'HH:mm'
+                                    }}
+                                </time>
+
+
+                                @if (
+                                messageOwn(
+                                message
+                                )
+                                ) {
+
+                                <mat-icon class="read-icon" [class.read]="
+    messageRead(
+      message
+    )
+  ">
+                                    {{
+                                    messageRead(
+                                    message
+                                    )
+                                    ? 'done_all'
+                                    : 'done'
+                                    }}
+                                </mat-icon>
+
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                }
+
+                }
+
+            </div>
+
+            @if (
+            selectedAttachment();
+            as file
+            ) {
+            <div class="selected-attachment">
+
+                <div class="selected-file-icon">
+                    <mat-icon>
+                        description
+                    </mat-icon>
+                </div>
+
+                <div>
+                    <strong>
+                        {{ file.name }}
+                    </strong>
+
+                    <span>
+                        {{
+                        formatFileSize(
+                        file.size
+                        )
+                        }}
+                    </span>
+                </div>
+
+                <button type="button" (click)="
+        removeAttachment()
+      ">
+                    <mat-icon>
+                        close
+                    </mat-icon>
+                </button>
+
+            </div>
+            }
+            <footer class="composer">
+
+                <input #attachmentInput type="file" hidden
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp,.gif,.zip,.txt" (change)="
+    selectAttachment(
+      $event
+    )
+  " />
+
+                <button type="button" class="attach-button" title="Прикрепить файл" (click)="
+    attachmentInput.click()
+  ">
+                    <mat-icon>
+                        attach_file
+                    </mat-icon>
+                </button>
+
+
+                <div class="composer-input">
+
+                    <textarea rows="1" maxlength="5000" placeholder="Напишите сообщение..." [value]="messageText()"
+                        (input)="
+                    setMessageText(
+                      $event
+                    )
+                  " (keydown)="
+                    onMessageKeydown(
+                      $event
+                    )
+                  "></textarea>
+
+                    <span>
+                        {{
+                        messageText()
+                        .length
+                        }}/5000
+                    </span>
+
+                </div>
+
+
+                <button type="button" class="send-button" [disabled]="
+  (
+    !messageText().trim() &&
+    !selectedAttachment()
+  ) ||
+  sending()
+" (click)="send()">
+
+                    @if (
+                    sending()
+                    ) {
+
+                    <mat-spinner diameter="20" />
+
+                    } @else {
+
+                    <mat-icon>
+                        send
+                    </mat-icon>
+
+                    }
+
+                </button>
+
+            </footer>
+
+            }
+
+            } @else {
+
+            <div class="no-conversation">
+
+                <div class="no-chat-icon">
+                    <mat-icon>
+                        forum
+                    </mat-icon>
+                </div>
+
+                <h2>
+                    Выберите диалог
+                </h2>
+
+                <p>
+                    Здесь будет отображаться
+                    переписка с преподавателями
+                    и обучающимися.
+                </p>
+
+                <button type="button" (click)="
+                openContacts()
+              ">
+                    <mat-icon>
+                        add
+                    </mat-icon>
+
+                    Новый диалог
+                </button>
+
+            </div>
+
+            }
+
+        </main>
+
+    </div>
+
+
+    <!-- CONTACTS MODAL -->
+
+    @if (
+    showContacts()
+    ) {
+
+    <div class="modal-backdrop" (click)="
+          closeContacts()
+        ">
+
+        <section class="contacts-modal" (click)="
+            $event.stopPropagation()
+          ">
+
+            <header>
+
+                <div>
+
+                    <span class="eyebrow">
+                        Новый диалог
+                    </span>
+
+                    <h2>
+                        Выберите пользователя
+                    </h2>
+
+                </div>
+
+
+                <button type="button" (click)="
+                closeContacts()
+              ">
+                    <mat-icon>
+                        close
+                    </mat-icon>
+                </button>
+
+            </header>
+
+
+            <label class="contact-search">
+
+                <mat-icon>
+                    search
+                </mat-icon>
+
+                <input type="search" autofocus placeholder="Имя, email, группа..." [value]="
+                contactSearch()
+              " (input)="
+                setContactSearch(
+                  $event
+                )
+              " />
+
+            </label>
+
+
+            <div class="contacts-list">
+
+                @for (
+                contact of
+                filteredContacts();
+                track contact.id
+                ) {
+
+                <button type="button" class="contact-item" [disabled]="
+                  creatingChatId() ===
+                  contact.id
+                " (click)="
+                  startChat(
+                    contact
+                  )
+                ">
+
+                    <div class="avatar">
+
+                        @if (
+                        contact.avatarUrl
+                        ) {
+
+                        <img [src]="
+                        contact.avatarUrl
+                      " [alt]="
+                        contact.fullName
+                      " />
+
+                        } @else {
+
+                        <span>
+                            {{
+                            initials(
+                            contact.fullName
+                            )
+                            }}
+                        </span>
+
+                        }
+
+                    </div>
+
+
+                    <div class="contact-copy">
+
+                        <strong>
+                            {{
+                            contact.fullName
+                            }}
+                        </strong>
+
+                        <span>
+                            {{
+                            roleLabel(
+                            contact
+                            )
+                            }}
+                        </span>
+
+                        <small>
+                            {{ contact.email }}
+                        </small>
+
+                    </div>
+
+
+                    @if (
+                    creatingChatId() ===
+                    contact.id
+                    ) {
+
+                    <mat-spinner diameter="22" />
+
+                    } @else {
+
+                    <mat-icon class="chevron">
+                        chevron_right
+                    </mat-icon>
+
+                    }
+
+                </button>
+
+                } @empty {
+
+                <div class="contacts-empty">
+
+                    <mat-icon>
+                        person_search
+                    </mat-icon>
+
+                    <strong>
+                        Никого не найдено
+                    </strong>
+
+                </div>
+
+                }
+
+            </div>
+
+        </section>
+
+    </div>
+
+    }
+
+    }
+
+</section>

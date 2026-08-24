@@ -19,13 +19,15 @@ export const routes: Routes = [
   },
   {
     path: 'student',
-    component: StudentLayout,
+
+    loadComponent: () =>
+      import('./core/layouts/student-layout/student-layout').then((m) => m.StudentLayout),
 
     children: [
       {
         path: '',
         loadChildren: () =>
-          import('./features/dashboard/dashboard.routes').then((r) => r.DASHBOARD_ROUTES),
+          import('./features/student/student.routes').then((m) => m.StudentRoutes),
       },
     ],
   },

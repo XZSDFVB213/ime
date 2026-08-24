@@ -1,0 +1,209 @@
+<section class="homework-page">
+    <a class="back-link" routerLink="/student/homeworks">
+        <mat-icon>arrow_back</mat-icon>
+        Вернуться к заданиям
+    </a>
+
+    @if (loading()) {
+    <div class="page-state">
+        <mat-spinner diameter="48" />
+        <p>Загружаем задание…</p>
+    </div>
+    } @else if (error()) {
+    <div class="page-state error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error() }}</p>
+    </div>
+    } @else if (homework(); as item) {
+    <div class="homework-layout">
+        <main class="homework-main">
+            <mat-card class="homework-info">
+                <mat-card-content>
+                    <div class="homework-heading">
+                        <div>
+                            <span class="subject">
+                                {{ item.subject?.name }}
+                            </span>
+
+                            <h1>{{ item.title }}</h1>
+                        </div>
+
+                        @if (!submission()) {
+                        <span class="status current">
+                            Нужно выполнить
+                        </span>
+                        } @else if (isSubmitted()) {
+                        <span class="status review">
+                            На проверке
+                        </span>
+                        } @else if (isGraded()) {
+                        <span class="status completed">
+                            Проверено
+                        </span>
+                        }
+                    </div>
+
+                    <div class="description">
+                        <h2>Описание задания</h2>
+
+                        <p>
+                            {{
+                            item.description ||
+                            'Преподаватель не добавил описание'
+                            }}
+                        </p>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="answer-card">
+                <mat-card-content>
+                    <div class="section-heading">
+                        <div>
+                            <h2>Ваш ответ</h2>
+
+                            @if (!isLocked()) {
+                            <p>
+                                Напишите решение или описание
+                                выполненной работы
+                            </p>
+                            }
+                        </div>
+                    </div>
+
+                    <mat-form-field appearance="outline" [class.readonly-field]="isLocked()"> <mat-label>Ответ на
+                            задание</mat-label>
+
+                        <textarea matInput rows="10" [formControl]="answerControl" [readonly]="isLocked()"
+                            placeholder="Введите ваш ответ..."></textarea>
+
+                        @if (
+                        answerControl.hasError('required')
+                        ) {
+                        <mat-error>
+                            Введите ответ
+                        </mat-error>
+                        }
+
+                        @if (
+                        answerControl.hasError('minlength')
+                        ) {
+                        <mat-error>
+                            Ответ слишком короткий
+                        </mat-error>
+                        }
+                    </mat-form-field>
+
+                    @if (!isLocked()) {
+                    <button mat-flat-button class="submit-button" [disabled]="submitting()" (click)="submit()">
+                        @if (submitting()) {
+                        Отправляем…
+                        } @else {
+                        <mat-icon>send</mat-icon>
+                        Отправить работу
+                        }
+                    </button>
+                    }
+
+                    @if (isSubmitted()) {
+                    <div class="submission-message review">
+                        <mat-icon>schedule</mat-icon>
+
+                        <div>
+                            <strong>
+                                Работа отправлена на проверку
+                            </strong>
+
+                            <span>
+                                {{
+                                submission()?.submittedAt
+                                | date:'dd MMMM yyyy, HH:mm'
+                                }}
+                            </span>
+                        </div>
+                    </div>
+                    }
+
+                    @if (isGraded()) {
+                    <div class="grade-result">
+                        <div class="grade-value">
+                            <span>Ваша оценка</span>
+
+                            <strong>
+                                {{ submission()?.score }}
+                                / {{ item.maxScore }}
+                            </strong>
+                        </div>
+
+                        @if (submission()?.feedback) {
+                        <div class="feedback">
+                            <span>Комментарий преподавателя</span>
+                            <p>{{ submission()?.feedback }}</p>
+                        </div>
+                        }
+                    </div>
+                    }
+                </mat-card-content>
+            </mat-card>
+        </main>
+
+        <aside class="homework-sidebar">
+            <mat-card>
+                <mat-card-content>
+                    <h2>Информация</h2>
+
+                    <div class="info-row">
+                        <mat-icon>event</mat-icon>
+
+                        <div>
+                            <span>Срок сдачи</span>
+                            <strong>
+                                {{
+                                item.deadline
+                                | date:'dd MMMM yyyy, HH:mm'
+                                }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <mat-icon>military_tech</mat-icon>
+
+                        <div>
+                            <span>Максимальный балл</span>
+                            <strong>
+                                {{ item.maxScore }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <mat-icon>person</mat-icon>
+
+                        <div>
+                            <span>Преподаватель</span>
+                            <strong>
+                                {{
+                                item.teacher?.user?.fullName ||
+                                'Не указан'
+                                }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <mat-icon>groups</mat-icon>
+
+                        <div>
+                            <span>Группа</span>
+                            <strong>
+                                {{ item.lesson?.group?.name }}
+                            </strong>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </aside>
+    </div>
+    }
+</section>

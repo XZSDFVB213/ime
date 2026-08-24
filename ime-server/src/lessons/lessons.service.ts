@@ -118,11 +118,30 @@ export class LessonsService {
       where: {
         teacherId,
       },
+
       include: {
         subject: true,
-        group: true,
+
+        group: {
+          include: {
+            students: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    avatarUrl: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+
         semester: true,
       },
+
       orderBy: {
         date: 'asc',
       },

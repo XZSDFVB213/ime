@@ -5,35 +5,109 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
-html {
-  height: 100%;
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$cyan-palette,
-        tertiary: mat.$orange-palette,
-      ),
-      typography: Roboto,
-      density: 0,
-    )
-  );
+@import '@fontsource/montserrat/400.css';
+@import '@fontsource/montserrat/500.css';
+@import '@fontsource/montserrat/600.css';
+@import '@fontsource/montserrat/700.css';
+
+:root {
+  --app-font: 'Montserrat', sans-serif;
+
+  --font-base: 16px;
+  --font-secondary: 15px;
+  --font-small: 14px;
+  --font-tiny: 12px;
+  --green: #1fa463;
+  --green-dark: #168451;
+  --green-soft: #eaf8f1;
+
+  --bg: #f5f6f7;
+  --surface: #ffffff;
+
+  --text: #202124;
+  --text-secondary: #74787f;
+
+  --border: #e9ebee;
+
+  --danger: #e5484d;
+  --warning: #f59e0b;
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+
+  --shadow: 0 8px 30px rgba(30, 40, 50, 0.06);
+  --font-card-title: 20px;
+  --font-page-title: 24px;
+
+  --sidebar-width: 280px;
+  --topbar-height: 78px;
+
+  --page-padding-x: 28px;
+  --page-padding-y: 22px;
+
+  --dashboard-gap: 20px;
+  --card-radius: 16px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+
+  font-family: var(--app-font);
+  font-size: var(--font-small);
+  font-weight: 400;
+
+  color: #122140;
+  background: #f5f7fb;
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
-  margin: 0;
-  height: 100%;
+  min-height: 100vh;
 }
-/* You can add global styles to this file, and also import other style files */
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.02em;
+}
+
+/* Angular Material иногда выставляет собственный шрифт */
+.mat-mdc-button,
+.mat-mdc-card,
+.mat-mdc-chip,
+.mat-mdc-list-item,
+.mat-mdc-form-field,
+.mat-mdc-dialog-container,
+.mat-mdc-snack-bar-container {
+  font-family: var(--app-font) !important;
+}

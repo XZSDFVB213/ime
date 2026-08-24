@@ -1,0 +1,364 @@
+<section class="students-page">
+    <header class="students-hero">
+        <div class="hero-copy">
+            <span class="eyebrow">
+                Обучающиеся
+            </span>
+
+            <h1>
+                Мои студенты
+            </h1>
+
+            <p>
+                Студенты учебных групп,
+                у которых вы ведёте занятия,
+                их активность и текущая
+                успеваемость.
+            </p>
+        </div>
+
+        <div class="hero-icon">
+            <mat-icon>
+                groups
+            </mat-icon>
+        </div>
+    </header>
+
+    @if (loading()) {
+    <div class="page-state">
+        <mat-spinner diameter="48" />
+
+        <p>
+            Загружаем студентов…
+        </p>
+    </div>
+    } @else if (error()) {
+    <div class="page-state error">
+        <mat-icon>
+            error_outline
+        </mat-icon>
+
+        <p>{{ error() }}</p>
+    </div>
+    } @else {
+    <section class="statistics-grid">
+        <article>
+            <div class="stat-icon blue">
+                <mat-icon>groups</mat-icon>
+            </div>
+
+            <div>
+                <strong>
+                    {{ students().length }}
+                </strong>
+
+                <span>
+                    Обучающихся
+                </span>
+            </div>
+        </article>
+
+        <article>
+            <div class="stat-icon purple">
+                <mat-icon>
+                    account_tree
+                </mat-icon>
+            </div>
+
+            <div>
+                <strong>
+                    {{ groups().length }}
+                </strong>
+
+                <span>
+                    Учебных групп
+                </span>
+            </div>
+        </article>
+
+        <article>
+            <div class="stat-icon orange">
+                <mat-icon>
+                    pending_actions
+                </mat-icon>
+            </div>
+
+            <div>
+                <strong>
+                    {{ totalPending() }}
+                </strong>
+
+                <span>
+                    Работ на проверке
+                </span>
+            </div>
+        </article>
+
+        <article>
+            <div class="stat-icon green">
+                <mat-icon>
+                    analytics
+                </mat-icon>
+            </div>
+
+            <div>
+                <strong>
+                    {{
+                    averagePerformance()
+                    }}%
+                </strong>
+
+                <span>
+                    Средний результат
+                </span>
+            </div>
+        </article>
+    </section>
+
+    <section class="toolbar">
+        <label class="search-box">
+            <mat-icon>
+                search
+            </mat-icon>
+
+            <input type="search" placeholder="Найти студента, группу или дисциплину" [value]="search()"
+                (input)="setSearch($event)" />
+        </label>
+
+        <nav class="group-filters">
+            <button type="button" [class.active]="
+            selectedGroup() ===
+            'ALL'
+          " (click)="setGroup('ALL')">
+                Все
+
+                <span>
+                    {{ students().length }}
+                </span>
+            </button>
+
+            @for (
+            group of groups();
+            track group.id
+            ) {
+            <button type="button" [class.active]="
+              selectedGroup() ===
+              group.id
+            " (click)="
+              setGroup(group.id)
+            ">
+                {{ group.name }}
+            </button>
+            }
+        </nav>
+    </section>
+
+    <section class="students-card">
+        <header class="table-heading">
+            <div>
+                <h2>
+                    Обучающиеся
+                </h2>
+
+                <p>
+                    Найдено:
+                    {{
+                    filteredStudents()
+                    .length
+                    }}
+                </p>
+            </div>
+        </header>
+
+        <div class="students-table">
+            <div class="table-header">
+                <span>
+                    Обучающийся
+                </span>
+
+                <span>
+                    Группа
+                </span>
+
+                <span>
+                    Дисциплины
+                </span>
+
+                <span>
+                    Сдано
+                </span>
+
+                <span>
+                    Проверено
+                </span>
+
+                <span>
+                    Результат
+                </span>
+            </div>
+
+            @for (
+            student of filteredStudents();
+            track student.id
+            ) {
+            <article class="student-row" [routerLink]="[
+    '/teacher/students',
+    student.id
+  ]">
+                <div class="student-info">
+                    <div class="avatar">
+                        @if (
+                        student.avatarUrl
+                        ) {
+                        <img [src]="
+                      student.avatarUrl
+                    " [alt]="
+                      student.fullName
+                    " />
+                        } @else {
+                        <span>
+                            {{
+                            initials(
+                            student.fullName
+                            )
+                            }}
+                        </span>
+                        }
+                    </div>
+
+                    <div class="student-copy">
+                        <strong>
+                            {{ student.fullName }}
+                        </strong>
+
+                        <span>
+                            {{
+                            student.email ||
+                            'Email не указан'
+                            }}
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="group-badge">
+                        <mat-icon>
+                            groups
+                        </mat-icon>
+
+                        {{ student.group.name }}
+                    </span>
+                </div>
+
+                <div class="subjects-list">
+                    @for (
+                    subject of
+                    student.subjects;
+                    track subject.id
+                    ) {
+                    <span>
+                        {{ subject.name }}
+                    </span>
+                    }
+                </div>
+
+                <div class="number-cell">
+                    <strong>
+                        {{
+                        student.submissionsCount
+                        }}
+                    </strong>
+
+                    @if (
+                    student.pendingCount > 0
+                    ) {
+                    <small class="pending">
+                        {{
+                        student.pendingCount
+                        }}
+                        на проверке
+                    </small>
+                    }
+                </div>
+
+                <div class="number-cell">
+                    <strong>
+                        {{ student.gradedCount }}
+                    </strong>
+
+                    <small>
+                        работ
+                    </small>
+                </div>
+
+                <div class="performance-cell">
+                    <div class="performance-top">
+                        <strong [class]="
+                    performanceClass(
+                      student.averagePercent
+                    )
+                  ">
+                            {{
+                            student.averagePercent
+                            }}%
+                        </strong>
+
+                        <span [class]="
+                    performanceClass(
+                      student.averagePercent
+                    )
+                  ">
+                            {{
+                            performanceLabel(
+                            student.averagePercent
+                            )
+                            }}
+                        </span>
+                    </div>
+
+                    <div class="progress-track">
+                        <span [class]="
+                    performanceClass(
+                      student.averagePercent
+                    )
+                  " [style.width.%]="
+                    student.averagePercent
+                  "></span>
+                    </div>
+
+                    @if (
+                    student.totalMaxScore > 0
+                    ) {
+                    <small>
+                        {{
+                        student.totalScore
+                        }}
+                        /
+                        {{
+                        student.totalMaxScore
+                        }}
+                        баллов
+                    </small>
+                    }
+                </div>
+            </article>
+            } @empty {
+            <div class="empty-state">
+                <mat-icon>
+                    person_search
+                </mat-icon>
+
+                <h3>
+                    Студенты не найдены
+                </h3>
+
+                <p>
+                    Попробуйте изменить
+                    поисковый запрос или группу.
+                </p>
+            </div>
+            }
+        </div>
+    </section>
+    }
+</section>

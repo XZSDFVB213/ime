@@ -1,0 +1,201 @@
+<section class="schedule-page">
+  <header class="schedule-hero">
+    <div>
+      <span class="eyebrow">
+        Учебный процесс
+      </span>
+
+      <h1>Расписание занятий</h1>
+
+      <p>
+        Следите за предстоящими лекциями,
+        практическими занятиями и семинарами
+      </p>
+    </div>
+
+    <div class="hero-icon">
+      <mat-icon>calendar_month</mat-icon>
+    </div>
+  </header>
+
+  <nav class="schedule-tabs">
+    <button
+      type="button"
+      [class.active]="activeMode() === 'TODAY'"
+      (click)="setMode('TODAY')"
+    >
+      Сегодня
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeMode() === 'WEEK'"
+      (click)="setMode('WEEK')"
+    >
+      Эта неделя
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeMode() === 'ALL'"
+      (click)="setMode('ALL')"
+    >
+      Всё расписание
+    </button>
+  </nav>
+
+  @if (loading()) {
+    <div class="schedule-state">
+      <mat-spinner diameter="46" />
+      <p>Загружаем расписание…</p>
+    </div>
+  } @else if (error()) {
+    <div class="schedule-state error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <div class="schedule-groups">
+      @for (
+        group of groupedLessons();
+        track group.key
+      ) {
+        <section class="day-section">
+          <header class="day-header">
+            <div class="day-date">
+              <span>
+                {{ group.date | date:'dd' }}
+              </span>
+
+              <small>
+                {{ group.date | date:'MM' }}
+              </small>
+            </div>
+
+            <div>
+              <h2>{{ group.label }}</h2>
+
+              <p>
+                {{ group.lessons.length }}
+                {{
+                  group.lessons.length === 1
+                    ? 'занятие'
+                    : 'занятия'
+                }}
+              </p>
+            </div>
+
+            @if (isToday(group.date)) {
+              <span class="today-label">
+                Сегодня
+              </span>
+            }
+          </header>
+
+          <div class="lessons-list">
+            @for (
+              lesson of group.lessons;
+              track lesson.id
+            ) {
+              <article
+                class="lesson-card"
+                [class.passed]="isLessonPassed(lesson)"
+              >
+                <div class="lesson-time">
+                  <strong>
+                    {{ lesson.date | date:'HH:mm' }}
+                  </strong>
+
+                  <span>
+                    {{
+                      lessonEndTime(lesson)
+                        | date:'HH:mm'
+                    }}
+                  </span>
+                </div>
+
+                <div
+                  class="lesson-marker"
+                  [class]="lessonClass(lesson.type)"
+                ></div>
+
+                <div class="lesson-main">
+                  <div class="lesson-title">
+                    <span
+                      class="lesson-type"
+                      [class]="lessonClass(lesson.type)"
+                    >
+                      {{ lessonType(lesson.type) }}
+                    </span>
+
+                    <h3>
+                      {{
+                        lesson.subject?.name ||
+                        lesson.title
+                      }}
+                    </h3>
+
+                    @if (
+                      lesson.title &&
+                      lesson.subject?.name !== lesson.title
+                    ) {
+                      <p>{{ lesson.title }}</p>
+                    }
+                  </div>
+
+                  <div class="lesson-details">
+                    <div>
+                      <mat-icon>meeting_room</mat-icon>
+
+                      <span>
+                        Аудитория
+                        {{ lesson.location || 'не указана' }}
+                      </span>
+                    </div>
+
+                    <div>
+                      <mat-icon>person_outline</mat-icon>
+
+                      <span>
+                        {{
+                          lesson.teacher?.user?.fullName ||
+                          'Преподаватель не указан'
+                        }}
+                      </span>
+                    </div>
+
+                    <div>
+                      <mat-icon>schedule</mat-icon>
+
+                      <span>
+                        {{ lesson.duration || 90 }} минут
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="lesson-action"
+                  aria-label="Подробнее"
+                >
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+              </article>
+            }
+          </div>
+        </section>
+      } @empty {
+        <div class="schedule-state">
+          <mat-icon>event_available</mat-icon>
+
+          <h2>Занятий нет</h2>
+
+          <p>
+            На выбранный период расписание отсутствует
+          </p>
+        </div>
+      }
+    </div>
+  }
+</section>
