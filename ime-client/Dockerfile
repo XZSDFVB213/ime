@@ -1,5 +1,5 @@
 # ---------- BUILD ----------
-FROM node:20.17.0-alpine AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
