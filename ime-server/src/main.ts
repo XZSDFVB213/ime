@@ -11,14 +11,27 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   app.enableCors({
-    origin: 'https://lk.nnou.ru',
+  origin: [
+    'https://lk.nnou.ru',
+    'http://localhost:4200',
+  ],
 
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  credentials: true,
 
-    allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS',
+  ],
 
-    credentials: true,
-  });
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+  ],
+});
 
   await app.listen(process.env.PORT ?? 5000, '0.0.0.0');
 }
