@@ -1,0 +1,299 @@
+<div class="subjects-page">
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        Учебный процесс
+      </span>
+
+      <h1>
+        Дисциплины
+      </h1>
+
+      <p>
+        Управление учебными дисциплинами
+        и их привязкой к кафедрам
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openCreate()"
+    >
+      <mat-icon>
+        add
+      </mat-icon>
+
+      Добавить дисциплину
+    </button>
+
+  </header>
+
+
+  <section class="stats">
+
+    <article>
+      <mat-icon>
+        menu_book
+      </mat-icon>
+
+      <div>
+        <span>
+          Всего дисциплин
+        </span>
+
+        <strong>
+          {{ subjects().length }}
+        </strong>
+      </div>
+    </article>
+
+
+    <article>
+      <mat-icon>
+        account_balance
+      </mat-icon>
+
+      <div>
+        <span>
+          Кафедр
+        </span>
+
+        <strong>
+          {{ departmentsCount() }}
+        </strong>
+      </div>
+    </article>
+
+
+    <article>
+      <mat-icon>
+        workspace_premium
+      </mat-icon>
+
+      <div>
+        <span>
+          Всего кредитов
+        </span>
+
+        <strong>
+          {{ totalCredits() }}
+        </strong>
+      </div>
+    </article>
+
+  </section>
+
+
+  <section class="subjects-card">
+
+    <div class="toolbar">
+
+      <div class="search">
+
+        <mat-icon>
+          search
+        </mat-icon>
+
+        <input
+          #searchInput
+          placeholder="Название, код или кафедра..."
+          (input)="
+            search.set(
+              searchInput.value
+            )
+          "
+        />
+
+      </div>
+
+
+      <mat-select
+        [value]="departmentFilter()"
+        (selectionChange)="
+          departmentFilter.set(
+            $event.value
+          )
+        "
+      >
+
+        <mat-option value="ALL">
+          Все кафедры
+        </mat-option>
+
+        @for (
+          department of departments();
+          track department.id
+        ) {
+
+          <mat-option
+            [value]="department.id"
+          >
+            {{ department.name }}
+          </mat-option>
+
+        }
+
+      </mat-select>
+
+    </div>
+
+
+    @if (loading()) {
+
+      <div class="state">
+        Загрузка дисциплин...
+      </div>
+
+    } @else if (
+      filteredSubjects().length === 0
+    ) {
+
+      <div class="state">
+        Дисциплины не найдены
+      </div>
+
+    } @else {
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>
+                Дисциплина
+              </th>
+
+              <th>
+                Код
+              </th>
+
+              <th>
+                Кафедра
+              </th>
+
+              <th>
+                Кредиты
+              </th>
+
+              <th>
+                Действия
+              </th>
+            </tr>
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              subject of
+                filteredSubjects();
+              track subject.id
+            ) {
+
+              <tr>
+
+                <td>
+
+                  <div class="subject-cell">
+
+                    <div class="subject-icon">
+                      <mat-icon>
+                        menu_book
+                      </mat-icon>
+                    </div>
+
+                    <div>
+
+                      <strong>
+                        {{ subject.name }}
+                      </strong>
+
+                      @if (
+                        subject.description
+                      ) {
+
+                        <span>
+                          {{
+                            subject.description
+                          }}
+                        </span>
+
+                      }
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  <span class="code">
+                    {{ subject.code }}
+                  </span>
+
+                </td>
+
+
+                <td>
+                  {{
+                    subject.department
+                      .name
+                  }}
+                </td>
+
+
+                <td>
+
+                  <span class="credits">
+                    {{ subject.credits }}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <button
+                    type="button"
+                    class="edit-button"
+                    (click)="
+                      openEdit(
+                        subject
+                      )
+                    "
+                  >
+
+                    <mat-icon>
+                      edit
+                    </mat-icon>
+
+                    Изменить
+
+                  </button>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

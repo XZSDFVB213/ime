@@ -1,0 +1,180 @@
+<div class="dialog">
+
+  <header>
+
+    <div class="header-icon">
+      <mat-icon>
+        menu_book
+      </mat-icon>
+    </div>
+
+    <div>
+
+      <h2>
+        {{
+          editing
+            ? 'Редактирование дисциплины'
+            : 'Новая дисциплина'
+        }}
+      </h2>
+
+      <p>
+        Основные параметры учебной дисциплины
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="close"
+      (click)="close()"
+    >
+      <mat-icon>
+        close
+      </mat-icon>
+    </button>
+
+  </header>
+
+
+  <div class="form">
+
+    <label>
+
+      <span>
+        Название *
+      </span>
+
+      <input
+        [(ngModel)]="name"
+        placeholder="Базы данных"
+      />
+
+    </label>
+
+
+    <div class="grid">
+
+      <label>
+
+        <span>
+          Код *
+        </span>
+
+        <input
+          [(ngModel)]="code"
+          placeholder="БД-01"
+        />
+
+      </label>
+
+
+      <label>
+
+        <span>
+          Кредиты *
+        </span>
+
+        <input
+          type="number"
+          min="0"
+          [(ngModel)]="credits"
+        />
+
+      </label>
+
+    </div>
+
+
+    <label>
+
+      <span>
+        Кафедра *
+      </span>
+
+      <mat-select
+        [(ngModel)]="departmentId"
+        placeholder="Выберите кафедру"
+      >
+
+        @for (
+          department of
+            data.departments;
+          track department.id
+        ) {
+
+          <mat-option
+            [value]="department.id"
+          >
+            {{ department.name }}
+          </mat-option>
+
+        }
+
+      </mat-select>
+
+    </label>
+
+
+    <label>
+
+      <span>
+        Описание
+      </span>
+
+      <textarea
+        [(ngModel)]="description"
+        rows="4"
+        placeholder="Описание дисциплины..."
+      ></textarea>
+
+    </label>
+
+
+    @if (error()) {
+
+      <div class="error">
+        {{ error() }}
+      </div>
+
+    }
+
+  </div>
+
+
+  <footer>
+
+    <button
+      type="button"
+      class="cancel"
+      (click)="close()"
+    >
+      Отмена
+    </button>
+
+
+    <button
+      type="button"
+      class="save"
+      [disabled]="saving()"
+      (click)="save()"
+    >
+
+      <mat-icon>
+        save
+      </mat-icon>
+
+      {{
+        saving()
+          ? 'Сохранение...'
+          : editing
+            ? 'Сохранить'
+            : 'Создать'
+      }}
+
+    </button>
+
+  </footer>
+
+</div>

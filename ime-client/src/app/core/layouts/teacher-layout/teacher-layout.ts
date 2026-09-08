@@ -57,7 +57,7 @@ export class TeacherLayout {
       path: '/teacher/schedule',
     },
     {
-      label: 'Домашние задания',
+      label: 'Мои задания',
       icon: 'assignment',
       path: '/teacher/homeworks',
     },
@@ -86,11 +86,7 @@ export class TeacherLayout {
       icon: 'forum',
       path: '/teacher/messages',
     },
-    {
-      label: 'Уведомления',
-      icon: 'notifications_none',
-      path: '/teacher/notifications',
-    },
+    
     {
       label: 'Профиль',
       icon: 'person_outline',

@@ -1,0 +1,383 @@
+<div class="teachers-page">
+
+    <header class="page-header">
+
+        <div>
+            <span class="eyebrow">
+                Управление персоналом
+            </span>
+
+            <h1>
+                Преподаватели
+            </h1>
+
+            <p>
+                Создание учетных записей,
+                назначение кафедр и управление
+                преподавательским составом
+            </p>
+        </div>
+
+
+        <button type="button" class="primary-button" (click)="openCreateTeacher()">
+            <mat-icon>
+                person_add
+            </mat-icon>
+
+            Добавить преподавателя
+        </button>
+
+    </header>
+
+
+    <section class="stats-grid">
+
+        <article class="stat-card">
+
+            <div class="stat-icon">
+                <mat-icon>
+                    co_present
+                </mat-icon>
+            </div>
+
+            <div>
+                <span>
+                    Всего преподавателей
+                </span>
+
+                <strong>
+                    {{ teachers().length }}
+                </strong>
+            </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+            <div class="stat-icon success">
+                <mat-icon>
+                    check_circle
+                </mat-icon>
+            </div>
+
+            <div>
+                <span>
+                    Активные
+                </span>
+
+                <strong>
+                    {{ activeCount() }}
+                </strong>
+            </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+            <div class="stat-icon">
+                <mat-icon>
+                    account_balance
+                </mat-icon>
+            </div>
+
+            <div>
+                <span>
+                    Кафедр
+                </span>
+
+                <strong>
+                    {{ departmentsCount() }}
+                </strong>
+            </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+            <div class="stat-icon warning">
+                <mat-icon>
+                    warning
+                </mat-icon>
+            </div>
+
+            <div>
+                <span>
+                    Без кафедры
+                </span>
+
+                <strong>
+                    {{ withoutDepartmentCount() }}
+                </strong>
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <section class="teachers-card">
+
+        <div class="toolbar">
+
+            <div class="search-box">
+
+                <mat-icon>
+                    search
+                </mat-icon>
+
+                <input #searchInput type="text" placeholder="Поиск по ФИО, email, должности..." [value]="search()"
+                    (input)="
+            setSearch(
+              searchInput.value
+            )
+          " />
+
+                @if (search()) {
+                <button type="button" (click)="
+              setSearch('');
+              searchInput.value = ''
+            ">
+                    <mat-icon>
+                        close
+                    </mat-icon>
+                </button>
+                }
+
+            </div>
+
+
+            <mat-select class="department-filter" [value]="departmentFilter()" (selectionChange)="
+          setDepartmentFilter(
+            $event.value
+          )
+        ">
+
+                <mat-option value="ALL">
+                    Все кафедры
+                </mat-option>
+
+                @for (
+                department of
+                departments();
+                track department.id
+                ) {
+
+                <mat-option [value]="department.id">
+                    {{ department.name }}
+                </mat-option>
+
+                }
+
+            </mat-select>
+
+        </div>
+
+
+        @if (loading()) {
+
+        <div class="state-block">
+
+            <div class="loader"></div>
+
+            <span>
+                Загружаем преподавателей...
+            </span>
+
+        </div>
+
+        } @else if (
+        filteredTeachers().length === 0
+        ) {
+
+        <div class="state-block">
+
+            <div class="empty-icon">
+                <mat-icon>
+                    person_search
+                </mat-icon>
+            </div>
+
+            <strong>
+                Преподаватели не найдены
+            </strong>
+
+            <span>
+                Измените параметры поиска
+                или создайте нового преподавателя
+            </span>
+
+        </div>
+
+        } @else {
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Преподаватель</th>
+                        <th>Должность</th>
+                        <th>Кафедра</th>
+                        <th>Статус</th>
+                        <th>Контакты</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+
+
+                <tbody>
+
+                    @for (
+                    teacher of
+                    filteredTeachers();
+                    track teacher.id
+                    ) {
+
+                    <tr>
+
+                        <td>
+
+                            <div class="teacher-cell">
+
+                                <div class="avatar">
+                                    {{
+                                    initials(
+                                    teacher.fullName
+                                    )
+                                    }}
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        {{ teacher.fullName }}
+                                    </strong>
+
+                                    <span>
+                                        {{ teacher.email }}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            @if (
+                            teacher.teacher
+                            ?.position
+                            ) {
+
+                            <span class="position">
+                                {{
+                                teacher.teacher
+                                ?.position
+                                }}
+                            </span>
+
+                            } @else {
+
+                            <span class="muted">
+                                Не указана
+                            </span>
+
+                            }
+
+                        </td>
+
+
+                        <td>
+
+                            @if (
+                            teacher.teacher
+                            ?.department;
+                            as department
+                            ) {
+
+                            <span class="department">
+                                {{ department.name }}
+                            </span>
+
+                            } @else {
+
+                            <span class="muted">
+                                Не назначена
+                            </span>
+
+                            }
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="status" [class.active]="
+                      teacher.status ===
+                      'ACTIVE'
+                    " [class.blocked]="
+                      teacher.status ===
+                      'BLOCKED'
+                    ">
+
+                                {{
+                                teacher.status ===
+                                'ACTIVE'
+                                ? 'Активен'
+                                : teacher.status ===
+                                'BLOCKED'
+                                ? 'Заблокирован'
+                                : teacher.status
+                                }}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="contacts">
+
+                                <span>
+                                    {{ teacher.email }}
+                                </span>
+
+                                @if (teacher.phone) {
+                                <small>
+                                    {{ teacher.phone }}
+                                </small>
+                                }
+
+                            </div>
+
+                        </td>
+                        <td>
+                            <button type="button" class="assignments-button" (click)="openAssignments(teacher)">
+                                <mat-icon>
+                                    menu_book
+                                </mat-icon>
+
+                                Дисциплины
+                            </button>
+                        </td>
+
+                    </tr>
+
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        }
+
+    </section>
+
+</div>

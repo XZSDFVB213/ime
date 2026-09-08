@@ -1,0 +1,557 @@
+<div class="dialog">
+
+    <header class="dialog-header">
+
+        <div class="group-icon">
+            <mat-icon>
+                groups
+            </mat-icon>
+        </div>
+
+        <div>
+
+            <h2>
+                {{ data.group.name }}
+            </h2>
+
+            <p>
+                {{
+                data.group.department
+                ?.name ??
+                'Кафедра не указана'
+                }}
+            </p>
+
+        </div>
+
+
+        <button type="button" class="close" (click)="close()">
+            <mat-icon>
+                close
+            </mat-icon>
+        </button>
+
+    </header>
+
+
+    @if (loading()) {
+
+    <div class="dialog-loading">
+
+        <div class="loader"></div>
+
+        <span>
+            Загружаем данные группы...
+        </span>
+
+    </div>
+
+    } @else {
+
+    <mat-tab-group animationDuration="200ms">
+
+
+        <!-- ========================= -->
+        <!-- STUDENTS -->
+        <!-- ========================= -->
+
+        <mat-tab>
+
+            <ng-template mat-tab-label>
+
+                <mat-icon>
+                    school
+                </mat-icon>
+
+                <span>
+                    Студенты
+                </span>
+
+                <b class="tab-count">
+                    {{ groupStudents().length }}
+                </b>
+
+            </ng-template>
+
+
+            <div class="tab-content">
+
+                <section class="assign-section">
+
+                    <div>
+
+                        <strong>
+                            Добавить студента
+                        </strong>
+
+                        <span>
+                            Студент будет переведен
+                            в группу {{ data.group.name }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="assign-controls">
+
+                        <mat-select [(ngModel)]="studentId" placeholder="Выберите студента">
+
+                            @for (
+                            student of
+                            availableStudents();
+                            track student.id
+                            ) {
+
+                            <mat-option [value]="student.id">
+                                {{ student.fullName }}
+
+                                @if (
+                                student.student
+                                ?.group;
+                                as currentGroup
+                                ) {
+                                —
+                                {{ currentGroup.name }}
+                                } @else {
+                                — без группы
+                                }
+
+                            </mat-option>
+
+                            }
+
+                        </mat-select>
+
+
+                        <button type="button" [disabled]="
+                  !studentId ||
+                  assigningStudent()
+                " (click)="assignStudent()">
+
+                            <mat-icon>
+                                person_add
+                            </mat-icon>
+
+                            {{
+                            assigningStudent()
+                            ? 'Добавление...'
+                            : 'Добавить'
+                            }}
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+                <section class="students-section">
+
+                    <header>
+
+                        <div>
+
+                            <h3>
+                                Состав группы
+                            </h3>
+
+                            <span>
+                                {{ groupStudents().length }}
+                                студентов
+                            </span>
+
+                        </div>
+
+
+                        <div class="search">
+
+                            <mat-icon>
+                                search
+                            </mat-icon>
+
+                            <input #searchInput type="text" placeholder="Найти студента..." (input)="
+                    search.set(
+                      searchInput.value
+                    )
+                  " />
+
+                        </div>
+
+                    </header>
+
+
+                    @if (
+                    filteredGroupStudents()
+                    .length === 0
+                    ) {
+
+                    <div class="state">
+                        В группе пока нет студентов
+                    </div>
+
+                    } @else {
+
+                    <div class="student-list">
+
+                        @for (
+                        student of
+                        filteredGroupStudents();
+                        track student.id
+                        ) {
+
+                        <div class="student-row">
+
+                            <div class="avatar">
+                                {{
+                                initials(
+                                student.fullName
+                                )
+                                }}
+                            </div>
+
+                            <div class="student-info">
+
+                                <strong>
+                                    {{ student.fullName }}
+                                </strong>
+
+                                <span>
+                                    {{ student.email }}
+                                </span>
+
+                            </div>
+
+
+                            <span class="status" [class.active]="
+                        student.status ===
+                        'ACTIVE'
+                      ">
+                                {{
+                                student.status ===
+                                'ACTIVE'
+                                ? 'Активен'
+                                : student.status
+                                }}
+                            </span>
+
+                        </div>
+
+                        }
+
+                    </div>
+
+                    }
+
+                </section>
+
+            </div>
+
+        </mat-tab>
+
+
+        <!-- ========================= -->
+        <!-- DISCIPLINES -->
+        <!-- ========================= -->
+
+        <mat-tab>
+
+            <ng-template mat-tab-label>
+
+                <mat-icon>
+                    menu_book
+                </mat-icon>
+
+                <span>
+                    Дисциплины
+                </span>
+
+                <b class="tab-count">
+                    {{ disciplinesCount() }}
+                </b>
+
+            </ng-template>
+
+
+            <div class="tab-content">
+
+                <section class="assignment-create">
+
+                    <div class="section-title">
+
+                        <div class="section-icon">
+                            <mat-icon>
+                                add_circle_outline
+                            </mat-icon>
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Назначить преподавателя
+                            </strong>
+
+                            <span>
+                                Свяжите дисциплину,
+                                преподавателя и группу
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="assignment-form">
+
+                        <label>
+
+                            <span>
+                                Преподаватель
+                            </span>
+
+                            <mat-select [(ngModel)]="teacherId" placeholder="Выберите преподавателя">
+
+                                @for (
+                                teacher of teachers();
+                                track teacher.id
+                                ) {
+
+                                @if (teacher.teacher) {
+
+                                <mat-option [value]="
+                          teacher.teacher.id
+                        ">
+                                    {{ teacher.fullName }}
+
+                                    @if (
+                                    teacher.teacher
+                                    .position
+                                    ) {
+                                    —
+                                    {{
+                                    teacher.teacher
+                                    .position
+                                    }}
+                                    }
+
+                                </mat-option>
+
+                                }
+
+                                }
+
+                            </mat-select>
+
+                        </label>
+
+
+                        <label>
+
+                            <span>
+                                Дисциплина
+                            </span>
+
+                            <mat-select [(ngModel)]="disciplineId" placeholder="Выберите дисциплину">
+
+                                @for (
+                                discipline of
+                                disciplines();
+                                track discipline.id
+                                ) {
+
+                                <mat-option [value]="discipline.id">
+                                    {{ discipline.name }}
+                                </mat-option>
+
+                                }
+
+                            </mat-select>
+
+                        </label>
+
+
+                        <button type="button" class="assign-teacher-button" [disabled]="
+                  !teacherId ||
+                  !disciplineId ||
+                  assigningTeacher()
+                " (click)="assignTeacher()">
+
+                            <mat-icon>
+                                add
+                            </mat-icon>
+
+                            {{
+                            assigningTeacher()
+                            ? 'Назначение...'
+                            : 'Назначить'
+                            }}
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+                <section class="assignments-section">
+
+                    <header>
+
+                        <div>
+
+                            <h3>
+                                Учебная нагрузка группы
+                            </h3>
+
+                            <span>
+                                {{
+                                assignments().length
+                                }}
+                                назначений
+                            </span>
+
+                        </div>
+
+                    </header>
+
+
+                    @if (
+                    assignments().length === 0
+                    ) {
+
+                    <div class="empty-assignments">
+
+                        <div>
+                            <mat-icon>
+                                menu_book
+                            </mat-icon>
+                        </div>
+
+                        <strong>
+                            Назначений пока нет
+                        </strong>
+
+                        <span>
+                            Добавьте преподавателя
+                            и дисциплину выше
+                        </span>
+
+                    </div>
+
+                    } @else {
+
+                    <div class="assignments-list">
+
+                        @for (
+                        assignment of
+                        assignments();
+                        track assignment.id
+                        ) {
+
+                        <article class="assignment-row">
+
+                            <div class="discipline-icon">
+                                <mat-icon>
+                                    menu_book
+                                </mat-icon>
+                            </div>
+
+
+                            <div class="discipline-info">
+
+                                <strong>
+                                    {{
+                                    assignment
+                                    .discipline
+                                    .name
+                                    }}
+                                </strong>
+
+                                @if (
+                                assignment.discipline.description
+                                ) {
+                                <span>
+                                    {{
+                                    assignment.discipline.description
+                                    }}
+                                </span>
+                                }
+
+                            </div>
+
+
+                            <div class="assignment-teacher">
+
+                                <div class="teacher-avatar">
+                                    {{
+                                    initials(
+                                    assignment
+                                    .teacher
+                                    .user
+                                    .fullName
+                                    )
+                                    }}
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        {{
+                                        assignment
+                                        .teacher
+                                        .user
+                                        .fullName
+                                        }}
+                                    </strong>
+
+                                    <span>
+                                        {{
+                                        assignment
+                                        .teacher
+                                        .position ??
+                                        assignment
+                                        .teacher
+                                        .department
+                                        ?.name ??
+                                        'Преподаватель'
+                                        }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <button type="button" class="delete-assignment" title="Удалить назначение" [disabled]="
+                        deletingAssignmentId() ===
+                        assignment.id
+                      " (click)="
+                        removeAssignment(
+                          assignment
+                        )
+                      ">
+
+                                <mat-icon>
+                                    delete_outline
+                                </mat-icon>
+
+                            </button>
+
+                        </article>
+
+                        }
+
+                    </div>
+
+                    }
+
+                </section>
+
+            </div>
+
+        </mat-tab>
+
+    </mat-tab-group>
+
+    }
+
+</div>

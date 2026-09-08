@@ -1,1 +1,191 @@
-<router-outlet />
+<div
+  class="admin-shell"
+  [class.sidebar-collapsed]="
+    !sidebarOpened()
+  "
+>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-brand">
+
+      <div class="brand-logo">
+        ННОУ
+      </div>
+
+      @if (sidebarOpened()) {
+        <div>
+          <strong>
+            Администрирование
+          </strong>
+
+          <span>
+            ННОУ
+          </span>
+        </div>
+      }
+
+    </div>
+
+
+    <nav class="sidebar-nav">
+
+      <a
+        routerLink="/admin/dashboard"
+        routerLinkActive="active"
+      >
+        <mat-icon>
+          dashboard
+        </mat-icon>
+
+        @if (sidebarOpened()) {
+          <span>
+            Главная
+          </span>
+        }
+      </a>
+
+
+      <a
+        routerLink="/admin/students"
+        routerLinkActive="active"
+      >
+        <mat-icon>
+          school
+        </mat-icon>
+
+        @if (sidebarOpened()) {
+          <span>
+            Студенты
+          </span>
+        }
+      </a>
+
+
+      <a
+        routerLink="/admin/teachers"
+        routerLinkActive="active"
+      >
+        <mat-icon>
+          co_present
+        </mat-icon>
+
+        @if (sidebarOpened()) {
+          <span>
+            Преподаватели
+          </span>
+        }
+      </a>
+
+
+      <a
+        routerLink="/admin/groups"
+        routerLinkActive="active"
+      >
+        <mat-icon>
+          groups
+        </mat-icon>
+
+        @if (sidebarOpened()) {
+          <span>
+            Группы
+          </span>
+        }
+      </a>
+
+
+      <a
+        routerLink="/admin/subjects"
+        routerLinkActive="active"
+      >
+        <mat-icon>
+          menu_book
+        </mat-icon>
+
+        @if (sidebarOpened()) {
+          <span>
+            Дисциплины
+          </span>
+        }
+      </a>
+
+
+      <a
+        routerLink="/admin/materials"
+        routerLinkActive="active"
+      >
+        <mat-icon>
+          folder
+        </mat-icon>
+
+        @if (sidebarOpened()) {
+          <span>
+            Материалы
+          </span>
+        }
+      </a>
+
+
+      <div class="nav-divider"></div>
+
+
+
+    </nav>
+
+  </aside>
+
+
+  <section class="main">
+
+    <header class="topbar">
+
+      <button
+        type="button"
+        class="menu-button"
+        (click)="toggleSidebar()"
+      >
+        <mat-icon>
+          menu
+        </mat-icon>
+      </button>
+
+
+      <div class="topbar-title">
+        Панель администратора
+      </div>
+
+
+      <div class="topbar-actions">
+
+        <app-notification-bell />
+
+        <div class="admin-profile">
+
+          <div class="avatar">
+            А
+          </div>
+
+          <div>
+            <strong>
+              Администратор
+            </strong>
+
+            <span>
+              ADMIN
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <main class="content">
+      <router-outlet />
+    </main>
+
+  </section>
+
+</div>

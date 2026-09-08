@@ -1,0 +1,233 @@
+<div class="dialog">
+
+  <header class="dialog-header">
+
+    <div class="header-icon">
+      <mat-icon>
+        co_present
+      </mat-icon>
+    </div>
+
+    <div>
+      <h2>
+        Новый преподаватель
+      </h2>
+
+      <p>
+        Создание учетной записи преподавателя
+      </p>
+    </div>
+
+
+    <button
+      type="button"
+      class="close-button"
+      (click)="close()"
+    >
+      <mat-icon>
+        close
+      </mat-icon>
+    </button>
+
+  </header>
+
+
+  <form
+    #form="ngForm"
+    (ngSubmit)="create()"
+  >
+
+    <div class="form-grid">
+
+      <label class="field full">
+
+        <span>
+          ФИО *
+        </span>
+
+        <input
+          type="text"
+          name="fullName"
+          placeholder="Иван Иванов"
+          [(ngModel)]="fullName"
+          required
+        />
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Email *
+        </span>
+
+        <input
+          type="email"
+          name="email"
+          placeholder="teacher@ime.ru"
+          [(ngModel)]="email"
+          required
+        />
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Телефон
+        </span>
+
+        <input
+          type="tel"
+          name="phone"
+          placeholder="+7 999 123-45-67"
+          [(ngModel)]="phone"
+        />
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Временный пароль *
+        </span>
+
+        <div class="password-field">
+
+          <input
+            [type]="
+              showPassword()
+                ? 'text'
+                : 'password'
+            "
+            name="password"
+            placeholder="Минимум 6 символов"
+            [(ngModel)]="password"
+            required
+          />
+
+          <button
+            type="button"
+            (click)="togglePassword()"
+          >
+            <mat-icon>
+              {{
+                showPassword()
+                  ? 'visibility_off'
+                  : 'visibility'
+              }}
+            </mat-icon>
+          </button>
+
+        </div>
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Должность
+        </span>
+
+        <input
+          type="text"
+          name="position"
+          placeholder="Доцент"
+          [(ngModel)]="position"
+        />
+
+      </label>
+
+
+      <label class="field full">
+
+        <span>
+          Кафедра
+        </span>
+
+        <mat-select
+          name="departmentId"
+          [(ngModel)]="departmentId"
+          placeholder="Выберите кафедру"
+        >
+
+          <mat-option value="">
+            Без кафедры
+          </mat-option>
+
+          @for (
+            department of
+              data.departments;
+            track department.id
+          ) {
+
+            <mat-option
+              [value]="department.id"
+            >
+              {{ department.name }}
+            </mat-option>
+
+          }
+
+        </mat-select>
+
+      </label>
+
+    </div>
+
+
+    @if (error()) {
+
+      <div class="error">
+        <mat-icon>
+          error_outline
+        </mat-icon>
+
+        {{ error() }}
+      </div>
+
+    }
+
+
+    <footer class="dialog-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="loading()"
+        (click)="close()"
+      >
+        Отмена
+      </button>
+
+
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="
+          loading() ||
+          form.invalid
+        "
+      >
+
+        @if (loading()) {
+          Создание...
+        } @else {
+          <mat-icon>
+            person_add
+          </mat-icon>
+
+          Создать преподавателя
+        }
+
+      </button>
+
+    </footer>
+
+  </form>
+
+</div>

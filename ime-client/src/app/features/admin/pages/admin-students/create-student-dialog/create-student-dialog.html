@@ -1,0 +1,222 @@
+<div class="dialog">
+
+  <header class="dialog-header">
+
+    <div class="header-icon">
+      <mat-icon>
+        person_add
+      </mat-icon>
+    </div>
+
+    <div>
+      <h2>
+        Новый студент
+      </h2>
+
+      <p>
+        Создайте учетную запись
+        и назначьте учебную группу
+      </p>
+    </div>
+
+
+    <button
+      type="button"
+      class="close-button"
+      (click)="close()"
+    >
+      <mat-icon>
+        close
+      </mat-icon>
+    </button>
+
+  </header>
+
+
+  <form
+    #form="ngForm"
+    (ngSubmit)="create()"
+  >
+
+    <div class="form-grid">
+
+      <label class="field full">
+
+        <span>
+          ФИО *
+        </span>
+
+        <input
+          type="text"
+          name="fullName"
+          placeholder="Магомед Магомедов"
+          [(ngModel)]="fullName"
+          required
+        />
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Email *
+        </span>
+
+        <input
+          type="email"
+          name="email"
+          placeholder="student@ime.ru"
+          [(ngModel)]="email"
+          required
+        />
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Телефон
+        </span>
+
+        <input
+          type="tel"
+          name="phone"
+          placeholder="+7 999 123-45-67"
+          [(ngModel)]="phone"
+        />
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Временный пароль *
+        </span>
+
+        <div class="password-field">
+
+          <input
+            [type]="
+              showPassword()
+                ? 'text'
+                : 'password'
+            "
+            name="password"
+            placeholder="Минимум 6 символов"
+            [(ngModel)]="password"
+            required
+          />
+
+          <button
+            type="button"
+            (click)="togglePassword()"
+          >
+            <mat-icon>
+              {{
+                showPassword()
+                  ? 'visibility_off'
+                  : 'visibility'
+              }}
+            </mat-icon>
+          </button>
+
+        </div>
+
+      </label>
+
+
+      <label class="field">
+
+        <span>
+          Учебная группа *
+        </span>
+
+        <mat-select
+          name="groupId"
+          [(ngModel)]="groupId"
+          placeholder="Выберите группу"
+          required
+        >
+
+          @for (
+            group of data.groups;
+            track group.id
+          ) {
+
+            <mat-option
+              [value]="group.id"
+            >
+              {{ group.name }}
+
+              @if (
+                group.department
+              ) {
+                —
+                {{
+                  group.department.name
+                }}
+              }
+
+            </mat-option>
+
+          }
+
+        </mat-select>
+
+      </label>
+
+    </div>
+
+
+    @if (error()) {
+      <div class="error">
+        <mat-icon>
+          error_outline
+        </mat-icon>
+
+        {{ error() }}
+      </div>
+    }
+
+
+    <footer class="dialog-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        [disabled]="loading()"
+        (click)="close()"
+      >
+        Отмена
+      </button>
+
+
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="
+          loading() ||
+          form.invalid
+        "
+      >
+
+        @if (loading()) {
+          Создание...
+        } @else {
+          <mat-icon>
+            person_add
+          </mat-icon>
+
+          Создать студента
+        }
+
+      </button>
+
+    </footer>
+
+  </form>
+
+</div>

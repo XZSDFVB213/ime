@@ -1,1 +1,702 @@
-<p>admin-dashboard works!</p>
+<div class="dashboard-page">
+
+  <header class="welcome">
+
+    <div>
+
+      <span class="eyebrow">
+        Панель управления
+      </span>
+
+      <h1>
+        Обзор платформы
+      </h1>
+
+      <p>
+        Управление образовательным процессом
+        Института мировой экономики
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="refresh-button"
+      [disabled]="loading()"
+      (click)="loadDashboard()"
+    >
+      <mat-icon>
+        refresh
+      </mat-icon>
+
+      Обновить
+    </button>
+
+  </header>
+
+
+  @if (loading()) {
+
+    <div class="dashboard-loading">
+
+      <div class="loader"></div>
+
+      <span>
+        Загружаем данные платформы...
+      </span>
+
+    </div>
+
+  } @else {
+
+
+    <!-- MAIN STATS -->
+
+    <section class="stats-grid">
+
+      <a
+        class="stat-card"
+        routerLink="/admin/students"
+      >
+
+        <div class="stat-icon students">
+          <mat-icon>
+            school
+          </mat-icon>
+        </div>
+
+        <div class="stat-content">
+
+          <span>
+            Студенты
+          </span>
+
+          <strong>
+            {{ students().length }}
+          </strong>
+
+          <small>
+            Активных:
+            {{ activeStudents() }}
+          </small>
+
+        </div>
+
+        <mat-icon class="arrow">
+          arrow_forward
+        </mat-icon>
+
+      </a>
+
+
+      <a
+        class="stat-card"
+        routerLink="/admin/teachers"
+      >
+
+        <div class="stat-icon teachers">
+          <mat-icon>
+            co_present
+          </mat-icon>
+        </div>
+
+        <div class="stat-content">
+
+          <span>
+            Преподаватели
+          </span>
+
+          <strong>
+            {{ teachers().length }}
+          </strong>
+
+          <small>
+            Активных:
+            {{ activeTeachers() }}
+          </small>
+
+        </div>
+
+        <mat-icon class="arrow">
+          arrow_forward
+        </mat-icon>
+
+      </a>
+
+
+      <a
+        class="stat-card"
+        routerLink="/admin/groups"
+      >
+
+        <div class="stat-icon groups">
+          <mat-icon>
+            groups
+          </mat-icon>
+        </div>
+
+        <div class="stat-content">
+
+          <span>
+            Учебные группы
+          </span>
+
+          <strong>
+            {{ groups().length }}
+          </strong>
+
+          <small>
+            студентов всего
+            {{ students().length }}
+          </small>
+
+        </div>
+
+        <mat-icon class="arrow">
+          arrow_forward
+        </mat-icon>
+
+      </a>
+
+
+      <a
+        class="stat-card"
+        routerLink="/admin/subjects"
+      >
+
+        <div class="stat-icon subjects">
+          <mat-icon>
+            menu_book
+          </mat-icon>
+        </div>
+
+        <div class="stat-content">
+
+          <span>
+            Дисциплины
+          </span>
+
+          <strong>
+            {{ disciplines().length }}
+          </strong>
+
+          <small>
+            Кафедр:
+            {{ departments().length }}
+          </small>
+
+        </div>
+
+        <mat-icon class="arrow">
+          arrow_forward
+        </mat-icon>
+
+      </a>
+
+    </section>
+
+
+    <!-- MAIN GRID -->
+
+    <section class="dashboard-grid">
+
+
+      <!-- RECENT USERS -->
+
+      <article class="panel recent-panel">
+
+        <header class="panel-header">
+
+          <div>
+
+            <h2>
+              Последние пользователи
+            </h2>
+
+            <span>
+              Недавно добавленные учетные записи
+            </span>
+
+          </div>
+
+
+        </header>
+
+
+        <div class="recent-users">
+
+          @if (
+            recentUsers().length === 0
+          ) {
+
+            <div class="empty">
+              Пользователей пока нет
+            </div>
+
+          } @else {
+
+            @for (
+              user of recentUsers();
+              track user.id
+            ) {
+
+              <div class="user-row">
+
+                <div
+                  class="user-avatar"
+                  [class.teacher]="
+                    user.userType ===
+                    'TEACHER'
+                  "
+                >
+                  {{
+                    initials(
+                      user.fullName
+                    )
+                  }}
+                </div>
+
+
+                <div class="user-info">
+
+                  <strong>
+                    {{ user.fullName }}
+                  </strong>
+
+                  <span>
+                    {{ user.email }}
+                  </span>
+
+                </div>
+
+
+                <div class="user-role">
+
+                  <span
+                    [class.teacher]="
+                      user.userType ===
+                      'TEACHER'
+                    "
+                  >
+                    {{
+                      user.userType ===
+                      'STUDENT'
+                        ? 'Студент'
+                        : 'Преподаватель'
+                    }}
+                  </span>
+
+                  <small>
+                    {{
+                      userDescription(
+                        user
+                      )
+                    }}
+                  </small>
+
+                </div>
+
+
+                <div class="user-date">
+                  {{
+                    formatDate(
+                      user.createdAt
+                    )
+                  }}
+                </div>
+
+              </div>
+
+            }
+
+          }
+
+        </div>
+
+      </article>
+
+
+      <!-- SYSTEM STATE -->
+
+      <article class="panel health-panel">
+
+        <header class="panel-header">
+
+          <div>
+
+            <h2>
+              Состояние данных
+            </h2>
+
+            <span>
+              На что стоит обратить внимание
+            </span>
+
+          </div>
+
+        </header>
+
+
+        <div class="health-list">
+
+
+          <div class="health-item">
+
+            <div
+              class="health-icon"
+              [class.ok]="
+                studentsWithoutGroup() ===
+                0
+              "
+            >
+              <mat-icon>
+                group_off
+              </mat-icon>
+            </div>
+
+            <div>
+
+              <strong>
+                Студенты без группы
+              </strong>
+
+              <span>
+                Не распределены
+                по учебным группам
+              </span>
+
+            </div>
+
+            <b>
+              {{
+                studentsWithoutGroup()
+              }}
+            </b>
+
+          </div>
+
+
+          <div class="health-item">
+
+            <div
+              class="health-icon"
+              [class.ok]="
+                teachersWithoutDepartment() ===
+                0
+              "
+            >
+              <mat-icon>
+                account_balance
+              </mat-icon>
+            </div>
+
+            <div>
+
+              <strong>
+                Без кафедры
+              </strong>
+
+              <span>
+                Преподаватели
+                без назначенной кафедры
+              </span>
+
+            </div>
+
+            <b>
+              {{
+                teachersWithoutDepartment()
+              }}
+            </b>
+
+          </div>
+
+
+          <div class="health-item">
+
+            <div class="health-icon ok">
+              <mat-icon>
+                verified_user
+              </mat-icon>
+            </div>
+
+            <div>
+
+              <strong>
+                Активные пользователи
+              </strong>
+
+              <span>
+                Студенты и преподаватели
+              </span>
+
+            </div>
+
+            <b>
+              {{
+                activeStudents() +
+                activeTeachers()
+              }}
+            </b>
+
+          </div>
+
+
+          <div class="health-item">
+
+            <div class="health-icon ok">
+              <mat-icon>
+                library_books
+              </mat-icon>
+            </div>
+
+            <div>
+
+              <strong>
+                Дисциплины
+              </strong>
+
+              <span>
+                Добавлены в систему
+              </span>
+
+            </div>
+
+            <b>
+              {{ disciplines().length }}
+            </b>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- GROUPS -->
+
+      <article class="panel groups-panel">
+
+        <header class="panel-header">
+
+          <div>
+
+            <h2>
+              Учебные группы
+            </h2>
+
+            <span>
+              Распределение студентов
+            </span>
+
+          </div>
+
+          <a
+            routerLink="/admin/groups"
+          >
+            Все группы
+
+            <mat-icon>
+              arrow_forward
+            </mat-icon>
+          </a>
+
+        </header>
+
+
+        <div class="groups-list">
+
+          @if (
+            sortedGroups().length === 0
+          ) {
+
+            <div class="empty">
+              Учебные группы пока не созданы
+            </div>
+
+          } @else {
+
+            @for (
+              group of sortedGroups();
+              track group.id
+            ) {
+
+              <div class="group-row">
+
+                <div class="group-main">
+
+                  <div>
+
+                    <strong>
+                      {{ group.name }}
+                    </strong>
+
+                    <span>
+                      {{
+                        group.department
+                          ?.name ??
+                        'Кафедра не указана'
+                      }}
+                    </span>
+
+                  </div>
+
+
+                  <b>
+                    {{
+                      groupStudentsCount(
+                        group
+                      )
+                    }}
+                  </b>
+
+                </div>
+
+
+                <div class="progress">
+
+                  <div
+                    [style.width.%]="
+                      groupProgress(
+                        group
+                      )
+                    "
+                  ></div>
+
+                </div>
+
+              </div>
+
+            }
+
+          }
+
+        </div>
+
+      </article>
+
+
+      <!-- QUICK ACTIONS -->
+
+      <article class="panel quick-panel">
+
+        <header class="panel-header">
+
+          <div>
+
+            <h2>
+              Быстрые действия
+            </h2>
+
+            <span>
+              Основные разделы администрирования
+            </span>
+
+          </div>
+
+        </header>
+
+
+        <div class="quick-actions">
+
+          <a
+            routerLink="/admin/students"
+          >
+
+            <div>
+              <mat-icon>
+                person_add
+              </mat-icon>
+            </div>
+
+            <span>
+              <strong>
+                Добавить студента
+              </strong>
+
+              <small>
+                Создать учетную запись
+              </small>
+            </span>
+
+          </a>
+
+
+          <a
+            routerLink="/admin/teachers"
+          >
+
+            <div>
+              <mat-icon>
+                co_present
+              </mat-icon>
+            </div>
+
+            <span>
+              <strong>
+                Преподаватели
+              </strong>
+
+              <small>
+                Создание и назначения
+              </small>
+            </span>
+
+          </a>
+
+
+          <a
+            routerLink="/admin/groups"
+          >
+
+            <div>
+              <mat-icon>
+                groups
+              </mat-icon>
+            </div>
+
+            <span>
+              <strong>
+                Учебные группы
+              </strong>
+
+              <small>
+                Управление составом
+              </small>
+            </span>
+
+          </a>
+
+
+          <a
+            routerLink="/admin/materials"
+          >
+
+            <div>
+              <mat-icon>
+                folder
+              </mat-icon>
+            </div>
+
+            <span>
+              <strong>
+                Материалы
+              </strong>
+
+              <small>
+                Учебный контент
+              </small>
+            </span>
+
+          </a>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  }
+
+</div>

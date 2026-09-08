@@ -2,7 +2,7 @@
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-logo">
-        <mat-icon>account_balance</mat-icon>
+        <img src="logo(white).png" class="brand-logo" alt="">
       </div>
 
       <div>
@@ -28,7 +28,7 @@
     </nav>
 
     <div class="sidebar-bottom">
-      <div class="profile-mini">
+      <div class="profile-mini" routerLink="/student/profile">
         <div class="profile-avatar">
           {{ session.initials() }}
         </div>
@@ -81,7 +81,7 @@
           <span class="action-badge">2</span>
         </button>
 
-        <div class="topbar-profile">
+        <div class="topbar-profile" routerLink="/student/profile">
           <div class="topbar-avatar">
             @if (session.user()?.avatarUrl) {
             <img [src]="session.user().avatarUrl" [alt]="session.fullName()" />

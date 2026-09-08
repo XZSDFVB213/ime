@@ -1,0 +1,379 @@
+<div class="groups-page">
+
+    <header class="page-header">
+
+        <div>
+
+            <span class="eyebrow">
+                Учебная структура
+            </span>
+
+            <h1>
+                Учебные группы
+            </h1>
+
+            <p>
+                Просмотр состава групп,
+                распределение студентов
+                и контроль учебной структуры
+            </p>
+
+        </div>
+        <div class="header-actions">
+
+            <button type="button" class="secondary-button" (click)="openCreateFaculty()">
+                <mat-icon>
+                    account_balance
+                </mat-icon>
+
+                Факультет
+            </button>
+
+
+            <button type="button" class="secondary-button" (click)="openCreateDepartment()">
+                <mat-icon>
+                    corporate_fare
+                </mat-icon>
+
+                Кафедра
+            </button>
+
+
+            <button type="button" class="primary-button" (click)="openCreateGroup()">
+                <mat-icon>
+                    add
+                </mat-icon>
+
+                Группа
+            </button>
+
+        </div>
+    </header>
+
+
+    <!-- STATS -->
+
+    <section class="stats-grid">
+
+        <article class="stat-card">
+
+            <div class="stat-icon">
+                <mat-icon>
+                    groups
+                </mat-icon>
+            </div>
+
+            <div>
+                <span>
+                    Всего групп
+                </span>
+
+                <strong>
+                    {{ groups().length }}
+                </strong>
+            </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+            <div class="stat-icon students">
+                <mat-icon>
+                    school
+                </mat-icon>
+            </div>
+
+            <div>
+                <span>
+                    Студентов в группах
+                </span>
+
+                <strong>
+                    {{ totalStudents() }}
+                </strong>
+            </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+            <div class="stat-icon department">
+                <mat-icon>
+                    account_balance
+                </mat-icon>
+            </div>
+
+            <div>
+                <span>
+                    Кафедр
+                </span>
+
+                <strong>
+                    {{ departmentsCount() }}
+                </strong>
+            </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+            <div class="stat-icon max">
+                <mat-icon>
+                    trending_up
+                </mat-icon>
+            </div>
+
+            <div>
+                <span>
+                    Самая большая группа
+                </span>
+
+                @if (
+                largestGroup();
+                as group
+                ) {
+                <strong class="group-name-stat">
+                    {{ group.name }}
+                </strong>
+
+                <strong>
+                    {{ activeStudentsCount(group) }}
+                </strong>
+                } @else {
+                <strong>
+                    —
+                </strong>
+                }
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- MAIN -->
+
+    <section class="groups-card">
+
+        <div class="toolbar">
+
+            <div class="search-box">
+
+                <mat-icon>
+                    search
+                </mat-icon>
+
+                <input #searchInput type="text" placeholder="Поиск группы или кафедры..." [value]="search()" (input)="
+            setSearch(
+              searchInput.value
+            )
+          " />
+
+                @if (search()) {
+
+                <button type="button" (click)="
+              setSearch('');
+              searchInput.value = ''
+            ">
+                    <mat-icon>
+                        close
+                    </mat-icon>
+                </button>
+
+                }
+
+            </div>
+
+        </div>
+
+
+        @if (loading()) {
+
+        <div class="state-block">
+
+            <div class="loader"></div>
+
+            <span>
+                Загружаем учебные группы...
+            </span>
+
+        </div>
+
+        } @else if (
+        filteredGroups().length === 0
+        ) {
+
+        <div class="state-block">
+
+            <div class="empty-icon">
+                <mat-icon>
+                    group_off
+                </mat-icon>
+            </div>
+
+            <strong>
+                Группы не найдены
+            </strong>
+
+            <span>
+                Попробуйте изменить запрос
+            </span>
+
+        </div>
+
+        } @else {
+
+        <div class="groups-grid">
+
+            @for (
+            group of filteredGroups();
+            track group.id
+            ) {
+
+            <article class="group-card" (click)="openGroup(group)">
+
+                <div class="group-card-header">
+
+                    <div class="group-icon">
+                        <mat-icon>
+                            groups
+                        </mat-icon>
+                    </div>
+
+                    <div class="group-title">
+
+                        <h2>
+                            {{ group.name }}
+                        </h2>
+
+                        <span>
+                            {{
+                            group.department
+                            ?.name ??
+                            'Кафедра не указана'
+                            }}
+                        </span>
+
+                    </div>
+
+
+                    <mat-icon class="arrow">
+                        chevron_right
+                    </mat-icon>
+
+                </div>
+
+
+                <div class="group-stats">
+
+                    <div>
+
+                        <span>
+                            Студентов
+                        </span>
+
+                        <strong>
+                            {{
+                            studentsCount(
+                            group
+                            )
+                            }}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Активных
+                        </span>
+
+                        <strong>
+                            {{
+                            (
+                            group.students ??
+                            []
+                            ).filter(
+                            student =>
+                            student.user
+                            .status ===
+                            'ACTIVE'
+                            ).length
+                            }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="students-preview">
+
+                    @for (
+                    student of
+                    (
+                    group.students ??
+                    []
+                    ).slice(0, 4);
+                    track student.id
+                    ) {
+
+                    <div class="mini-avatar" [title]="
+                    student.user
+                      .fullName
+                  ">
+                        {{
+                        student.user
+                        .fullName
+                        .charAt(0)
+                        .toUpperCase()
+                        }}
+                    </div>
+
+                    }
+
+
+                    @if (
+                    studentsCount(group) >
+                    4
+                    ) {
+
+                    <div class="mini-avatar more">
+                        +{{
+                        studentsCount(group) -
+                        4
+                        }}
+                    </div>
+
+                    }
+
+                </div>
+
+
+                <footer>
+
+                    <span>
+                        Открыть группу
+                    </span>
+
+                    <mat-icon>
+                        arrow_forward
+                    </mat-icon>
+
+                </footer>
+
+            </article>
+
+            }
+
+        </div>
+
+        }
+
+    </section>
+
+</div>

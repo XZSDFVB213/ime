@@ -1,0 +1,64 @@
+.teacher-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.assignment-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: start;
+  gap: 12px;
+}
+
+.assignments-header {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.assignments {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.assignment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 16px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.discipline {
+  font-weight: 600;
+}
+
+.group {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  opacity: 0.6;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+@media (max-width: 700px) {
+  .assignment-form {
+    grid-template-columns: 1fr;
+  }
+}

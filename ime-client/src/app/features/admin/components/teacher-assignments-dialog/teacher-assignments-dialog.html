@@ -1,0 +1,126 @@
+<h2 mat-dialog-title>
+  Назначения преподавателя
+</h2>
+
+<mat-dialog-content>
+
+  <div class="teacher-name">
+    {{ data.fullName }}
+  </div>
+
+  <form
+    class="assignment-form"
+    [formGroup]="form"
+    (ngSubmit)="assign()"
+  >
+
+    <mat-form-field appearance="outline">
+      <mat-label>Дисциплина</mat-label>
+
+      <mat-select formControlName="disciplineId">
+        @for (discipline of disciplines; track discipline.id) {
+          <mat-option [value]="discipline.id">
+            {{ discipline.name }}
+          </mat-option>
+        }
+      </mat-select>
+
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Группа</mat-label>
+
+      <mat-select formControlName="groupId">
+        @for (group of groups; track group.id) {
+          <mat-option [value]="group.id">
+            {{ group.name }}
+          </mat-option>
+        }
+      </mat-select>
+
+    </mat-form-field>
+
+    <button
+      mat-flat-button
+      type="submit"
+      [disabled]="form.invalid || saving"
+    >
+      <mat-icon>add</mat-icon>
+
+      Назначить
+    </button>
+
+  </form>
+
+  <div class="assignments-header">
+    Текущие назначения
+  </div>
+
+  @if (loading) {
+
+    <div class="loading">
+      <mat-spinner diameter="35"></mat-spinner>
+    </div>
+
+  } @else {
+
+    @if (!assignments.length) {
+
+      <div class="empty">
+        У преподавателя пока нет назначений
+      </div>
+
+    } @else {
+
+      <div class="assignments">
+
+        @for (
+          assignment of assignments;
+          track assignment.id
+        ) {
+
+          <div class="assignment">
+
+            <div>
+
+              <div class="discipline">
+                {{ assignment.discipline.name }}
+              </div>
+
+              <div class="group">
+                {{ assignment.group.name }}
+              </div>
+
+            </div>
+
+            <button
+              mat-icon-button
+              type="button"
+              (click)="remove(assignment.id)"
+            >
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  }
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+
+  <button
+    mat-button
+    type="button"
+    (click)="close()"
+  >
+    Закрыть
+  </button>
+
+</mat-dialog-actions>

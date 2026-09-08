@@ -1,0 +1,106 @@
+<div class="dialog">
+
+  <header>
+
+    <div class="header-icon">
+      <mat-icon>
+        account_balance
+      </mat-icon>
+    </div>
+
+    <div>
+      <h2>
+        Новый факультет
+      </h2>
+
+      <p>
+        Создание факультета или направления
+      </p>
+    </div>
+
+
+    <button
+      type="button"
+      class="close"
+      (click)="close()"
+    >
+      <mat-icon>
+        close
+      </mat-icon>
+    </button>
+
+  </header>
+
+
+  <div class="form">
+
+    <label>
+
+      <span>
+        Название *
+      </span>
+
+      <input
+        [(ngModel)]="name"
+        placeholder="Факультет информационных технологий"
+      />
+
+    </label>
+
+
+    <label>
+
+      <span>
+        Сокращение *
+      </span>
+
+      <input
+        [(ngModel)]="shortName"
+        placeholder="ФИТ"
+      />
+
+    </label>
+
+
+    @if (error()) {
+
+      <div class="error">
+        {{ error() }}
+      </div>
+
+    }
+
+  </div>
+
+
+  <footer>
+
+    <button
+      type="button"
+      class="cancel"
+      (click)="close()"
+    >
+      Отмена
+    </button>
+
+
+    <button
+      type="button"
+      class="save"
+      [disabled]="saving()"
+      (click)="save()"
+    >
+      <mat-icon>
+        add
+      </mat-icon>
+
+      {{
+        saving()
+          ? 'Создание...'
+          : 'Создать'
+      }}
+    </button>
+
+  </footer>
+
+</div>

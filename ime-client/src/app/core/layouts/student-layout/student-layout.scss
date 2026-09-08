@@ -7,7 +7,9 @@
   min-height: 100vh;
   background: #f5f7fb;
 }
-
+.brand-logo {
+  width: 100%;
+}
 .sidebar {
   position: fixed;
   z-index: 100;
@@ -38,8 +40,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 
   .brand-logo {
-    width: 46px;
-    height: 46px;
+    width: 58px;
 
     display: grid;
     place-items: center;

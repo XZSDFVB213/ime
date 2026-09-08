@@ -1,0 +1,126 @@
+<div class="dialog">
+
+  <header>
+
+    <div class="header-icon">
+      <mat-icon>
+        groups
+      </mat-icon>
+    </div>
+
+    <div>
+      <h2>
+        Новая группа
+      </h2>
+
+      <p>
+        Создание учебной группы
+      </p>
+    </div>
+
+
+    <button
+      type="button"
+      class="close"
+      (click)="close()"
+    >
+      <mat-icon>
+        close
+      </mat-icon>
+    </button>
+
+  </header>
+
+
+  <div class="form">
+
+    <label>
+
+      <span>
+        Название группы *
+      </span>
+
+      <input
+        [(ngModel)]="name"
+        placeholder="ПИ-21-1"
+      />
+
+    </label>
+
+
+    <label>
+
+      <span>
+        Кафедра *
+      </span>
+
+      <mat-select
+        [(ngModel)]="departmentId"
+        placeholder="Выберите кафедру"
+      >
+
+        @for (
+          department of data.departments;
+          track department.id
+        ) {
+
+          <mat-option
+            [value]="department.id"
+          >
+            {{ department.name }}
+
+            @if (department.faculty) {
+              —
+              {{ department.faculty.shortName }}
+            }
+          </mat-option>
+
+        }
+
+      </mat-select>
+
+    </label>
+
+
+    @if (error()) {
+
+      <div class="error">
+        {{ error() }}
+      </div>
+
+    }
+
+  </div>
+
+
+  <footer>
+
+    <button
+      type="button"
+      class="cancel"
+      (click)="close()"
+    >
+      Отмена
+    </button>
+
+
+    <button
+      type="button"
+      class="save"
+      [disabled]="saving()"
+      (click)="save()"
+    >
+      <mat-icon>
+        add
+      </mat-icon>
+
+      {{
+        saving()
+          ? 'Создание...'
+          : 'Создать группу'
+      }}
+    </button>
+
+  </footer>
+
+</div>

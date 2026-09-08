@@ -63,15 +63,9 @@ export class StudentLayout {
       path: '/student/grades',
     },
     {
-      label: 'Домашние задания',
+      label: 'Мои задания',
       icon: 'assignment',
       path: '/student/homeworks',
-    },
-    {
-      label: 'Уведомления',
-      icon: 'notifications_none',
-      path: '/student/notifications',
-      badge: 3,
     },
     {
       label: 'Сообщения',

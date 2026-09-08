@@ -1,0 +1,316 @@
+<div class="materials-page">
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        Учебный контент
+      </span>
+
+      <h1>
+        Материалы
+      </h1>
+
+      <p>
+        Материалы всех учебных дисциплин
+      </p>
+
+    </div>
+
+
+    <button
+      class="primary-button"
+      type="button"
+      (click)="openCreate()"
+    >
+      <mat-icon>
+        upload_file
+      </mat-icon>
+
+      Добавить материал
+    </button>
+
+  </header>
+
+
+  <section class="stats">
+
+    <article>
+      <mat-icon>
+        folder
+      </mat-icon>
+
+      <div>
+        <span>Всего</span>
+
+        <strong>
+          {{ materials().length }}
+        </strong>
+      </div>
+    </article>
+
+
+    <article>
+      <mat-icon>
+        description
+      </mat-icon>
+
+      <div>
+        <span>Файлы</span>
+
+        <strong>
+          {{ filesCount() }}
+        </strong>
+      </div>
+    </article>
+
+
+    <article>
+      <mat-icon>
+        link
+      </mat-icon>
+
+      <div>
+        <span>Ссылки</span>
+
+        <strong>
+          {{ linksCount() }}
+        </strong>
+      </div>
+    </article>
+
+  </section>
+
+
+  <section class="materials-card">
+
+    <div class="toolbar">
+
+      <div class="search">
+
+        <mat-icon>
+          search
+        </mat-icon>
+
+        <input
+          #searchInput
+          placeholder="Поиск материала..."
+          (input)="
+            search.set(
+              searchInput.value
+            )
+          "
+        />
+
+      </div>
+
+
+      <mat-select
+        [value]="typeFilter()"
+        (selectionChange)="
+          typeFilter.set(
+            $event.value
+          )
+        "
+      >
+        <mat-option value="ALL">
+          Все типы
+        </mat-option>
+
+        <mat-option value="FILE">
+          Файлы
+        </mat-option>
+
+        <mat-option value="LINK">
+          Ссылки
+        </mat-option>
+      </mat-select>
+
+
+      <mat-select
+        [value]="subjectFilter()"
+        (selectionChange)="
+          subjectFilter.set(
+            $event.value
+          )
+        "
+      >
+        <mat-option value="ALL">
+          Все дисциплины
+        </mat-option>
+
+        @for (
+          subject of subjects();
+          track subject.id
+        ) {
+          <mat-option
+            [value]="subject.id"
+          >
+            {{ subject.name }}
+          </mat-option>
+        }
+
+      </mat-select>
+
+    </div>
+
+
+    @if (loading()) {
+
+      <div class="state">
+        Загрузка материалов...
+      </div>
+
+    } @else if (
+      filteredMaterials().length === 0
+    ) {
+
+      <div class="state">
+        Материалы не найдены
+      </div>
+
+    } @else {
+
+      <div class="material-list">
+
+        @for (
+          material of
+            filteredMaterials();
+          track material.id
+        ) {
+
+          <article class="material-row">
+
+            <div
+              class="material-icon"
+              [class.link]="
+                material.type === 'LINK'
+              "
+            >
+              <mat-icon>
+                {{
+                  material.type === 'FILE'
+                    ? 'description'
+                    : 'link'
+                }}
+              </mat-icon>
+            </div>
+
+
+            <div class="material-info">
+
+              <strong>
+                {{ material.title }}
+              </strong>
+
+              <span>
+                {{ material.subject.name }}
+              </span>
+
+              @if (material.description) {
+                <p>
+                  {{ material.description }}
+                </p>
+              }
+
+            </div>
+
+
+            <div class="material-meta">
+
+              <span>
+                {{
+                  material.type === 'FILE'
+                    ? 'Файл'
+                    : 'Ссылка'
+                }}
+              </span>
+
+              @if (material.size) {
+                <small>
+                  {{
+                    formatSize(
+                      material.size
+                    )
+                  }}
+                </small>
+              }
+
+            </div>
+
+
+            <div class="author">
+
+              @if (material.uploadedByUser) {
+
+                <span>
+                  Администратор
+                </span>
+
+                <small>
+                  {{
+                    material
+                      .uploadedByUser
+                      .fullName
+                  }}
+                </small>
+
+              } @else if (
+                material.teacher
+              ) {
+
+                <span>
+                  Преподаватель
+                </span>
+
+                <small>
+                  {{
+                    material
+                      .teacher
+                      .user
+                      .fullName
+                  }}
+                </small>
+
+              }
+
+            </div>
+
+
+            <a
+              class="open-button"
+              [href]="material.url"
+              target="_blank"
+            >
+              <mat-icon>
+                open_in_new
+              </mat-icon>
+            </a>
+
+
+            <button
+              type="button"
+              class="delete-button"
+              (click)="
+                deleteMaterial(
+                  material
+                )
+              "
+            >
+              <mat-icon>
+                delete_outline
+              </mat-icon>
+            </button>
+
+          </article>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

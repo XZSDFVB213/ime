@@ -1,0 +1,431 @@
+<div class="students-page">
+
+  <header class="page-header">
+
+    <div>
+      <span class="eyebrow">
+        Управление пользователями
+      </span>
+
+      <h1>
+        Студенты
+      </h1>
+
+      <p>
+        Создание учетных записей,
+        распределение по группам
+        и управление студентами
+      </p>
+    </div>
+
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openCreateStudent()"
+    >
+      <mat-icon>
+        person_add
+      </mat-icon>
+
+      Добавить студента
+    </button>
+
+  </header>
+
+
+  <!-- STATS -->
+
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <div class="stat-icon">
+        <mat-icon>
+          school
+        </mat-icon>
+      </div>
+
+      <div>
+        <span>
+          Всего студентов
+        </span>
+
+        <strong>
+          {{ students().length }}
+        </strong>
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon">
+        <mat-icon>
+          check_circle
+        </mat-icon>
+      </div>
+
+      <div>
+        <span>
+          Активные
+        </span>
+
+        <strong>
+          {{ activeCount() }}
+        </strong>
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon">
+        <mat-icon>
+          groups
+        </mat-icon>
+      </div>
+
+      <div>
+        <span>
+          Групп
+        </span>
+
+        <strong>
+          {{ groupsCount() }}
+        </strong>
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon warning">
+        <mat-icon>
+          person_off
+        </mat-icon>
+      </div>
+
+      <div>
+        <span>
+          Без группы
+        </span>
+
+        <strong>
+          {{ withoutGroupCount() }}
+        </strong>
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- TABLE CARD -->
+
+  <section class="students-card">
+
+    <div class="toolbar">
+
+      <div class="search-box">
+
+        <mat-icon>
+          search
+        </mat-icon>
+
+        <input
+          #searchInput
+          type="text"
+          placeholder="Поиск по ФИО, email, телефону..."
+          [value]="search()"
+          (input)="
+            setSearch(
+              searchInput.value
+            )
+          "
+        />
+
+        @if (search()) {
+          <button
+            type="button"
+            (click)="
+              setSearch('');
+              searchInput.value = ''
+            "
+          >
+            <mat-icon>
+              close
+            </mat-icon>
+          </button>
+        }
+
+      </div>
+
+
+      <mat-select
+        class="group-filter"
+        [value]="groupFilter()"
+        (selectionChange)="
+          setGroupFilter(
+            $event.value
+          )
+        "
+      >
+        <mat-option value="ALL">
+          Все группы
+        </mat-option>
+
+        @for (
+          group of groups();
+          track group.id
+        ) {
+          <mat-option
+            [value]="group.id"
+          >
+            {{ group.name }}
+          </mat-option>
+        }
+
+      </mat-select>
+
+    </div>
+
+
+    @if (loading()) {
+
+      <div class="state-block">
+
+        <div class="loader"></div>
+
+        <span>
+          Загружаем студентов...
+        </span>
+
+      </div>
+
+    } @else if (
+      filteredStudents().length === 0
+    ) {
+
+      <div class="state-block">
+
+        <div class="empty-icon">
+          <mat-icon>
+            person_search
+          </mat-icon>
+        </div>
+
+        <strong>
+          Студенты не найдены
+        </strong>
+
+        <span>
+          Измените параметры поиска
+          или добавьте нового студента
+        </span>
+
+      </div>
+
+    } @else {
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>
+                Студент
+              </th>
+
+              <th>
+                Группа
+              </th>
+
+              <th>
+                Кафедра
+              </th>
+
+              <th>
+                Статус
+              </th>
+
+              <th>
+                Контакты
+              </th>
+            </tr>
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              student of
+                filteredStudents();
+              track student.id
+            ) {
+
+              <tr>
+
+                <td>
+
+                  <div class="student-cell">
+
+                    <div class="avatar">
+                      {{
+                        initials(
+                          student.fullName
+                        )
+                      }}
+                    </div>
+
+                    <div>
+                      <strong>
+                        {{ student.fullName }}
+                      </strong>
+
+                      <span>
+                        {{ student.email }}
+                      </span>
+                    </div>
+
+                  </div>
+
+                </td>
+
+
+                <td>
+
+                  @if (student.student) {
+
+                    <mat-select
+                      class="student-group-select"
+                      [value]="
+                        student.student
+                          .group?.id
+                      "
+                      [disabled]="
+                        changingGroupId() ===
+                        student.student.id
+                      "
+                      (selectionChange)="
+                        changeGroup(
+                          student,
+                          $event.value
+                        )
+                      "
+                    >
+
+                      @for (
+                        group of groups();
+                        track group.id
+                      ) {
+
+                        <mat-option
+                          [value]="group.id"
+                        >
+                          {{ group.name }}
+                        </mat-option>
+
+                      }
+
+                    </mat-select>
+
+                  } @else {
+
+                    <span class="muted">
+                      Профиль не создан
+                    </span>
+
+                  }
+
+                </td>
+
+
+                <td>
+
+                  @if (
+                    student.student
+                      ?.group
+                      ?.department;
+                    as department
+                  ) {
+
+                    <span class="department">
+                      {{ department.name }}
+                    </span>
+
+                  } @else {
+
+                    <span class="muted">
+                      —
+                    </span>
+
+                  }
+
+                </td>
+
+
+                <td>
+
+                  <span
+                    class="status"
+                    [class.active]="
+                      student.status ===
+                      'ACTIVE'
+                    "
+                    [class.blocked]="
+                      student.status ===
+                      'BLOCKED'
+                    "
+                  >
+                    {{
+                      student.status ===
+                      'ACTIVE'
+                        ? 'Активен'
+                        : student.status ===
+                            'BLOCKED'
+                          ? 'Заблокирован'
+                          : student.status
+                    }}
+                  </span>
+
+                </td>
+
+
+                <td>
+
+                  <div class="contacts">
+
+                    <span>
+                      {{ student.email }}
+                    </span>
+
+                    @if (student.phone) {
+                      <small>
+                        {{ student.phone }}
+                      </small>
+                    }
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

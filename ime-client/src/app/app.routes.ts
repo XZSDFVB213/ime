@@ -32,13 +32,25 @@ export const routes: Routes = [
     ],
   },
   {
+  path: 'admin',
+
+  loadChildren:
+    () =>
+      import(
+        './features/admin/admin.routes'
+      ).then(
+        (m) =>
+          m.AdminRoutes,
+      ),
+},
+  {
     path: '',
-    redirectTo: 'auth',
+    redirectTo: 'auth/login',
     pathMatch: 'full',
   },
 
   {
     path: '**',
-    redirectTo: 'auth',
+    redirectTo: 'auth/login',
   },
 ];

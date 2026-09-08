@@ -26,7 +26,9 @@
 
   box-shadow: 10px 0 40px rgba(4, 27, 65, 0.08);
 }
-
+.brand-logo {
+  width: 100%;
+}
 .brand {
   min-height: 58px;
   padding: 0 12px 20px;
@@ -38,8 +40,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
 
   .brand-logo {
-    width: 46px;
-    height: 46px;
+    width: 58px;
 
     display: grid;
     place-items: center;
