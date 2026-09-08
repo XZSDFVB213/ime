@@ -25,6 +25,7 @@ import { MaterialsModule } from './materials/materials.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { join } from 'path';
+import { AdminModule } from './admin/admin.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -56,6 +57,7 @@ import { join } from 'path';
     AcademicYearModule,
     HomeworkModule,
     MaterialsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

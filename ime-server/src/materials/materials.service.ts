@@ -335,11 +335,32 @@ export class MaterialsService {
     title: string;
     subjectId: string;
     lessonId: string | null;
-    teacherId: string;
+    teacherId: string | null;
   }) {
     /*
-     * Если материал конкретного занятия —
-     * уведомляем только студентов
+     * Название дисциплины получаем отдельно.
+     *
+     * Это работает и для материала преподавателя,
+     * и для материала администратора.
+     */
+    const subject = await this.prisma.subject.findUnique({
+      where: {
+        id: material.subjectId,
+      },
+
+      select: {
+        name: true,
+      },
+    });
+
+    if (!subject) {
+      return;
+    }
+
+    /*
+     * Материал конкретного занятия.
+     *
+     * Уведомляем только студентов
      * группы этого занятия.
      */
     if (material.lessonId) {
@@ -349,12 +370,6 @@ export class MaterialsService {
         },
 
         select: {
-          subject: {
-            select: {
-              name: true,
-            },
-          },
-
           group: {
             select: {
               students: {
@@ -371,48 +386,54 @@ export class MaterialsService {
         return;
       }
 
-      await this.notifications.createMany(
-        lesson.group.students.map((student) => student.userId),
-        {
-          type: NotificationType.MATERIAL_CREATED,
+      const userIds = lesson.group.students.map((student) => student.userId);
 
-          title: 'Новый учебный материал',
+      if (!userIds.length) {
+        return;
+      }
 
-          message: `${lesson.subject.name}: «${material.title}»`,
+      await this.notifications.createMany(userIds, {
+        type: NotificationType.MATERIAL_CREATED,
 
-          data: {
-            materialId: material.id,
+        title: 'Новый учебный материал',
 
-            subjectId: material.subjectId,
+        message: `${subject.name}: «${material.title}»`,
 
-            lessonId: material.lessonId,
-          },
+        data: {
+          materialId: material.id,
+
+          subjectId: material.subjectId,
+
+          lessonId: material.lessonId,
         },
-      );
+      });
 
       return;
     }
 
     /*
-     * Материал всей дисциплины.
+     * Общий материал дисциплины.
      *
-     * Находим все группы,
-     * которым преподавалась дисциплина.
+     * Если teacherId есть:
+     *   материал создал преподаватель
+     *   -> ищем его занятия.
+     *
+     * Если teacherId === null:
+     *   материал создал администратор
+     *   -> ищем ВСЕ занятия этой дисциплины.
      */
     const lessons = await this.prisma.lesson.findMany({
       where: {
         subjectId: material.subjectId,
 
-        teacherId: material.teacherId,
+        ...(material.teacherId
+          ? {
+              teacherId: material.teacherId,
+            }
+          : {}),
       },
 
       select: {
-        subject: {
-          select: {
-            name: true,
-          },
-        },
-
         group: {
           select: {
             students: {
@@ -429,6 +450,11 @@ export class MaterialsService {
       return;
     }
 
+    /*
+     * Один студент может попасть
+     * через несколько занятий,
+     * поэтому Set убирает дубли.
+     */
     const userIds = new Set<string>();
 
     for (const lesson of lessons) {
@@ -437,12 +463,16 @@ export class MaterialsService {
       }
     }
 
+    if (!userIds.size) {
+      return;
+    }
+
     await this.notifications.createMany(Array.from(userIds), {
       type: NotificationType.MATERIAL_CREATED,
 
       title: 'Новый учебный материал',
 
-      message: `${lessons[0].subject.name}: «${material.title}»`,
+      message: `${subject.name}: «${material.title}»`,
 
       data: {
         materialId: material.id,

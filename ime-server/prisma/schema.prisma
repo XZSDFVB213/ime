@@ -66,14 +66,11 @@ enum MaterialType {
 }
 
 model Material {
-  id String @id @default(cuid())
-
+  id          String       @id @default(cuid())
   title       String
   description String?
-
-  type MaterialType
-
-  url String
+  type        MaterialType
+  url         String
 
   fileName String?
   mimeType String?
@@ -81,18 +78,20 @@ model Material {
 
   subjectId String
   lessonId  String?
-  teacherId String
 
-  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  lesson  Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id])
+
+  uploadedByUserId String?
+  uploadedByUser   User?   @relation("MaterialUploadedBy", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+
+  subject Subject @relation(fields: [subjectId], references: [id])
+  lesson  Lesson? @relation(fields: [lessonId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([subjectId])
-  @@index([lessonId])
-  @@index([teacherId])
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
 }
 
 // ====================== USERS ======================
@@ -120,6 +119,8 @@ model User {
   conferenceMembers  ConferenceMember[]
   notifications      Notification[]
   attachments        MessageAttachment[]
+  materials          Material[]
+  uploadedMaterials  Material[]          @relation("MaterialUploadedBy")
 
   @@index([email])
   @@map("users")
@@ -173,11 +174,12 @@ model Group {
   departmentId String
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
 
-  students  Student[]
-  schedule  ScheduleEntry[]
-  createdAt DateTime        @default(now())
-  subjects  GroupSubject[]
-  lessons   Lesson[]
+  students                Student[]
+  schedule                ScheduleEntry[]
+  createdAt               DateTime                 @default(now())
+  subjects                GroupSubject[]
+  lessons                 Lesson[]
+  teacherDisciplineGroups TeacherDisciplineGroup[]
 
   @@unique([name, departmentId])
   @@map("groups")
@@ -221,11 +223,12 @@ model Teacher {
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   department Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
 
-  subjects  SubjectTeacher[]
-  lessons   Lesson[] // уже было
-  homeworks Homework[]
-  schedule  ScheduleEntry[] // ← ДОБАВЛЕНО (обратная связь)
-  materials Material[]
+  subjects                SubjectTeacher[]
+  lessons                 Lesson[] // уже было
+  homeworks               Homework[]
+  schedule                ScheduleEntry[] // ← ДОБАВЛЕНО (обратная связь)
+  materials               Material[]
+  teacherDisciplineGroups TeacherDisciplineGroup[]
 
   @@index([departmentId])
   @@map("teachers")
@@ -587,4 +590,34 @@ model MessageAttachment {
   homeworkSubmissionId String?
 
   @@index([messageId])
+}
+
+model Discipline {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  assignments TeacherDisciplineGroup[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TeacherDisciplineGroup {
+  id String @id @default(cuid())
+
+  teacherId    String
+  disciplineId String
+  groupId      String
+
+  teacher    Teacher    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  discipline Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+  group      Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([teacherId, disciplineId, groupId])
+  @@index([teacherId])
+  @@index([disciplineId])
+  @@index([groupId])
 }
