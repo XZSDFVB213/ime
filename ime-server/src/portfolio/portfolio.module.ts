@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
 import { PortfolioController } from './portfolio.controller';
+import { PrismaService } from 'src/prisma.service';
 
 @Module({
   controllers: [PortfolioController],
-  providers: [PortfolioService],
+  providers: [PortfolioService, PrismaService],
 })
 export class PortfolioModule {}
