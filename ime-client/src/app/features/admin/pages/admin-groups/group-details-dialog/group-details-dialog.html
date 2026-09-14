@@ -353,13 +353,13 @@
                             <mat-select [(ngModel)]="subjectId" placeholder="Выберите дисциплину">
 
                                 @for (
-                                discipline of
-                                disciplines();
-                                track discipline.id
+                                subject of
+                                subjects();
+                                track subject.id
                                 ) {
 
-                                <mat-option [value]="discipline.id">
-                                    {{ discipline.name }}
+                                <mat-option [value]="subject.id">
+                                    {{ subject.name }}
                                 </mat-option>
 
                                 }
@@ -461,17 +461,17 @@
                                 <strong>
                                     {{
                                     assignment
-                                    .discipline
+                                    .subject
                                     .name
                                     }}
                                 </strong>
 
                                 @if (
-                                assignment.discipline.description
+                                assignment.subject.description
                                 ) {
                                 <span>
                                     {{
-                                    assignment.discipline.description
+                                    assignment.subject.description
                                     }}
                                 </span>
                                 }
