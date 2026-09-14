@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
-import { finalize, forkJoin } from 'rxjs';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 
@@ -20,6 +20,7 @@ import {
 } from '../../portfolio.service';
 
 import { AddPortfolioDialog } from './add-portfolio-dialog/add-portfolio-dialog';
+import { StudentService } from '../../student.service';
 
 type PortfolioFilter = 'ALL' | 'WORKS' | 'ACHIEVEMENTS' | PortfolioItemType;
 
@@ -36,9 +37,7 @@ type PortfolioFilter = 'ALL' | 'WORKS' | 'ACHIEVEMENTS' | PortfolioItemType;
 })
 export class StudentPortfolio {
   private readonly portfolioService = inject(PortfolioService);
-
-  private readonly http = inject(HttpClient);
-
+  private readonly studentService = inject(StudentService);
   private readonly dialog = inject(MatDialog);
 
   private readonly snackBar = inject(MatSnackBar);
@@ -112,7 +111,21 @@ export class StudentPortfolio {
     forkJoin({
       portfolio: this.portfolioService.getPortfolio(),
 
-      subjects: this.http.get<PortfolioSubject[]>(`${environment.api}/student/subjects`),
+      lessons: this.studentService.getSchedule().pipe(
+        catchError((error) => {
+          console.error('Ошибка загрузки расписания:', error);
+
+          return of([]);
+        }),
+      ),
+
+      homeworks: this.studentService.getHomeworks().pipe(
+        catchError((error) => {
+          console.error('Ошибка загрузки домашних заданий:', error);
+
+          return of([]);
+        }),
+      ),
     })
       .pipe(
         finalize(() => {
@@ -120,10 +133,10 @@ export class StudentPortfolio {
         }),
       )
       .subscribe({
-        next: ({ portfolio, subjects }) => {
+        next: ({ portfolio, lessons, homeworks }) => {
           this.items.set(portfolio);
 
-          this.subjects.set(subjects);
+          this.subjects.set(this.buildSubjects(lessons, homeworks));
         },
 
         error: (error) => {
@@ -135,7 +148,64 @@ export class StudentPortfolio {
         },
       });
   }
+  private buildSubjects(lessons: any[], homeworks: any[]): PortfolioSubject[] {
+    const subjectsMap = new Map<string, PortfolioSubject>();
 
+    /*
+     * Дисциплины из расписания
+     */
+    for (const lesson of lessons) {
+      const subject = lesson.subject;
+
+      if (!subject?.id) {
+        continue;
+      }
+
+      if (subjectsMap.has(subject.id)) {
+        continue;
+      }
+
+      subjectsMap.set(subject.id, {
+        id: subject.id,
+
+        name: subject.name,
+
+        code: subject.code ?? null,
+      });
+    }
+
+    /*
+     * Дисциплины из домашних заданий.
+     *
+     * Они тоже нужны, потому что
+     * дисциплина может иметь homework,
+     * но сейчас не иметь занятия
+     * в расписании.
+     */
+    for (const homework of homeworks) {
+      const subject = homework.subject;
+
+      if (!subject?.id) {
+        continue;
+      }
+
+      if (subjectsMap.has(subject.id)) {
+        continue;
+      }
+
+      subjectsMap.set(subject.id, {
+        id: subject.id,
+
+        name: subject.name,
+
+        code: subject.code ?? null,
+      });
+    }
+
+    return Array.from(subjectsMap.values()).sort((first, second) =>
+      first.name.localeCompare(second.name, 'ru'),
+    );
+  }
   openAddDialog(): void {
     const dialogRef = this.dialog.open(AddPortfolioDialog, {
       width: '620px',
