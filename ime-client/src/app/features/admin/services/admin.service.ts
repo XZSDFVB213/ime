@@ -83,7 +83,30 @@ deleteSubject(
   ) {
     return this.http.post(`${environment.api}/admin/teachers/${teacherId}/assignments`, data);
   }
+updateTeacher(
+  teacherId: string,
 
+  dto: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    position?: string;
+    departmentId: string;
+    password?: string;
+  },
+) {
+  return this.http.patch(
+    `${environment.api}/admin/teachers/${teacherId}`,
+    dto,
+  );
+}
+deleteTeacher(
+  teacherId: string,
+) {
+  return this.http.delete(
+    `${environment.api}/admin/teachers/${teacherId}`,
+  );
+}
   deleteTeacherAssignment(teacherId: string, assignmentId: string) {
     return this.http.delete(
       `${environment.api}/admin/teachers/${teacherId}/assignments/${assignmentId}`,
