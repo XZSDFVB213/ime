@@ -1,0 +1,547 @@
+<div class="library-page">
+
+  <!-- HEADER -->
+
+  <header class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        Электронная библиотека
+      </span>
+
+      <h1>
+        Библиотека
+      </h1>
+
+      <p>
+        Учебная и научная литература
+        для образовательного процесса
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <!-- IPR HERO -->
+
+  <section class="ipr-card">
+
+    <div class="ipr-content">
+
+      <div class="ipr-logo">
+
+        <mat-icon>
+          local_library
+        </mat-icon>
+
+      </div>
+
+
+      <div class="ipr-copy">
+
+        <span class="ipr-label">
+          Электронно-библиотечная система
+        </span>
+
+        <h2>
+          IPR SMART
+        </h2>
+
+        <p>
+          Электронные учебники,
+          учебные пособия, научная
+          и профессиональная литература
+          в электронной библиотечной системе.
+        </p>
+
+
+        <div class="ipr-features">
+
+          <span>
+            <mat-icon>
+              menu_book
+            </mat-icon>
+
+            Учебная литература
+          </span>
+
+
+          <span>
+            <mat-icon>
+              science
+            </mat-icon>
+
+            Научные издания
+          </span>
+
+
+          <span>
+            <mat-icon>
+              devices
+            </mat-icon>
+
+            Онлайн-доступ
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <a
+      class="ipr-button"
+      href="https://www.iprbookshop.ru/"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Открыть IPR SMART
+
+      <mat-icon>
+        open_in_new
+      </mat-icon>
+    </a>
+
+  </section>
+
+
+  <!-- ACCESS INFO -->
+
+  @if (!apiConnected()) {
+
+    <section class="access-card">
+
+      <div class="access-icon">
+
+        <mat-icon>
+          key
+        </mat-icon>
+
+      </div>
+
+
+      <div class="access-content">
+
+        <div class="access-heading">
+
+          <div>
+
+            <span class="section-label">
+              Доступ к библиотеке
+            </span>
+
+            <h2>
+              Как получить доступ?
+            </h2>
+
+          </div>
+
+
+          <span class="status-badge">
+            IPR SMART
+          </span>
+
+        </div>
+
+
+        <p class="access-description">
+          Для получения доступа
+          в электронную библиотечную
+          систему IPR SMART студентам
+          выдаются учетные данные
+          в библиотеке университета.
+        </p>
+
+
+        <div class="steps">
+
+          <div class="step">
+
+            <span class="step-number">
+              1
+            </span>
+
+            <div>
+              <strong>
+                Получите учетные данные
+              </strong>
+
+              <p>
+                Обратитесь в библиотеку
+                университета для получения
+                логина и пароля.
+              </p>
+            </div>
+
+          </div>
+
+
+          <mat-icon class="step-arrow">
+            arrow_forward
+          </mat-icon>
+
+
+          <div class="step">
+
+            <span class="step-number">
+              2
+            </span>
+
+            <div>
+              <strong>
+                Откройте IPR SMART
+              </strong>
+
+              <p>
+                Перейдите в электронную
+                библиотеку по кнопке
+                на этой странице.
+              </p>
+            </div>
+
+          </div>
+
+
+          <mat-icon class="step-arrow">
+            arrow_forward
+          </mat-icon>
+
+
+          <div class="step">
+
+            <span class="step-number">
+              3
+            </span>
+
+            <div>
+              <strong>
+                Войдите в систему
+              </strong>
+
+              <p>
+                Используйте полученные
+                в библиотеке учетные данные.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="integration-note">
+
+          <div>
+            <mat-icon>
+              sync
+            </mat-icon>
+          </div>
+
+          <p>
+            В дальнейшем каталог IPR SMART
+            будет доступен непосредственно
+            в личном кабинете студента.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  }
+
+
+  <!-- CATALOG -->
+
+  <section class="catalog-card">
+
+    <header class="catalog-header">
+
+      <div>
+
+        <span class="section-label">
+          Электронный каталог
+        </span>
+
+        <h2>
+          Каталог литературы
+        </h2>
+
+        <p>
+          Поиск учебных и научных изданий
+          в электронной библиотеке
+        </p>
+
+      </div>
+
+
+      @if (apiConnected()) {
+
+        <span class="connected">
+          <span></span>
+
+          IPR SMART подключён
+        </span>
+
+      } @else {
+
+        <span class="not-connected">
+          <mat-icon>
+            schedule
+          </mat-icon>
+
+          Интеграция готовится
+        </span>
+
+      }
+
+    </header>
+
+
+    <!-- SEARCH -->
+
+    <div
+      class="catalog-toolbar"
+      [class.disabled]="
+        !apiConnected()
+      "
+    >
+
+      <div class="search-box">
+
+        <mat-icon>
+          search
+        </mat-icon>
+
+        <input
+          #searchInput
+          type="search"
+          placeholder="Название, автор, издательство, ISBN..."
+          [disabled]="
+            !apiConnected()
+          "
+          (input)="
+            setSearch(
+              searchInput.value
+            )
+          "
+        />
+
+
+        @if (search()) {
+
+          <button
+            type="button"
+            (click)="
+              setSearch('');
+              searchInput.value = ''
+            "
+          >
+            <mat-icon>
+              close
+            </mat-icon>
+          </button>
+
+        }
+
+      </div>
+
+    </div>
+
+
+    @if (!apiConnected()) {
+
+      <!-- API ЕЩЁ НЕ ПОДКЛЮЧЁН -->
+
+      <div class="catalog-placeholder">
+
+        <div class="placeholder-icon">
+
+          <mat-icon>
+            auto_stories
+          </mat-icon>
+
+        </div>
+
+
+        <h3>
+          Каталог скоро появится здесь
+        </h3>
+
+
+        <p>
+          После подключения интеграции
+          с IPR SMART вы сможете искать
+          книги и учебные материалы
+          прямо в личном кабинете.
+        </p>
+
+
+        <a
+          href="https://www.iprbookshop.ru/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Перейти в IPR SMART
+
+          <mat-icon>
+            arrow_forward
+          </mat-icon>
+        </a>
+
+      </div>
+
+    } @else if (loading()) {
+
+      <div class="catalog-state">
+
+        <div class="loader"></div>
+
+        <span>
+          Загружаем каталог...
+        </span>
+
+      </div>
+
+    } @else if (
+      filteredBooks().length === 0
+    ) {
+
+      <div class="catalog-state">
+
+        <mat-icon>
+          search_off
+        </mat-icon>
+
+        <strong>
+          Ничего не найдено
+        </strong>
+
+        <span>
+          Попробуйте изменить поисковый запрос
+        </span>
+
+      </div>
+
+    } @else {
+
+      <!-- БУДУЩИЙ КАТАЛОГ API -->
+
+      <div class="books-grid">
+
+        @for (
+          book of filteredBooks();
+          track book.id
+        ) {
+
+          <article class="book-card">
+
+            <div class="book-cover">
+
+              @if (book.imageUrl) {
+
+                <img
+                  [src]="book.imageUrl"
+                  [alt]="book.title"
+                />
+
+              } @else {
+
+                <mat-icon>
+                  menu_book
+                </mat-icon>
+
+              }
+
+            </div>
+
+
+            <div class="book-content">
+
+              @if (book.type) {
+
+                <span class="book-type">
+                  {{ book.type }}
+                </span>
+
+              }
+
+
+              <h3>
+                {{ book.title }}
+              </h3>
+
+
+              @if (book.authors) {
+
+                <p class="authors">
+                  {{ book.authors }}
+                </p>
+
+              }
+
+
+              <div class="book-meta">
+
+                @if (book.publisher) {
+
+                  <span>
+                    <mat-icon>
+                      corporate_fare
+                    </mat-icon>
+
+                    {{ book.publisher }}
+                  </span>
+
+                }
+
+
+                @if (book.year) {
+
+                  <span>
+                    <mat-icon>
+                      calendar_month
+                    </mat-icon>
+
+                    {{ book.year }}
+                  </span>
+
+                }
+
+              </div>
+
+
+              @if (book.url) {
+
+                <a
+                  class="read-button"
+                  [href]="book.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Открыть
+
+                  <mat-icon>
+                    arrow_forward
+                  </mat-icon>
+                </a>
+
+              }
+
+            </div>
+
+          </article>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

@@ -1,0 +1,372 @@
+<div class="dialog">
+
+  <header class="dialog-header">
+
+    <div class="header-icon">
+      <mat-icon>
+        add_to_photos
+      </mat-icon>
+    </div>
+
+
+    <div>
+      <h2>
+        Добавить в портфолио
+      </h2>
+
+      <p>
+        Добавьте учебную работу,
+        проект или достижение
+      </p>
+    </div>
+
+
+    <button
+      type="button"
+      class="close-button"
+      (click)="close()"
+    >
+      <mat-icon>
+        close
+      </mat-icon>
+    </button>
+
+  </header>
+
+
+  <div class="dialog-content">
+
+    <!-- НАЗВАНИЕ -->
+
+    <label class="field">
+
+      <span class="field-label">
+        Название *
+      </span>
+
+      <input
+        type="text"
+        [(ngModel)]="title"
+        placeholder="Например: Информационная система магазина"
+      />
+
+    </label>
+
+
+    <!-- TYPE -->
+
+    <label class="field">
+
+      <span class="field-label">
+        Тип работы *
+      </span>
+
+      <mat-select
+        [(ngModel)]="type"
+        class="select"
+      >
+
+        @for (
+          item of types;
+          track item.value
+        ) {
+
+          <mat-option
+            [value]="item.value"
+          >
+
+            <div class="type-option">
+              <mat-icon>
+                {{ item.icon }}
+              </mat-icon>
+
+              {{ item.label }}
+            </div>
+
+          </mat-option>
+
+        }
+
+      </mat-select>
+
+    </label>
+
+
+    <!-- SUBJECT -->
+
+    <label class="field">
+
+      <span class="field-label">
+        Дисциплина
+      </span>
+
+      <mat-select
+        [(ngModel)]="subjectId"
+        class="select"
+        placeholder="Не выбрана"
+      >
+
+        <mat-option value="">
+          Без дисциплины
+        </mat-option>
+
+
+        @for (
+          subject of data.subjects;
+          track subject.id
+        ) {
+
+          <mat-option
+            [value]="subject.id"
+          >
+            {{ subject.name }}
+          </mat-option>
+
+        }
+
+      </mat-select>
+
+      <small>
+        Для сертификатов и внешних
+        достижений можно не указывать
+      </small>
+
+    </label>
+
+
+    <!-- DESCRIPTION -->
+
+    <label class="field">
+
+      <span class="field-label">
+        Описание
+      </span>
+
+      <textarea
+        [(ngModel)]="description"
+        rows="4"
+        placeholder="Кратко расскажите о работе..."
+      ></textarea>
+
+    </label>
+
+
+    <!-- SOURCE -->
+
+    <div class="field">
+
+      <span class="field-label">
+        Материал *
+      </span>
+
+
+      <div class="source-switch">
+
+        <button
+          type="button"
+          [class.active]="
+            sourceType === 'FILE'
+          "
+          (click)="
+            setSource('FILE')
+          "
+        >
+          <mat-icon>
+            upload_file
+          </mat-icon>
+
+          Загрузить файл
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            sourceType === 'LINK'
+          "
+          (click)="
+            setSource('LINK')
+          "
+        >
+          <mat-icon>
+            link
+          </mat-icon>
+
+          Добавить ссылку
+        </button>
+
+      </div>
+
+    </div>
+
+
+    @if (
+      sourceType === 'FILE'
+    ) {
+
+      @if (!file) {
+
+        <label
+          class="upload-zone"
+        >
+
+          <input
+            type="file"
+            hidden
+            (change)="
+              onFileSelected($event)
+            "
+          />
+
+
+          <div class="upload-icon">
+            <mat-icon>
+              cloud_upload
+            </mat-icon>
+          </div>
+
+
+          <strong>
+            Выберите файл
+          </strong>
+
+          <span>
+            Документ, презентация,
+            изображение или другой
+            материал работы
+          </span>
+
+
+          <div class="choose-file">
+            Выбрать файл
+          </div>
+
+        </label>
+
+      } @else {
+
+        <div class="selected-file">
+
+          <div class="file-icon">
+            <mat-icon>
+              description
+            </mat-icon>
+          </div>
+
+
+          <div class="file-info">
+
+            <strong>
+              {{ file.name }}
+            </strong>
+
+            <span>
+              {{
+                formatFileSize(
+                  file.size
+                )
+              }}
+            </span>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="remove-file"
+            (click)="removeFile()"
+          >
+            <mat-icon>
+              close
+            </mat-icon>
+          </button>
+
+        </div>
+
+      }
+
+    } @else {
+
+      <label class="field">
+
+        <span class="field-label">
+          Ссылка *
+        </span>
+
+        <div class="link-input">
+
+          <mat-icon>
+            link
+          </mat-icon>
+
+          <input
+            type="url"
+            [(ngModel)]="url"
+            placeholder="https://..."
+          />
+
+        </div>
+
+      </label>
+
+    }
+
+
+    @if (error()) {
+
+      <div class="error-message">
+
+        <mat-icon>
+          error_outline
+        </mat-icon>
+
+        {{ error() }}
+
+      </div>
+
+    }
+
+  </div>
+
+
+  <footer class="dialog-footer">
+
+    <button
+      type="button"
+      class="cancel-button"
+      [disabled]="saving()"
+      (click)="close()"
+    >
+      Отмена
+    </button>
+
+
+    <button
+      type="button"
+      class="save-button"
+      [disabled]="saving()"
+      (click)="save()"
+    >
+
+      @if (saving()) {
+
+        <span class="button-loader">
+        </span>
+
+        Добавление...
+
+      } @else {
+
+        <mat-icon>
+          add
+        </mat-icon>
+
+        Добавить
+
+      }
+
+    </button>
+
+  </footer>
+
+</div>

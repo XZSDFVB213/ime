@@ -1,0 +1,526 @@
+<div class="portfolio-page">
+
+  <!-- HEADER -->
+
+  <header class="page-header">
+
+    <div>
+      <span class="eyebrow">
+        Личное портфолио
+      </span>
+
+      <h1>
+        Портфолио
+      </h1>
+
+      <p>
+        Ваши учебные работы,
+        проекты и достижения
+      </p>
+    </div>
+
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openAddDialog()"
+    >
+      <mat-icon>
+        add
+      </mat-icon>
+
+      Добавить работу
+    </button>
+
+  </header>
+
+
+  <!-- STATS -->
+
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <div class="stat-icon">
+        <mat-icon>
+          folder_open
+        </mat-icon>
+      </div>
+
+      <div>
+        <span>
+          Всего в портфолио
+        </span>
+
+        <strong>
+          {{ totalCount() }}
+        </strong>
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon project">
+        <mat-icon>
+          code
+        </mat-icon>
+      </div>
+
+      <div>
+        <span>
+          Проекты
+        </span>
+
+        <strong>
+          {{ projectsCount() }}
+        </strong>
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon academic">
+        <mat-icon>
+          school
+        </mat-icon>
+      </div>
+
+      <div>
+        <span>
+          Учебные работы
+        </span>
+
+        <strong>
+          {{
+            academicWorksCount()
+          }}
+        </strong>
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon achievement">
+        <mat-icon>
+          workspace_premium
+        </mat-icon>
+      </div>
+
+      <div>
+        <span>
+          Достижения
+        </span>
+
+        <strong>
+          {{
+            achievementsCount()
+          }}
+        </strong>
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- MAIN CARD -->
+
+  <section class="portfolio-card">
+
+    <div class="toolbar">
+
+      <div class="filters">
+
+        <button
+          type="button"
+          [class.active]="
+            filter() === 'ALL'
+          "
+          (click)="setFilter('ALL')"
+        >
+          Все
+
+          <span>
+            {{ totalCount() }}
+          </span>
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            filter() === 'WORKS'
+          "
+          (click)="
+            setFilter('WORKS')
+          "
+        >
+          Работы
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            filter() === 'PROJECT'
+          "
+          (click)="
+            setFilter('PROJECT')
+          "
+        >
+          Проекты
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            filter() ===
+            'COURSEWORK'
+          "
+          (click)="
+            setFilter(
+              'COURSEWORK'
+            )
+          "
+        >
+          Курсовые
+        </button>
+
+
+        <button
+          type="button"
+          [class.active]="
+            filter() ===
+            'ACHIEVEMENTS'
+          "
+          (click)="
+            setFilter(
+              'ACHIEVEMENTS'
+            )
+          "
+        >
+          Достижения
+        </button>
+
+      </div>
+
+
+      <div class="search-box">
+
+        <mat-icon>
+          search
+        </mat-icon>
+
+        <input
+          #searchInput
+          type="search"
+          placeholder="Поиск в портфолио..."
+          [value]="search()"
+          (input)="
+            setSearch(
+              searchInput.value
+            )
+          "
+        />
+
+
+        @if (search()) {
+
+          <button
+            type="button"
+            (click)="
+              setSearch('');
+              searchInput.value = ''
+            "
+          >
+            <mat-icon>
+              close
+            </mat-icon>
+          </button>
+
+        }
+
+      </div>
+
+    </div>
+
+
+    @if (loading()) {
+
+      <div class="state-block">
+
+        <div class="loader">
+        </div>
+
+        <span>
+          Загружаем портфолио...
+        </span>
+
+      </div>
+
+    } @else if (
+      filteredItems().length === 0
+    ) {
+
+      <div class="state-block empty">
+
+        <div class="empty-icon">
+          <mat-icon>
+            auto_stories
+          </mat-icon>
+        </div>
+
+
+        @if (
+          totalCount() === 0
+        ) {
+
+          <strong>
+            Портфолио пока пусто
+          </strong>
+
+          <span>
+            Добавьте свой первый
+            проект, курсовую работу
+            или достижение
+          </span>
+
+
+          <button
+            type="button"
+            (click)="openAddDialog()"
+          >
+            <mat-icon>
+              add
+            </mat-icon>
+
+            Добавить работу
+          </button>
+
+        } @else {
+
+          <strong>
+            Ничего не найдено
+          </strong>
+
+          <span>
+            Измените параметры
+            поиска или фильтра
+          </span>
+
+        }
+
+      </div>
+
+    } @else {
+
+      <div class="items-list">
+
+        @for (
+          item of filteredItems();
+          track item.id
+        ) {
+
+          <article class="portfolio-item">
+
+            <div
+              class="item-icon"
+              [attr.data-type]="
+                item.type
+              "
+            >
+
+              <mat-icon>
+                {{
+                  typeIcon(
+                    item.type
+                  )
+                }}
+              </mat-icon>
+
+            </div>
+
+
+            <div class="item-content">
+
+              <div class="item-heading">
+
+                <div>
+
+                  <div class="item-title-row">
+
+                    <h3>
+                      {{ item.title }}
+                    </h3>
+
+
+                    <span
+                      class="type-badge"
+                      [attr.data-type]="
+                        item.type
+                      "
+                    >
+                      {{
+                        typeLabel(
+                          item.type
+                        )
+                      }}
+                    </span>
+
+                  </div>
+
+
+                  @if (
+                    item.description
+                  ) {
+
+                    <p class="description">
+                      {{
+                        item.description
+                      }}
+                    </p>
+
+                  }
+
+                </div>
+
+              </div>
+
+
+              <div class="item-meta">
+
+                @if (
+                  item.subject;
+                  as subject
+                ) {
+
+                  <span>
+
+                    <mat-icon>
+                      menu_book
+                    </mat-icon>
+
+                    {{ subject.name }}
+
+                  </span>
+
+                }
+
+
+                <span>
+
+                  <mat-icon>
+                    calendar_month
+                  </mat-icon>
+
+                  {{
+                    formatDate(
+                      item.createdAt
+                    )
+                  }}
+
+                </span>
+
+
+                @if (
+                  item.fileName
+                ) {
+
+                  <span>
+
+                    <mat-icon>
+                      attach_file
+                    </mat-icon>
+
+                    {{ item.fileName }}
+
+                    @if (item.size) {
+                      ·
+                      {{
+                        formatFileSize(
+                          item.size
+                        )
+                      }}
+                    }
+
+                  </span>
+
+                } @else if (
+                  item.url
+                ) {
+
+                  <span>
+
+                    <mat-icon>
+                      link
+                    </mat-icon>
+
+                    Внешняя ссылка
+
+                  </span>
+
+                }
+
+              </div>
+
+            </div>
+
+
+            <div class="item-actions">
+
+              @if (item.url) {
+
+                <button
+                  type="button"
+                  class="open-button"
+                  (click)="
+                    openItem(item)
+                  "
+                >
+                  <mat-icon>
+                    open_in_new
+                  </mat-icon>
+
+                  Открыть
+                </button>
+
+              }
+
+
+              <button
+                type="button"
+                class="delete-button"
+                title="Удалить"
+                [disabled]="
+                  deletingId() ===
+                  item.id
+                "
+                (click)="
+                  deleteItem(item)
+                "
+              >
+                <mat-icon>
+                  delete_outline
+                </mat-icon>
+              </button>
+
+            </div>
+
+          </article>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

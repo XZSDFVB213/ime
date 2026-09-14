@@ -84,6 +84,36 @@ export const StudentRoutes: Routes = [
       .then((m) => m.StudentMaterials),
 },
 {
+  path: 'library',
+
+  data: {
+    title: 'Библиотека',
+  },
+
+  loadComponent: () =>
+    import(
+      './pages/student-library/student-library'
+    ).then(
+      (m) =>
+        m.StudentLibrary,
+    ),
+},
+{
+  path: 'portfolio',
+
+  data: {
+    title: 'Портфолио',
+  },
+
+  loadComponent: () =>
+    import(
+      './pages/student-portfolio/student-portfolio'
+    ).then(
+      (m) =>
+        m.StudentPortfolio,
+    ),
+},
+{
   path: 'messages',
 
   data: {
