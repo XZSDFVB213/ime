@@ -44,6 +44,7 @@ import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { CreateDepartmentDto } from './dto/create-departament.dto';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
@@ -63,6 +64,24 @@ export class AdminController {
     subjectId: string,
   ) {
     return this.adminService.deleteSubject(subjectId);
+  }
+  @Patch('teachers/:teacherId')
+  updateTeacher(
+    @Param('teacherId')
+    teacherId: string,
+
+    @Body()
+    dto: UpdateTeacherDto,
+  ) {
+    return this.adminService.updateTeacher(teacherId, dto);
+  }
+
+  @Delete('teachers/:teacherId')
+  deleteTeacher(
+    @Param('teacherId')
+    teacherId: string,
+  ) {
+    return this.adminService.deleteTeacher(teacherId);
   }
   @Post('faculties')
   createFaculty(

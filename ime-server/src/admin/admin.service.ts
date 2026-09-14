@@ -23,6 +23,7 @@ import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { CreateDepartmentDto } from './dto/create-departament.dto';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
 @Injectable()
 export class AdminService {
@@ -423,7 +424,208 @@ export class AdminService {
   // ==========================================
   // CREATE TEACHER
   // ==========================================
+async updateTeacher(
+  teacherId: string,
+  dto: UpdateTeacherDto,
+) {
+  const teacher =
+    await this.prisma.teacher.findUnique({
+      where: {
+        id: teacherId,
+      },
 
+      include: {
+        user: true,
+      },
+    });
+
+  if (!teacher) {
+    throw new NotFoundException(
+      'Преподаватель не найден',
+    );
+  }
+
+
+  if (dto.departmentId) {
+    const department =
+      await this.prisma.department.findUnique({
+        where: {
+          id: dto.departmentId,
+        },
+      });
+
+    if (!department) {
+      throw new NotFoundException(
+        'Кафедра не найдена',
+      );
+    }
+  }
+
+
+  if (
+    dto.email &&
+    dto.email !== teacher.user.email
+  ) {
+    const emailExists =
+      await this.prisma.user.findUnique({
+        where: {
+          email: dto.email.trim(),
+        },
+      });
+
+    if (emailExists) {
+      throw new ConflictException(
+        'Пользователь с таким email уже существует',
+      );
+    }
+  }
+
+let passwordHash: string | undefined;
+
+if (dto.password) {
+  passwordHash =
+    await bcrypt.hash(
+      dto.password,
+      10,
+    );
+}
+  await this.prisma.$transaction([
+    this.prisma.user.update({
+  where: {
+    id: teacher.userId,
+  },
+
+  data: {
+    ...(dto.fullName !== undefined
+      ? {
+          fullName:
+            dto.fullName.trim(),
+        }
+      : {}),
+
+    ...(dto.email !== undefined
+      ? {
+          email:
+            dto.email.trim(),
+        }
+      : {}),
+
+    ...(dto.phone !== undefined
+      ? {
+          phone:
+            dto.phone.trim() ||
+            null,
+        }
+      : {}),
+
+    ...(passwordHash
+      ? {
+          password:
+            passwordHash,
+        }
+      : {}),
+  },
+}),
+
+    this.prisma.teacher.update({
+      where: {
+        id: teacherId,
+      },
+
+      data: {
+        ...(dto.position !== undefined
+          ? {
+              position:
+                dto.position.trim() ||
+                null,
+            }
+          : {}),
+
+        ...(dto.departmentId !== undefined
+          ? {
+              departmentId:
+                dto.departmentId,
+            }
+          : {}),
+      },
+    }),
+  ]);
+
+
+  return this.prisma.user.findUnique({
+    where: {
+      id: teacher.userId,
+    },
+
+    include: {
+      roles: true,
+
+      teacher: {
+        include: {
+          department: true,
+        },
+      },
+    },
+  });
+}
+async deleteTeacher(
+  teacherId: string,
+) {
+  const teacher =
+    await this.prisma.teacher.findUnique({
+      where: {
+        id: teacherId,
+      },
+
+      select: {
+        id: true,
+        userId: true,
+
+        user: {
+          select: {
+            fullName: true,
+          },
+        },
+      },
+    });
+
+  if (!teacher) {
+    throw new NotFoundException(
+      'Преподаватель не найден',
+    );
+  }
+
+
+  await this.prisma.$transaction([
+    /*
+     * Убираем текущие назначения
+     * дисциплина + группа.
+     *
+     * Lesson/Material и историю
+     * НЕ трогаем.
+     */
+    this.prisma.teacherDisciplineGroup.deleteMany({
+      where: {
+        teacherId,
+      },
+    }),
+
+    this.prisma.user.update({
+      where: {
+        id: teacher.userId,
+      },
+
+      data: {
+        status: 'DELETED',
+      },
+    }),
+  ]);
+
+
+  return {
+    success: true,
+  };
+}
   async createTeacher(dto: CreateTeacherDto) {
     const email = dto.email.trim().toLowerCase();
 
