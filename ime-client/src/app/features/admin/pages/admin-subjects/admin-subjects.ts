@@ -64,7 +64,8 @@ export class AdminSubjects {
   readonly search = signal('');
 
   readonly departmentFilter = signal('ALL');
-
+readonly deletingSubjectId =
+  signal<string | null>(null);
   readonly filteredSubjects = computed(() => {
     const search = this.search().trim().toLowerCase();
 
@@ -102,7 +103,65 @@ export class AdminSubjects {
   constructor() {
     this.load();
   }
+deleteSubject(
+  subject: AdminSubject,
+): void {
+  const confirmed =
+    confirm(
+      `Удалить дисциплину «${subject.name}»?`,
+    );
 
+  if (!confirmed) {
+    return;
+  }
+
+
+  this.deletingSubjectId.set(
+    subject.id,
+  );
+
+
+  this.adminService
+    .deleteSubject(subject.id)
+    .subscribe({
+      next: () => {
+        this.subjects.update(
+          (subjects) =>
+            subjects.filter(
+              (item) =>
+                item.id !== subject.id,
+            ),
+        );
+
+        this.deletingSubjectId.set(
+          null,
+        );
+
+        this.snackBar.open(
+          'Дисциплина удалена',
+          'OK',
+          {
+            duration: 2500,
+          },
+        );
+      },
+
+      error: (error) => {
+        this.deletingSubjectId.set(
+          null,
+        );
+
+        this.snackBar.open(
+          error.error?.message ??
+            'Не удалось удалить дисциплину',
+          'Закрыть',
+          {
+            duration: 4000,
+          },
+        );
+      },
+    });
+}
   load(): void {
     this.loading.set(true);
 

@@ -9,7 +9,60 @@
   gap: 24px;
 }
 
+.actions {
+  display: flex;
+  align-items: center;
 
+  gap: 8px;
+}
+
+
+.delete-button {
+  min-height: 36px;
+
+  padding: 0 11px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  color: #b42318;
+  background: #fff0ee;
+
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+
+  border: 0;
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: #ffe4e0;
+
+    transform:
+      translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+  }
+
+  mat-icon {
+    width: 17px;
+    height: 17px;
+
+    font-size: 17px;
+  }
+}
 /* =========================
    HEADER
 ========================= */

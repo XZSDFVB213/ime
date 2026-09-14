@@ -67,7 +67,13 @@ export class AdminService {
   getTeacherAssignments(teacherId: string) {
     return this.http.get<any[]>(`${environment.api}/admin/teachers/${teacherId}/assignments`);
   }
-
+deleteSubject(
+  subjectId: string,
+) {
+  return this.http.delete(
+    `${environment.api}/admin/subjects/${subjectId}`,
+  );
+}
   assignTeacher(
     teacherId: string,
     data: {

@@ -260,27 +260,49 @@
                 </td>
 
 
-                <td>
+               <td>
 
-                  <button
-                    type="button"
-                    class="edit-button"
-                    (click)="
-                      openEdit(
-                        subject
-                      )
-                    "
-                  >
+  <div class="actions">
 
-                    <mat-icon>
-                      edit
-                    </mat-icon>
+    <button
+      type="button"
+      class="edit-button"
+      (click)="openEdit(subject)"
+    >
+      <mat-icon>
+        edit
+      </mat-icon>
 
-                    Изменить
+      Изменить
+    </button>
 
-                  </button>
 
-                </td>
+    <button
+      type="button"
+      class="delete-button"
+      [disabled]="
+        deletingSubjectId() ===
+        subject.id
+      "
+      (click)="
+        deleteSubject(subject)
+      "
+    >
+      <mat-icon>
+        delete_outline
+      </mat-icon>
+
+      {{
+        deletingSubjectId() ===
+        subject.id
+          ? 'Удаление...'
+          : 'Удалить'
+      }}
+    </button>
+
+  </div>
+
+</td>
 
               </tr>
 
