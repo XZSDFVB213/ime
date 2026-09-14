@@ -386,33 +386,40 @@
               </div>
 
             </td>
-            <td>
 
-              <div class="actions">
+             <td class="actions-cell">
 
-                <button type="button" class="edit-button" (click)="
-        openEditStudent(student)
-      ">
-                  <mat-icon>
-                    edit
-                  </mat-icon>
+  <div class="actions">
 
-                  Изменить
-                </button>
+    <button
+      type="button"
+      class="action-button edit"
+      title="Редактировать студента"
+      (click)="openEditStudent(student)"
+    >
+      <mat-icon>
+        edit
+      </mat-icon>
+    </button>
 
 
-                <button type="button" class="delete-button" [disabled]="
+    <button
+      type="button"
+      class="action-button delete"
+      title="Удалить студента"
+      [disabled]="
         deletingStudentId() ===
         student.student?.id
-      " (click)="
-        deleteStudent(student)
-      ">
-                  <mat-icon>
-                    delete_outline
-                  </mat-icon>
-                </button>
+      "
+      (click)="deleteStudent(student)"
+    >
+      <mat-icon>
+        delete_outline
+      </mat-icon>
+    </button>
 
-              </div>
+  </div>
+
 
             </td>
           </tr>

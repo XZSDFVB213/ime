@@ -360,47 +360,40 @@
 
   <div class="actions">
 
-    <button
-      type="button"
-      class="assignments-button"
-      (click)="openAssignments(teacher)"
-    >
-      <mat-icon>
-        menu_book
-      </mat-icon>
+  <button
+    type="button"
+    class="action-button subjects"
+    title="Дисциплины"
+    (click)="openAssignments(teacher)"
+  >
+    <mat-icon>
+      menu_book
+    </mat-icon>
+  </button>
 
-      Дисциплины
-    </button>
+  <button
+    type="button"
+    class="action-button edit"
+    title="Редактировать"
+    (click)="openEditTeacher(teacher)"
+  >
+    <mat-icon>
+      edit
+    </mat-icon>
+  </button>
 
+  <button
+    type="button"
+    class="action-button delete"
+    title="Удалить"
+    (click)="deleteTeacher(teacher)"
+  >
+    <mat-icon>
+      delete_outline
+    </mat-icon>
+  </button>
 
-    <button
-      type="button"
-      class="edit-button"
-      (click)="openEditTeacher(teacher)"
-    >
-      <mat-icon>
-        edit
-      </mat-icon>
-
-      Изменить
-    </button>
-
-
-    <button
-      type="button"
-      class="delete-button"
-      [disabled]="
-        deletingTeacherId() ===
-        teacher.teacher?.id
-      "
-      (click)="deleteTeacher(teacher)"
-    >
-      <mat-icon>
-        delete_outline
-      </mat-icon>
-    </button>
-
-  </div>
+</div>
 
 </td>
 

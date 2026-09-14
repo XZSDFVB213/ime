@@ -285,7 +285,17 @@
     cursor: not-allowed;
   }
 }
+.action-button.subjects {
+  color: #7047c7;
+  background: #f2edff;
 
+  &:hover:not(:disabled) {
+    color: #5d35b4;
+    background: #e8dfff;
+
+    box-shadow: 0 4px 10px rgba(112, 71, 199, 0.12);
+  }
+}
 .department-filter {
   width: 220px;
 
