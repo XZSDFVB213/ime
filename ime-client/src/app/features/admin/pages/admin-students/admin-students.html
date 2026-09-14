@@ -19,11 +19,7 @@
     </div>
 
 
-    <button
-      type="button"
-      class="primary-button"
-      (click)="openCreateStudent()"
-    >
+    <button type="button" class="primary-button" (click)="openCreateStudent()">
       <mat-icon>
         person_add
       </mat-icon>
@@ -136,57 +132,42 @@
           search
         </mat-icon>
 
-        <input
-          #searchInput
-          type="text"
-          placeholder="Поиск по ФИО, email, телефону..."
-          [value]="search()"
-          (input)="
+        <input #searchInput type="text" placeholder="Поиск по ФИО, email, телефону..." [value]="search()" (input)="
             setSearch(
               searchInput.value
             )
-          "
-        />
+          " />
 
         @if (search()) {
-          <button
-            type="button"
-            (click)="
+        <button type="button" (click)="
               setSearch('');
               searchInput.value = ''
-            "
-          >
-            <mat-icon>
-              close
-            </mat-icon>
-          </button>
+            ">
+          <mat-icon>
+            close
+          </mat-icon>
+        </button>
         }
 
       </div>
 
 
-      <mat-select
-        class="group-filter"
-        [value]="groupFilter()"
-        (selectionChange)="
+      <mat-select class="group-filter" [value]="groupFilter()" (selectionChange)="
           setGroupFilter(
             $event.value
           )
-        "
-      >
+        ">
         <mat-option value="ALL">
           Все группы
         </mat-option>
 
         @for (
-          group of groups();
-          track group.id
+        group of groups();
+        track group.id
         ) {
-          <mat-option
-            [value]="group.id"
-          >
-            {{ group.name }}
-          </mat-option>
+        <mat-option [value]="group.id">
+          {{ group.name }}
+        </mat-option>
         }
 
       </mat-select>
@@ -196,233 +177,253 @@
 
     @if (loading()) {
 
-      <div class="state-block">
+    <div class="state-block">
 
-        <div class="loader"></div>
+      <div class="loader"></div>
 
-        <span>
-          Загружаем студентов...
-        </span>
+      <span>
+        Загружаем студентов...
+      </span>
 
-      </div>
+    </div>
 
     } @else if (
-      filteredStudents().length === 0
+    filteredStudents().length === 0
     ) {
 
-      <div class="state-block">
+    <div class="state-block">
 
-        <div class="empty-icon">
-          <mat-icon>
-            person_search
-          </mat-icon>
-        </div>
-
-        <strong>
-          Студенты не найдены
-        </strong>
-
-        <span>
-          Измените параметры поиска
-          или добавьте нового студента
-        </span>
-
+      <div class="empty-icon">
+        <mat-icon>
+          person_search
+        </mat-icon>
       </div>
+
+      <strong>
+        Студенты не найдены
+      </strong>
+
+      <span>
+        Измените параметры поиска
+        или добавьте нового студента
+      </span>
+
+    </div>
 
     } @else {
 
-      <div class="table-wrapper">
+    <div class="table-wrapper">
 
-        <table>
+      <table>
 
-          <thead>
-            <tr>
-              <th>
-                Студент
-              </th>
+        <thead>
+          <tr>
+            <th>
+              Студент
+            </th>
 
-              <th>
-                Группа
-              </th>
+            <th>
+              Группа
+            </th>
 
-              <th>
-                Кафедра
-              </th>
+            <th>
+              Кафедра
+            </th>
 
-              <th>
-                Статус
-              </th>
+            <th>
+              Статус
+            </th>
 
-              <th>
-                Контакты
-              </th>
-            </tr>
-          </thead>
-
-
-          <tbody>
-
-            @for (
-              student of
-                filteredStudents();
-              track student.id
-            ) {
-
-              <tr>
-
-                <td>
-
-                  <div class="student-cell">
-
-                    <div class="avatar">
-                      {{
-                        initials(
-                          student.fullName
-                        )
-                      }}
-                    </div>
-
-                    <div>
-                      <strong>
-                        {{ student.fullName }}
-                      </strong>
-
-                      <span>
-                        {{ student.email }}
-                      </span>
-                    </div>
-
-                  </div>
-
-                </td>
+            <th>
+              Контакты
+            </th>
+            <th>
+              Действия
+            </th>
+          </tr>
+        </thead>
 
 
-                <td>
+        <tbody>
 
-                  @if (student.student) {
+          @for (
+          student of
+          filteredStudents();
+          track student.id
+          ) {
 
-                    <mat-select
-                      class="student-group-select"
-                      [value]="
+          <tr>
+
+            <td>
+
+              <div class="student-cell">
+
+                <div class="avatar">
+                  {{
+                  initials(
+                  student.fullName
+                  )
+                  }}
+                </div>
+
+                <div>
+                  <strong>
+                    {{ student.fullName }}
+                  </strong>
+
+                  <span>
+                    {{ student.email }}
+                  </span>
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <td>
+
+              @if (student.student) {
+
+              <mat-select class="student-group-select" [value]="
                         student.student
                           .group?.id
-                      "
-                      [disabled]="
+                      " [disabled]="
                         changingGroupId() ===
                         student.student.id
-                      "
-                      (selectionChange)="
+                      " (selectionChange)="
                         changeGroup(
                           student,
                           $event.value
                         )
-                      "
-                    >
+                      ">
 
-                      @for (
-                        group of groups();
-                        track group.id
-                      ) {
+                @for (
+                group of groups();
+                track group.id
+                ) {
 
-                        <mat-option
-                          [value]="group.id"
-                        >
-                          {{ group.name }}
-                        </mat-option>
+                <mat-option [value]="group.id">
+                  {{ group.name }}
+                </mat-option>
 
-                      }
+                }
 
-                    </mat-select>
+              </mat-select>
 
-                  } @else {
+              } @else {
 
-                    <span class="muted">
-                      Профиль не создан
-                    </span>
+              <span class="muted">
+                Профиль не создан
+              </span>
 
-                  }
+              }
 
-                </td>
+            </td>
 
 
-                <td>
+            <td>
 
-                  @if (
-                    student.student
-                      ?.group
-                      ?.department;
-                    as department
-                  ) {
+              @if (
+              student.student
+              ?.group
+              ?.department;
+              as department
+              ) {
 
-                    <span class="department">
-                      {{ department.name }}
-                    </span>
+              <span class="department">
+                {{ department.name }}
+              </span>
 
-                  } @else {
+              } @else {
 
-                    <span class="muted">
-                      —
-                    </span>
+              <span class="muted">
+                —
+              </span>
 
-                  }
+              }
 
-                </td>
+            </td>
 
 
-                <td>
+            <td>
 
-                  <span
-                    class="status"
-                    [class.active]="
+              <span class="status" [class.active]="
                       student.status ===
                       'ACTIVE'
-                    "
-                    [class.blocked]="
+                    " [class.blocked]="
                       student.status ===
                       'BLOCKED'
-                    "
-                  >
-                    {{
-                      student.status ===
-                      'ACTIVE'
-                        ? 'Активен'
-                        : student.status ===
-                            'BLOCKED'
-                          ? 'Заблокирован'
-                          : student.status
-                    }}
-                  </span>
+                    ">
+                {{
+                student.status ===
+                'ACTIVE'
+                ? 'Активен'
+                : student.status ===
+                'BLOCKED'
+                ? 'Заблокирован'
+                : student.status
+                }}
+              </span>
 
-                </td>
+            </td>
 
 
-                <td>
+            <td>
 
-                  <div class="contacts">
+              <div class="contacts">
 
-                    <span>
-                      {{ student.email }}
-                    </span>
+                <span>
+                  {{ student.email }}
+                </span>
 
-                    @if (student.phone) {
-                      <small>
-                        {{ student.phone }}
-                      </small>
-                    }
+                @if (student.phone) {
+                <small>
+                  {{ student.phone }}
+                </small>
+                }
 
-                  </div>
+              </div>
 
-                </td>
+            </td>
+            <td>
 
-              </tr>
+              <div class="actions">
 
-            }
+                <button type="button" class="edit-button" (click)="
+        openEditStudent(student)
+      ">
+                  <mat-icon>
+                    edit
+                  </mat-icon>
 
-          </tbody>
+                  Изменить
+                </button>
 
-        </table>
 
-      </div>
+                <button type="button" class="delete-button" [disabled]="
+        deletingStudentId() ===
+        student.student?.id
+      " (click)="
+        deleteStudent(student)
+      ">
+                  <mat-icon>
+                    delete_outline
+                  </mat-icon>
+                </button>
+
+              </div>
+
+            </td>
+          </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
 
     }
 

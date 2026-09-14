@@ -67,13 +67,9 @@ export class AdminService {
   getTeacherAssignments(teacherId: string) {
     return this.http.get<any[]>(`${environment.api}/admin/teachers/${teacherId}/assignments`);
   }
-deleteSubject(
-  subjectId: string,
-) {
-  return this.http.delete(
-    `${environment.api}/admin/subjects/${subjectId}`,
-  );
-}
+  deleteSubject(subjectId: string) {
+    return this.http.delete(`${environment.api}/admin/subjects/${subjectId}`);
+  }
   assignTeacher(
     teacherId: string,
     data: {
@@ -83,30 +79,40 @@ deleteSubject(
   ) {
     return this.http.post(`${environment.api}/admin/teachers/${teacherId}/assignments`, data);
   }
-updateTeacher(
-  teacherId: string,
+  updateTeacher(
+    teacherId: string,
 
-  dto: {
-    fullName: string;
-    email: string;
-    phone?: string;
-    position?: string;
-    departmentId: string;
-    password?: string;
-  },
-) {
-  return this.http.patch(
-    `${environment.api}/admin/teachers/${teacherId}`,
-    dto,
-  );
-}
-deleteTeacher(
-  teacherId: string,
-) {
-  return this.http.delete(
-    `${environment.api}/admin/teachers/${teacherId}`,
-  );
-}
+    dto: {
+      fullName: string;
+      email: string;
+      phone?: string;
+      position?: string;
+      departmentId: string;
+      password?: string;
+    },
+  ) {
+    return this.http.patch(`${environment.api}/admin/teachers/${teacherId}`, dto);
+  }
+  deleteTeacher(teacherId: string) {
+    return this.http.delete(`${environment.api}/admin/teachers/${teacherId}`);
+  }
+  updateStudent(
+    studentId: string,
+
+    dto: {
+      fullName: string;
+      email: string;
+      phone?: string;
+      groupId: string;
+      password?: string;
+    },
+  ) {
+    return this.http.patch(`${environment.api}/admin/students/${studentId}`, dto);
+  }
+
+  deleteStudent(studentId: string) {
+    return this.http.delete(`${environment.api}/admin/students/${studentId}`);
+  }
   deleteTeacherAssignment(teacherId: string, assignmentId: string) {
     return this.http.delete(
       `${environment.api}/admin/teachers/${teacherId}/assignments/${assignmentId}`,

@@ -15,6 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { AdminService } from '../../services/admin.service';
 
 import { CreateStudentDialog } from './create-student-dialog/create-student-dialog';
+import { EditStudentDialog } from './edit-student-dialog/edit-student-dialog';
 
 interface AdminGroup {
   id: string;
@@ -85,7 +86,7 @@ export class AdminStudents {
   readonly groupFilter = signal<string>('ALL');
 
   readonly changingGroupId = signal<string | null>(null);
-
+  readonly deletingStudentId = signal<string | null>(null);
   readonly filteredStudents = computed(() => {
     const search = this.search().trim().toLowerCase();
 
@@ -170,7 +171,78 @@ export class AdminStudents {
   setGroupFilter(value: string): void {
     this.groupFilter.set(value);
   }
+  deleteStudent(student: AdminStudent): void {
+    if (!student.student?.id) {
+      return;
+    }
 
+    const confirmed = confirm(`Удалить студента «${student.fullName}»?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingStudentId.set(student.student.id);
+
+    this.adminService.deleteStudent(student.student.id).subscribe({
+      next: () => {
+        this.students.update((students) => students.filter((item) => item.id !== student.id));
+
+        this.deletingStudentId.set(null);
+
+        this.snackBar.open('Студент удалён', 'OK', {
+          duration: 2500,
+        });
+      },
+
+      error: (error) => {
+        console.error(error);
+
+        this.deletingStudentId.set(null);
+
+        this.snackBar.open(error.error?.message ?? 'Не удалось удалить студента', 'Закрыть', {
+          duration: 3500,
+        });
+      },
+    });
+  }
+  openEditStudent(student: AdminStudent): void {
+    if (!student.student?.id) {
+      this.snackBar.open('У пользователя отсутствует профиль Student', 'Закрыть', {
+        duration: 3000,
+      });
+
+      return;
+    }
+
+    const dialogRef = this.dialog.open(EditStudentDialog, {
+      width: '560px',
+
+      maxWidth: 'calc(100vw - 32px)',
+
+      autoFocus: false,
+
+      data: {
+        studentId: student.student.id,
+
+        fullName: student.fullName,
+
+        email: student.email,
+
+        phone: student.phone,
+
+        groupId: student.student.group?.id,
+
+        groups: this.groups(),
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((updated) => {
+      if (updated) {
+        this.load();
+      }
+    });
+  }
   openCreateStudent(): void {
     const dialogRef = this.dialog.open(CreateStudentDialog, {
       width: '560px',

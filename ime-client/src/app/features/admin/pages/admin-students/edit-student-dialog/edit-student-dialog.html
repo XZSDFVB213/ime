@@ -1,0 +1,199 @@
+<div class="dialog">
+
+  <header>
+
+    <div class="header-icon">
+      <mat-icon>
+        edit
+      </mat-icon>
+    </div>
+
+    <div class="header-copy">
+
+      <h2>
+        Редактирование студента
+      </h2>
+
+      <p>
+        Личные данные, группа и доступ
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="close"
+      (click)="close()"
+    >
+      <mat-icon>
+        close
+      </mat-icon>
+    </button>
+
+  </header>
+
+
+  <div class="form">
+
+    <label>
+
+      <span>
+        ФИО *
+      </span>
+
+      <input
+        [(ngModel)]="fullName"
+        placeholder="Иван Иванов"
+      />
+
+    </label>
+
+
+    <label>
+
+      <span>
+        Email *
+      </span>
+
+      <input
+        type="email"
+        [(ngModel)]="email"
+        placeholder="student@nnou.ru"
+      />
+
+    </label>
+
+
+    <label>
+
+      <span>
+        Новый пароль
+      </span>
+
+      <div class="password-input">
+
+        <input
+          [type]="
+            hidePassword
+              ? 'password'
+              : 'text'
+          "
+          [(ngModel)]="password"
+          placeholder="Оставьте пустым, чтобы не менять"
+          autocomplete="new-password"
+        />
+
+
+        <button
+          type="button"
+          (click)="
+            hidePassword =
+              !hidePassword
+          "
+        >
+          <mat-icon>
+            {{
+              hidePassword
+                ? 'visibility'
+                : 'visibility_off'
+            }}
+          </mat-icon>
+        </button>
+
+      </div>
+
+      <small>
+        Заполняйте только если нужно изменить пароль
+      </small>
+
+    </label>
+
+
+    <label>
+
+      <span>
+        Телефон
+      </span>
+
+      <input
+        [(ngModel)]="phone"
+        placeholder="+7..."
+      />
+
+    </label>
+
+
+    <label>
+
+      <span>
+        Группа *
+      </span>
+
+      <mat-select
+        [(ngModel)]="groupId"
+        placeholder="Выберите группу"
+      >
+
+        @for (
+          group of data.groups;
+          track group.id
+        ) {
+
+          <mat-option
+            [value]="group.id"
+          >
+            {{ group.name }}
+          </mat-option>
+
+        }
+
+      </mat-select>
+
+    </label>
+
+
+    @if (error()) {
+
+      <div class="error">
+        {{ error() }}
+      </div>
+
+    }
+
+  </div>
+
+
+  <footer>
+
+    <button
+      type="button"
+      class="cancel"
+      (click)="close()"
+    >
+      Отмена
+    </button>
+
+
+    <button
+      type="button"
+      class="save"
+      [disabled]="saving()"
+      (click)="save()"
+    >
+
+      <mat-icon>
+        save
+      </mat-icon>
+
+      {{
+        saving()
+          ? 'Сохранение...'
+          : 'Сохранить'
+      }}
+
+    </button>
+
+  </footer>
+
+</div>
