@@ -1,4 +1,4 @@
 import { PartialType } from '@nestjs/swagger';
-import { CreatePortfolioDto } from './create-portfolio.dto';
+import { CreatePortfolioItemDto } from './create-portfolio.dto';
 
-export class UpdatePortfolioDto extends PartialType(CreatePortfolioDto) {}
+export class UpdatePortfolioDto extends PartialType(CreatePortfolioItemDto) {}
