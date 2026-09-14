@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { Role } from '@prisma/client';
+import { Role, UserStatus } from '@prisma/client';
 
 import * as bcrypt from 'bcrypt';
 
@@ -17,13 +17,13 @@ import { CreateTeacherDto } from './dto/create-teacher.dto';
 
 import { AssignStudentGroupDto } from './dto/assign-student-group.dto';
 import { CreateDisciplineDto } from './dto/create-discipline.dto';
-import { AssignTeacherDto } from './dto/assign-teacher.dto';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { CreateDepartmentDto } from './dto/create-departament.dto';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
 
 @Injectable()
 export class AdminService {
@@ -127,75 +127,60 @@ export class AdminService {
       },
     });
   }
- async getTeacherAssignments(
-  teacherId: string,
-) {
-  return this.prisma.teacherDisciplineGroup.findMany({
-    where: {
-      teacherId,
-    },
+  async getTeacherAssignments(teacherId: string) {
+    return this.prisma.teacherDisciplineGroup.findMany({
+      where: {
+        teacherId,
+      },
 
-    include: {
-      subject: true,
-      group: true,
-    },
+      include: {
+        subject: true,
+        group: true,
+      },
 
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-}
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
   async assignTeacher(
-  teacherId: string,
-  dto: {
-    subjectId: string;
-    groupId: string;
-  },
-) {
-  const teacher =
-    await this.prisma.teacher.findUnique({
+    teacherId: string,
+    dto: {
+      subjectId: string;
+      groupId: string;
+    },
+  ) {
+    const teacher = await this.prisma.teacher.findUnique({
       where: {
         id: teacherId,
       },
     });
 
-  if (!teacher) {
-    throw new NotFoundException(
-      'Преподаватель не найден',
-    );
-  }
+    if (!teacher) {
+      throw new NotFoundException('Преподаватель не найден');
+    }
 
-
-  const subject =
-    await this.prisma.subject.findUnique({
+    const subject = await this.prisma.subject.findUnique({
       where: {
         id: dto.subjectId,
       },
     });
 
-  if (!subject) {
-    throw new NotFoundException(
-      'Дисциплина не найдена',
-    );
-  }
+    if (!subject) {
+      throw new NotFoundException('Дисциплина не найдена');
+    }
 
-
-  const group =
-    await this.prisma.group.findUnique({
+    const group = await this.prisma.group.findUnique({
       where: {
         id: dto.groupId,
       },
     });
 
-  if (!group) {
-    throw new NotFoundException(
-      'Группа не найдена',
-    );
-  }
+    if (!group) {
+      throw new NotFoundException('Группа не найдена');
+    }
 
-
-  const existing =
-    await this.prisma.teacherDisciplineGroup.findUnique({
+    const existing = await this.prisma.teacherDisciplineGroup.findUnique({
       where: {
         teacherId_subjectId_groupId: {
           teacherId,
@@ -205,33 +190,31 @@ export class AdminService {
       },
     });
 
+    if (existing) {
+      throw new ConflictException(
+        'Эта дисциплина уже назначена преподавателю в данной группе',
+      );
+    }
 
-  if (existing) {
-    throw new ConflictException(
-      'Эта дисциплина уже назначена преподавателю в данной группе',
-    );
-  }
+    return this.prisma.teacherDisciplineGroup.create({
+      data: {
+        teacherId,
+        subjectId: dto.subjectId,
+        groupId: dto.groupId,
+      },
 
+      include: {
+        subject: true,
+        group: true,
 
-  return this.prisma.teacherDisciplineGroup.create({
-    data: {
-      teacherId,
-      subjectId: dto.subjectId,
-      groupId: dto.groupId,
-    },
-
-    include: {
-      subject: true,
-      group: true,
-
-      teacher: {
-        include: {
-          user: true,
+        teacher: {
+          include: {
+            user: true,
+          },
         },
       },
-    },
-  });
-}
+    });
+  }
   async deleteTeacherAssignment(teacherId: string, assignmentId: string) {
     const assignment = await this.prisma.teacherDisciplineGroup.findFirst({
       where: {
@@ -424,12 +407,8 @@ export class AdminService {
   // ==========================================
   // CREATE TEACHER
   // ==========================================
-async updateTeacher(
-  teacherId: string,
-  dto: UpdateTeacherDto,
-) {
-  const teacher =
-    await this.prisma.teacher.findUnique({
+  async updateTeacher(teacherId: string, dto: UpdateTeacherDto) {
+    const teacher = await this.prisma.teacher.findUnique({
       where: {
         id: teacherId,
       },
@@ -439,140 +418,113 @@ async updateTeacher(
       },
     });
 
-  if (!teacher) {
-    throw new NotFoundException(
-      'Преподаватель не найден',
-    );
-  }
+    if (!teacher) {
+      throw new NotFoundException('Преподаватель не найден');
+    }
 
-
-  if (dto.departmentId) {
-    const department =
-      await this.prisma.department.findUnique({
+    if (dto.departmentId) {
+      const department = await this.prisma.department.findUnique({
         where: {
           id: dto.departmentId,
         },
       });
 
-    if (!department) {
-      throw new NotFoundException(
-        'Кафедра не найдена',
-      );
+      if (!department) {
+        throw new NotFoundException('Кафедра не найдена');
+      }
     }
-  }
 
-
-  if (
-    dto.email &&
-    dto.email !== teacher.user.email
-  ) {
-    const emailExists =
-      await this.prisma.user.findUnique({
+    if (dto.email && dto.email !== teacher.user.email) {
+      const emailExists = await this.prisma.user.findUnique({
         where: {
           email: dto.email.trim(),
         },
       });
 
-    if (emailExists) {
-      throw new ConflictException(
-        'Пользователь с таким email уже существует',
-      );
+      if (emailExists) {
+        throw new ConflictException(
+          'Пользователь с таким email уже существует',
+        );
+      }
     }
-  }
 
-let passwordHash: string | undefined;
+    let passwordHash: string | undefined;
 
-if (dto.password) {
-  passwordHash =
-    await bcrypt.hash(
-      dto.password,
-      10,
-    );
-}
-  await this.prisma.$transaction([
-    this.prisma.user.update({
-  where: {
-    id: teacher.userId,
-  },
+    if (dto.password) {
+      passwordHash = await bcrypt.hash(dto.password, 10);
+    }
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: {
+          id: teacher.userId,
+        },
 
-  data: {
-    ...(dto.fullName !== undefined
-      ? {
-          fullName:
-            dto.fullName.trim(),
-        }
-      : {}),
+        data: {
+          ...(dto.fullName !== undefined
+            ? {
+                fullName: dto.fullName.trim(),
+              }
+            : {}),
 
-    ...(dto.email !== undefined
-      ? {
-          email:
-            dto.email.trim(),
-        }
-      : {}),
+          ...(dto.email !== undefined
+            ? {
+                email: dto.email.trim(),
+              }
+            : {}),
 
-    ...(dto.phone !== undefined
-      ? {
-          phone:
-            dto.phone.trim() ||
-            null,
-        }
-      : {}),
+          ...(dto.phone !== undefined
+            ? {
+                phone: dto.phone.trim() || null,
+              }
+            : {}),
 
-    ...(passwordHash
-      ? {
-          password:
-            passwordHash,
-        }
-      : {}),
-  },
-}),
+          ...(passwordHash
+            ? {
+                password: passwordHash,
+              }
+            : {}),
+        },
+      }),
 
-    this.prisma.teacher.update({
+      this.prisma.teacher.update({
+        where: {
+          id: teacherId,
+        },
+
+        data: {
+          ...(dto.position !== undefined
+            ? {
+                position: dto.position.trim() || null,
+              }
+            : {}),
+
+          ...(dto.departmentId !== undefined
+            ? {
+                departmentId: dto.departmentId,
+              }
+            : {}),
+        },
+      }),
+    ]);
+
+    return this.prisma.user.findUnique({
       where: {
-        id: teacherId,
+        id: teacher.userId,
       },
 
-      data: {
-        ...(dto.position !== undefined
-          ? {
-              position:
-                dto.position.trim() ||
-                null,
-            }
-          : {}),
+      include: {
+        roles: true,
 
-        ...(dto.departmentId !== undefined
-          ? {
-              departmentId:
-                dto.departmentId,
-            }
-          : {}),
-      },
-    }),
-  ]);
-
-
-  return this.prisma.user.findUnique({
-    where: {
-      id: teacher.userId,
-    },
-
-    include: {
-      roles: true,
-
-      teacher: {
-        include: {
-          department: true,
+        teacher: {
+          include: {
+            department: true,
+          },
         },
       },
-    },
-  });
-}
-async deleteTeacher(
-  teacherId: string,
-) {
-  const teacher =
-    await this.prisma.teacher.findUnique({
+    });
+  }
+  async deleteTeacher(teacherId: string) {
+    const teacher = await this.prisma.teacher.findUnique({
       where: {
         id: teacherId,
       },
@@ -589,43 +541,39 @@ async deleteTeacher(
       },
     });
 
-  if (!teacher) {
-    throw new NotFoundException(
-      'Преподаватель не найден',
-    );
+    if (!teacher) {
+      throw new NotFoundException('Преподаватель не найден');
+    }
+
+    await this.prisma.$transaction([
+      /*
+       * Убираем текущие назначения
+       * дисциплина + группа.
+       *
+       * Lesson/Material и историю
+       * НЕ трогаем.
+       */
+      this.prisma.teacherDisciplineGroup.deleteMany({
+        where: {
+          teacherId,
+        },
+      }),
+
+      this.prisma.user.update({
+        where: {
+          id: teacher.userId,
+        },
+
+        data: {
+          status: 'DELETED',
+        },
+      }),
+    ]);
+
+    return {
+      success: true,
+    };
   }
-
-
-  await this.prisma.$transaction([
-    /*
-     * Убираем текущие назначения
-     * дисциплина + группа.
-     *
-     * Lesson/Material и историю
-     * НЕ трогаем.
-     */
-    this.prisma.teacherDisciplineGroup.deleteMany({
-      where: {
-        teacherId,
-      },
-    }),
-
-    this.prisma.user.update({
-      where: {
-        id: teacher.userId,
-      },
-
-      data: {
-        status: 'DELETED',
-      },
-    }),
-  ]);
-
-
-  return {
-    success: true,
-  };
-}
   async createTeacher(dto: CreateTeacherDto) {
     const email = dto.email.trim().toLowerCase();
 
@@ -975,6 +923,147 @@ async deleteTeacher(
         },
       },
     });
+  }
+  async updateStudent(studentId: string, dto: UpdateStudentDto) {
+    const student = await this.prisma.student.findUnique({
+      where: {
+        id: studentId,
+      },
+
+      include: {
+        user: true,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Студент не найден');
+    }
+
+    if (dto.groupId) {
+      const group = await this.prisma.group.findUnique({
+        where: {
+          id: dto.groupId,
+        },
+      });
+
+      if (!group) {
+        throw new NotFoundException('Группа не найдена');
+      }
+    }
+
+    if (dto.email && dto.email.trim() !== student.user.email) {
+      const emailExists = await this.prisma.user.findUnique({
+        where: {
+          email: dto.email.trim(),
+        },
+      });
+
+      if (emailExists) {
+        throw new ConflictException(
+          'Пользователь с таким email уже существует',
+        );
+      }
+    }
+
+    let passwordHash: string | undefined;
+
+    if (dto.password) {
+      passwordHash = await bcrypt.hash(dto.password, 10);
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: {
+          id: student.userId,
+        },
+
+        data: {
+          ...(dto.fullName !== undefined
+            ? {
+                fullName: dto.fullName.trim(),
+              }
+            : {}),
+
+          ...(dto.email !== undefined
+            ? {
+                email: dto.email.trim(),
+              }
+            : {}),
+
+          ...(dto.phone !== undefined
+            ? {
+                phone: dto.phone.trim() || null,
+              }
+            : {}),
+
+          ...(passwordHash
+            ? {
+                password: passwordHash,
+              }
+            : {}),
+        },
+      }),
+
+      this.prisma.student.update({
+        where: {
+          id: studentId,
+        },
+
+        data: {
+          ...(dto.groupId !== undefined
+            ? {
+                groupId: dto.groupId,
+              }
+            : {}),
+        },
+      }),
+    ]);
+
+    return this.prisma.user.findUnique({
+      where: {
+        id: student.userId,
+      },
+
+      include: {
+        roles: true,
+
+        student: {
+          include: {
+            group: true,
+          },
+        },
+      },
+    });
+  }
+  async deleteStudent(studentId: string) {
+    const student = await this.prisma.student.findUnique({
+      where: {
+        id: studentId,
+      },
+
+      select: {
+        id: true,
+        userId: true,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Студент не найден');
+    }
+
+    await this.prisma.user.update({
+      where: {
+        id: student.userId,
+      },
+
+      data: {
+        status: UserStatus.DELETED,
+      },
+    });
+
+    return {
+      success: true,
+    };
   }
   async deleteMaterial(materialId: string) {
     const material = await this.prisma.material.findUnique({
