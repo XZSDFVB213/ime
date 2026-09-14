@@ -64,7 +64,7 @@ interface DashboardDepartment {
   name: string;
 }
 
-interface DashboardDiscipline {
+interface Dashboardsubject {
   id: string;
   name: string;
   code?: string | null;
@@ -96,7 +96,7 @@ export class AdminDashboard {
 
   readonly departments = signal<DashboardDepartment[]>([]);
 
-  readonly subjects = signal<DashboardDiscipline[]>([]);
+  readonly subjects = signal<Dashboardsubject[]>([]);
 
   readonly activeStudents = computed(
     () => this.students().filter((student) => student.status === 'ACTIVE').length,
@@ -171,7 +171,7 @@ export class AdminDashboard {
 
         this.departments.set(departments as DashboardDepartment[]);
 
-        this.subjects.set(subjects as DashboardDiscipline[]);
+        this.subjects.set(subjects as Dashboardsubject[]);
 
         this.loading.set(false);
       },

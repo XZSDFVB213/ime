@@ -18,9 +18,9 @@
       <mat-label>Дисциплина</mat-label>
 
       <mat-select formControlName="subjectId">
-        @for (discipline of disciplines; track discipline.id) {
-          <mat-option [value]="discipline.id">
-            {{ discipline.name }}
+        @for (subject of subjects; track subject.id) {
+          <mat-option [value]="subject.id">
+            {{ subject.name }}
           </mat-option>
         }
       </mat-select>
@@ -83,8 +83,8 @@
 
             <div>
 
-              <div class="discipline">
-                {{ assignment.discipline.name }}
+              <div class="subject">
+                {{ assignment.subject.name }}
               </div>
 
               <div class="group">

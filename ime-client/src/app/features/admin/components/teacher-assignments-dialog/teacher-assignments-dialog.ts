@@ -27,7 +27,7 @@ import { AdminService } from '../../services/admin.service';
   styleUrls: ['./teacher-assignments-dialog.scss'],
 })
 export class TeacherAssignmentsDialogComponent implements OnInit {
-  disciplines: any[] = [];
+  subjects: any[] = [];
   groups: any[] = [];
   assignments: any[] = [];
 
@@ -65,8 +65,8 @@ export class TeacherAssignmentsDialogComponent implements OnInit {
     this.loading = true;
 
     this.adminService.getSubjects().subscribe({
-      next: (disciplines) => {
-        this.disciplines = disciplines;
+      next: (subjects) => {
+        this.subjects = subjects;
       },
     });
 

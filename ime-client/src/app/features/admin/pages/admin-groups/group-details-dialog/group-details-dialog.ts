@@ -144,7 +144,7 @@ export class GroupDetailsDialogComponent {
   teacherId = '';
 
   subjectId = '';
-  readonly disciplinesCount = computed(() => {
+  readonly subjectsCount = computed(() => {
     return new Set(this.assignments().map((assignment) => assignment.subjectId)).size;
   });
   readonly groupStudents = computed(() => {

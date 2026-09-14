@@ -60,8 +60,8 @@ export class AdminService {
       groupId,
     });
   }
-  getDisciplines() {
-    return this.http.get<any[]>(`${environment.api}/admin/disciplines`);
+  getsubjects() {
+    return this.http.get<any[]>(`${environment.api}/admin/subjects`);
   }
 
   getTeacherAssignments(teacherId: string) {
