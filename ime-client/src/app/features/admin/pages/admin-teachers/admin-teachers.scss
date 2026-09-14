@@ -41,7 +41,6 @@
   }
 }
 
-
 .primary-button {
   min-height: 44px;
 
@@ -71,16 +70,13 @@
   }
 }
 
-
 .stats-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
   gap: 16px;
 }
-
 
 .stat-card {
   min-height: 105px;
@@ -140,7 +136,6 @@
   }
 }
 
-
 .teachers-card {
   overflow: hidden;
 
@@ -149,7 +144,6 @@
   border: 1px solid #e6eaf0;
   border-radius: 18px;
 }
-
 
 .toolbar {
   min-height: 76px;
@@ -162,7 +156,6 @@
 
   border-bottom: 1px solid #edf0f4;
 }
-
 
 .search-box {
   width: 100%;
@@ -197,83 +190,52 @@
     outline: none;
     border: 0;
   }
-.actions {
-  display: flex;
-  align-items: center;
+  .actions {
+    display: flex;
+    align-items: center;
 
-  gap: 7px;
+    gap: 7px;
 
-  white-space: nowrap;
-}
-
-
-.edit-button,
-.delete-button {
-  min-height: 36px;
-
-  padding: 0 10px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 6px;
-
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-
-  border: 0;
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  transition:
-    background 0.15s ease,
-    transform 0.15s ease;
-
-  &:hover:not(:disabled) {
-    transform:
-      translateY(-1px);
+    white-space: nowrap;
   }
 
-  mat-icon {
-    width: 17px;
-    height: 17px;
+  .edit-button,
+  .delete-button {
+    min-height: 36px;
 
-    font-size: 17px;
+    padding: 0 10px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+
+    border: 0;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    transition:
+      background 0.15s ease,
+      transform 0.15s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    mat-icon {
+      width: 17px;
+      height: 17px;
+
+      font-size: 17px;
+    }
   }
-}
 
-
-.edit-button {
-  color: #1767ec;
-  background: #edf4ff;
-
-  &:hover {
-    background: #e1edff;
-  }
-}
-
-
-.delete-button {
-  width: 36px;
-
-  padding: 0;
-
-  color: #b42318;
-  background: #fff0ee;
-
-  &:hover:not(:disabled) {
-    background: #ffe2de;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-
-    cursor: not-allowed;
-  }
-}
   button {
     width: 30px;
     height: 30px;
@@ -296,7 +258,33 @@
     }
   }
 }
+.edit-button {
+  color: #1767ec;
+  background: #edf4ff;
 
+  &:hover {
+    background: #e1edff;
+  }
+}
+
+.delete-button {
+  width: 36px;
+
+  padding: 0;
+
+  color: #b42318;
+  background: #fff0ee;
+
+  &:hover:not(:disabled) {
+    background: #ffe2de;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+
+    cursor: not-allowed;
+  }
+}
 
 .department-filter {
   width: 220px;
@@ -309,17 +297,14 @@
   border-radius: 11px;
 }
 
-
 .table-wrapper {
   overflow-x: auto;
 }
-
 
 table {
   width: 100%;
   border-collapse: collapse;
 }
-
 
 th {
   padding: 13px 18px;
@@ -335,7 +320,6 @@ th {
   white-space: nowrap;
 }
 
-
 td {
   padding: 15px 18px;
 
@@ -346,11 +330,9 @@ td {
   border-top: 1px solid #eef1f5;
 }
 
-
 tbody tr:hover {
   background: #fafcff;
 }
-
 
 .teacher-cell {
   min-width: 230px;
@@ -395,13 +377,11 @@ tbody tr:hover {
   }
 }
 
-
 .position,
 .department {
   color: #586b83;
   font-size: 13px;
 }
-
 
 .status {
   padding: 5px 9px;
@@ -424,7 +404,6 @@ tbody tr:hover {
   }
 }
 
-
 .contacts {
   min-width: 180px;
 
@@ -446,12 +425,10 @@ tbody tr:hover {
   }
 }
 
-
 .muted {
   color: #9aa5b3;
   font-size: 13px;
 }
-
 
 .state-block {
   min-height: 320px;
@@ -482,7 +459,6 @@ tbody tr:hover {
   }
 }
 
-
 .empty-icon {
   width: 60px;
   height: 60px;
@@ -494,7 +470,6 @@ tbody tr:hover {
 
   border-radius: 18px;
 }
-
 
 .loader {
   width: 32px;
@@ -510,9 +485,7 @@ tbody tr:hover {
 .assignments-button {
   min-height: 38px;
 
-  padding:
-    0
-    12px;
+  padding: 0 12px;
 
   display: inline-flex;
   align-items: center;
@@ -553,14 +526,11 @@ tbody tr:hover {
   }
 }
 
-
 @media (max-width: 1050px) {
   .stats-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
 
 @media (max-width: 700px) {
   .page-header {
