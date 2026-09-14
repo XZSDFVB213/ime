@@ -91,7 +91,7 @@ export class AdminService {
       },
 
       include: {
-        discipline: true,
+        subject: true,
         group: true,
       },
 
@@ -111,13 +111,13 @@ export class AdminService {
       throw new NotFoundException('Преподаватель не найден');
     }
 
-    const discipline = await this.prisma.discipline.findUnique({
+    const subject = await this.prisma.subject.findUnique({
       where: {
-        id: dto.disciplineId,
+        id: dto.subjectId,
       },
     });
 
-    if (!discipline) {
+    if (!subject) {
       throw new NotFoundException('Дисциплина не найдена');
     }
 
@@ -131,32 +131,39 @@ export class AdminService {
       throw new NotFoundException('Группа не найдена');
     }
 
-    const existing = await this.prisma.teacherDisciplineGroup.findUnique({
+    const exists = await this.prisma.teacherDisciplineGroup.findUnique({
       where: {
-        teacherId_disciplineId_groupId: {
+        teacherId_subjectId_groupId: {
           teacherId,
-          disciplineId: dto.disciplineId,
+          subjectId: dto.subjectId,
           groupId: dto.groupId,
         },
       },
     });
 
-    if (existing) {
+    if (exists) {
       throw new ConflictException(
-        'Преподаватель уже назначен на эту дисциплину в данной группе',
+        'Преподаватель уже назначен на эту дисциплину для этой группы',
       );
     }
 
     return this.prisma.teacherDisciplineGroup.create({
       data: {
         teacherId,
-        disciplineId: dto.disciplineId,
+        subjectId: dto.subjectId,
         groupId: dto.groupId,
       },
 
       include: {
-        discipline: true,
+        subject: true,
         group: true,
+
+        teacher: {
+          include: {
+            
+            user: true,
+          },
+        },
       },
     });
   }
@@ -203,19 +210,11 @@ export class AdminService {
       },
 
       include: {
-        discipline: true,
+        subject: true,
 
         teacher: {
           include: {
-            user: {
-              select: {
-                id: true,
-                fullName: true,
-                email: true,
-                avatarUrl: true,
-              },
-            },
-
+            user: true,
             department: true,
           },
         },

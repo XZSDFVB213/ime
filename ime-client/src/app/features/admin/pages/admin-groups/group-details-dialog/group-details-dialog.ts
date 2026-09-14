@@ -56,7 +56,7 @@ interface AdminTeacher {
   } | null;
 }
 
-interface Discipline {
+interface Subject {
   id: string;
   name: string;
   description?: string | null;
@@ -66,10 +66,10 @@ interface GroupAssignment {
   id: string;
 
   teacherId: string;
-  disciplineId: string;
+  subjectId: string;
   groupId: string;
 
-  discipline: {
+  subject: {
     id: string;
     name: string;
     description?: string | null;
@@ -125,7 +125,7 @@ export class GroupDetailsDialogComponent {
 
   readonly teachers = signal<AdminTeacher[]>([]);
 
-  readonly disciplines = signal<Discipline[]>([]);
+  readonly subjects = signal<Subject[]>([]);
 
   readonly assignments = signal<GroupAssignment[]>([]);
 
@@ -143,9 +143,9 @@ export class GroupDetailsDialogComponent {
 
   teacherId = '';
 
-  disciplineId = '';
+  subjectId = '';
   readonly disciplinesCount = computed(() => {
-    return new Set(this.assignments().map((assignment) => assignment.disciplineId)).size;
+    return new Set(this.assignments().map((assignment) => assignment.subjectId)).size;
   });
   readonly groupStudents = computed(() => {
     return this.allStudents().filter(
@@ -190,16 +190,16 @@ export class GroupDetailsDialogComponent {
 
       teachers: this.adminService.getTeachers(),
 
-      disciplines: this.adminService.getDisciplines(),
+      subjects: this.adminService.getSubjects(),
 
       assignments: this.adminService.getGroupAssignments(this.data.group.id),
     }).subscribe({
-      next: ({ students, teachers, disciplines, assignments }) => {
+      next: ({ students, teachers, subjects, assignments }) => {
         this.allStudents.set(students as AdminStudent[]);
 
         this.teachers.set(teachers as AdminTeacher[]);
 
-        this.disciplines.set(disciplines as Discipline[]);
+        this.subjects.set(subjects as Subject[]);
 
         this.assignments.set(assignments as GroupAssignment[]);
 
@@ -266,13 +266,13 @@ export class GroupDetailsDialogComponent {
   }
 
   assignTeacher(): void {
-    if (!this.teacherId || !this.disciplineId || this.assigningTeacher()) {
+    if (!this.teacherId || !this.subjectId || this.assigningTeacher()) {
       return;
     }
 
     const exists = this.assignments().some(
       (assignment) =>
-        assignment.teacherId === this.teacherId && assignment.disciplineId === this.disciplineId,
+        assignment.teacherId === this.teacherId && assignment.subjectId === this.subjectId,
     );
 
     if (exists) {
@@ -287,7 +287,7 @@ export class GroupDetailsDialogComponent {
 
     this.adminService
       .assignTeacher(this.teacherId, {
-        disciplineId: this.disciplineId,
+        subjectId: this.subjectId,
 
         groupId: this.data.group.id,
       })
@@ -299,7 +299,7 @@ export class GroupDetailsDialogComponent {
       .subscribe({
         next: () => {
           this.teacherId = '';
-          this.disciplineId = '';
+          this.subjectId = '';
 
           this.snackBar.open('Преподаватель назначен', 'OK', {
             duration: 2200,

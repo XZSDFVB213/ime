@@ -251,6 +251,7 @@ model Subject {
   conferences Conference[]
   groups      GroupSubject[]
   materials   Material[]
+  assignments TeacherDisciplineGroup[]
 
   @@index([departmentId])
   @@map("subjects")
@@ -606,18 +607,22 @@ model Discipline {
 model TeacherDisciplineGroup {
   id String @id @default(cuid())
 
-  teacherId    String
-  disciplineId String
-  groupId      String
+  teacherId String
+  subjectId String
+  groupId   String
 
-  teacher    Teacher    @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  discipline Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
-  group      Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
-  @@unique([teacherId, disciplineId, groupId])
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime    @default(now())
+  Discipline   Discipline? @relation(fields: [disciplineId], references: [id])
+  disciplineId String?
+
+  @@unique([teacherId, subjectId, groupId])
   @@index([teacherId])
-  @@index([disciplineId])
+  @@index([subjectId])
   @@index([groupId])
 }

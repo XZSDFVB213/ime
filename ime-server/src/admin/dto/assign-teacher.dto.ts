@@ -1,9 +1,14 @@
-import { IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 
 export class AssignTeacherDto {
   @IsString()
-  disciplineId!: string;
+  @IsNotEmpty()
+  subjectId!: string;
 
   @IsString()
+  @IsNotEmpty()
   groupId!: string;
 }

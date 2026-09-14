@@ -350,7 +350,7 @@
                                 Дисциплина
                             </span>
 
-                            <mat-select [(ngModel)]="disciplineId" placeholder="Выберите дисциплину">
+                            <mat-select [(ngModel)]="subjectId" placeholder="Выберите дисциплину">
 
                                 @for (
                                 discipline of
@@ -371,7 +371,7 @@
 
                         <button type="button" class="assign-teacher-button" [disabled]="
                   !teacherId ||
-                  !disciplineId ||
+                  !subjectId ||
                   assigningTeacher()
                 " (click)="assignTeacher()">
 

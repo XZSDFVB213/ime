@@ -17,7 +17,7 @@
     <mat-form-field appearance="outline">
       <mat-label>Дисциплина</mat-label>
 
-      <mat-select formControlName="disciplineId">
+      <mat-select formControlName="subjectId">
         @for (discipline of disciplines; track discipline.id) {
           <mat-option [value]="discipline.id">
             {{ discipline.name }}

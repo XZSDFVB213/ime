@@ -96,7 +96,7 @@ export class AdminDashboard {
 
   readonly departments = signal<DashboardDepartment[]>([]);
 
-  readonly disciplines = signal<DashboardDiscipline[]>([]);
+  readonly subjects = signal<DashboardDiscipline[]>([]);
 
   readonly activeStudents = computed(
     () => this.students().filter((student) => student.status === 'ACTIVE').length,
@@ -160,9 +160,9 @@ export class AdminDashboard {
 
       departments: this.adminService.getDepartments(),
 
-      disciplines: this.adminService.getDisciplines(),
+      subjects: this.adminService.getSubjects(),
     }).subscribe({
-      next: ({ students, teachers, groups, departments, disciplines }) => {
+      next: ({ students, teachers, groups, departments, subjects }) => {
         this.students.set(students as DashboardUser[]);
 
         this.teachers.set(teachers as DashboardUser[]);
@@ -171,7 +171,7 @@ export class AdminDashboard {
 
         this.departments.set(departments as DashboardDepartment[]);
 
-        this.disciplines.set(disciplines as DashboardDiscipline[]);
+        this.subjects.set(subjects as DashboardDiscipline[]);
 
         this.loading.set(false);
       },

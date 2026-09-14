@@ -71,7 +71,7 @@ export class AdminService {
   assignTeacher(
     teacherId: string,
     data: {
-      disciplineId: string;
+      subjectId: string;
       groupId: string;
     },
   ) {

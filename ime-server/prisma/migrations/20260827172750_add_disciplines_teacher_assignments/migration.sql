@@ -13,7 +13,7 @@ CREATE TABLE "public"."Discipline" (
 CREATE TABLE "public"."TeacherDisciplineGroup" (
     "id" TEXT NOT NULL,
     "teacherId" TEXT NOT NULL,
-    "disciplineId" TEXT NOT NULL,
+    "subjectId" TEXT NOT NULL,
     "groupId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -24,19 +24,19 @@ CREATE TABLE "public"."TeacherDisciplineGroup" (
 CREATE INDEX "TeacherDisciplineGroup_teacherId_idx" ON "public"."TeacherDisciplineGroup"("teacherId");
 
 -- CreateIndex
-CREATE INDEX "TeacherDisciplineGroup_disciplineId_idx" ON "public"."TeacherDisciplineGroup"("disciplineId");
+CREATE INDEX "TeacherDisciplineGroup_subjectId_idx" ON "public"."TeacherDisciplineGroup"("subjectId");
 
 -- CreateIndex
 CREATE INDEX "TeacherDisciplineGroup_groupId_idx" ON "public"."TeacherDisciplineGroup"("groupId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "TeacherDisciplineGroup_teacherId_disciplineId_groupId_key" ON "public"."TeacherDisciplineGroup"("teacherId", "disciplineId", "groupId");
+CREATE UNIQUE INDEX "TeacherDisciplineGroup_teacherId_subjectId_groupId_key" ON "public"."TeacherDisciplineGroup"("teacherId", "subjectId", "groupId");
 
 -- AddForeignKey
 ALTER TABLE "public"."TeacherDisciplineGroup" ADD CONSTRAINT "TeacherDisciplineGroup_teacherId_fkey" FOREIGN KEY ("teacherId") REFERENCES "public"."teachers"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."TeacherDisciplineGroup" ADD CONSTRAINT "TeacherDisciplineGroup_disciplineId_fkey" FOREIGN KEY ("disciplineId") REFERENCES "public"."Discipline"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "public"."TeacherDisciplineGroup" ADD CONSTRAINT "TeacherDisciplineGroup_subjectId_fkey" FOREIGN KEY ("subjectId") REFERENCES "public"."Discipline"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."TeacherDisciplineGroup" ADD CONSTRAINT "TeacherDisciplineGroup_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "public"."groups"("id") ON DELETE CASCADE ON UPDATE CASCADE;

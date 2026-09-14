@@ -35,7 +35,7 @@ export class TeacherAssignmentsDialogComponent implements OnInit {
   saving = false;
 
   form = new FormGroup({
-    disciplineId: new FormControl('', {
+    subjectId: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required],
     }),
@@ -64,7 +64,7 @@ export class TeacherAssignmentsDialogComponent implements OnInit {
   loadData(): void {
     this.loading = true;
 
-    this.adminService.getDisciplines().subscribe({
+    this.adminService.getSubjects().subscribe({
       next: (disciplines) => {
         this.disciplines = disciplines;
       },
@@ -104,7 +104,7 @@ export class TeacherAssignmentsDialogComponent implements OnInit {
         this.assignments = [assignment, ...this.assignments];
 
         this.form.reset({
-          disciplineId: '',
+          subjectId: '',
           groupId: '',
         });
 
