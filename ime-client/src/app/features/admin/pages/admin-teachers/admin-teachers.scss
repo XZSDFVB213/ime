@@ -258,43 +258,112 @@
     }
   }
 }
-.action-button.edit-button {
-  color: #1767ec;
-  background: #edf4ff;
+.actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
 
-  &:hover {
-    background: #e1edff;
-  }
+  gap: 6px;
+
+  white-space: nowrap;
 }
 
-.action-button.delete {
-  width: 36px;
+
+.action-button {
+  appearance: none;
+
+  width: 34px;
+  height: 34px;
+
+  min-width: 34px;
 
   padding: 0;
+  margin: 0;
 
-  color: #b42318;
-  background: #fff0ee;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  outline: none;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+
+    font-size: 18px;
+    line-height: 18px;
+  }
 
   &:hover:not(:disabled) {
-    background: #ffe2de;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
   }
 
   &:disabled {
-    opacity: 0.5;
-
+    opacity: 0.45;
     cursor: not-allowed;
   }
 }
+
+
+/* Дисциплины */
+
 .action-button.subjects {
   color: #7047c7;
-  background: #f2edff;
+  background: #f1edff;
 
   &:hover:not(:disabled) {
-    color: #5d35b4;
-    background: #e8dfff;
-
-    box-shadow: 0 4px 10px rgba(112, 71, 199, 0.12);
+    color: #5b34b1;
+    background: #e7deff;
   }
+}
+
+
+/* Редактирование */
+
+.action-button.edit {
+  color: #1767ec;
+  background: #edf4ff;
+
+  &:hover:not(:disabled) {
+    color: #1059cd;
+    background: #dceaff;
+  }
+}
+
+
+/* Удаление */
+
+.action-button.delete {
+  color: #c03636;
+  background: #fff0f0;
+
+  &:hover:not(:disabled) {
+    color: #a92626;
+    background: #ffe0e0;
+  }
+}
+.actions-cell {
+  width: 130px;
+
+  padding-right: 18px !important;
+
+  white-space: nowrap;
 }
 .department-filter {
   width: 220px;

@@ -356,46 +356,38 @@
                             </div>
 
                         </td>
-                        <td>
+                        <td class="actions-cell">
 
-  <div class="actions">
+                            <div class="actions">
 
-  <button
-    type="button"
-    class="action-button subjects"
-    title="Дисциплины"
-    (click)="openAssignments(teacher)"
-  >
-    <mat-icon>
-      menu_book
-    </mat-icon>
-  </button>
+                                <button type="button" class="action-button subjects" title="Дисциплины"
+                                    (click)="openAssignments(teacher)">
+                                    <mat-icon>
+                                        menu_book
+                                    </mat-icon>
+                                </button>
 
-  <button
-    type="button"
-    class="action-button edit"
-    title="Редактировать"
-    (click)="openEditTeacher(teacher)"
-  >
-    <mat-icon>
-      edit
-    </mat-icon>
-  </button>
 
-  <button
-    type="button"
-    class="action-button delete"
-    title="Удалить"
-    (click)="deleteTeacher(teacher)"
-  >
-    <mat-icon>
-      delete_outline
-    </mat-icon>
-  </button>
+                                <button type="button" class="action-button edit" title="Редактировать"
+                                    (click)="openEditTeacher(teacher)">
+                                    <mat-icon>
+                                        edit
+                                    </mat-icon>
+                                </button>
 
-</div>
 
-</td>
+                                <button type="button" class="action-button delete" title="Удалить" [disabled]="
+        deletingTeacherId() ===
+        teacher.teacher?.id
+      " (click)="deleteTeacher(teacher)">
+                                    <mat-icon>
+                                        delete_outline
+                                    </mat-icon>
+                                </button>
+
+                            </div>
+
+                        </td>
 
                     </tr>
 
