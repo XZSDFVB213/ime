@@ -126,64 +126,75 @@ export class AdminService {
       },
     });
   }
-  async getTeacherAssignments(teacherId: string) {
-    const teacher = await this.prisma.teacher.findUnique({
+ async getTeacherAssignments(
+  teacherId: string,
+) {
+  return this.prisma.teacherDisciplineGroup.findMany({
+    where: {
+      teacherId,
+    },
+
+    include: {
+      subject: true,
+      group: true,
+    },
+
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+}
+  async assignTeacher(
+  teacherId: string,
+  dto: {
+    subjectId: string;
+    groupId: string;
+  },
+) {
+  const teacher =
+    await this.prisma.teacher.findUnique({
       where: {
         id: teacherId,
       },
     });
 
-    if (!teacher) {
-      throw new NotFoundException('Преподаватель не найден');
-    }
-
-    return this.prisma.teacherDisciplineGroup.findMany({
-      where: {
-        teacherId,
-      },
-
-      include: {
-        subject: true,
-        group: true,
-      },
-
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+  if (!teacher) {
+    throw new NotFoundException(
+      'Преподаватель не найден',
+    );
   }
-  async assignTeacher(teacherId: string, dto: AssignTeacherDto) {
-    const teacher = await this.prisma.teacher.findUnique({
-      where: {
-        id: teacherId,
-      },
-    });
 
-    if (!teacher) {
-      throw new NotFoundException('Преподаватель не найден');
-    }
 
-    const subject = await this.prisma.subject.findUnique({
+  const subject =
+    await this.prisma.subject.findUnique({
       where: {
         id: dto.subjectId,
       },
     });
 
-    if (!subject) {
-      throw new NotFoundException('Дисциплина не найдена');
-    }
+  if (!subject) {
+    throw new NotFoundException(
+      'Дисциплина не найдена',
+    );
+  }
 
-    const group = await this.prisma.group.findUnique({
+
+  const group =
+    await this.prisma.group.findUnique({
       where: {
         id: dto.groupId,
       },
     });
 
-    if (!group) {
-      throw new NotFoundException('Группа не найдена');
-    }
+  if (!group) {
+    throw new NotFoundException(
+      'Группа не найдена',
+    );
+  }
 
-    const exists = await this.prisma.teacherDisciplineGroup.findUnique({
+
+  const existing =
+    await this.prisma.teacherDisciplineGroup.findUnique({
       where: {
         teacherId_subjectId_groupId: {
           teacherId,
@@ -193,31 +204,33 @@ export class AdminService {
       },
     });
 
-    if (exists) {
-      throw new ConflictException(
-        'Преподаватель уже назначен на эту дисциплину для этой группы',
-      );
-    }
 
-    return this.prisma.teacherDisciplineGroup.create({
-      data: {
-        teacherId,
-        subjectId: dto.subjectId,
-        groupId: dto.groupId,
-      },
+  if (existing) {
+    throw new ConflictException(
+      'Эта дисциплина уже назначена преподавателю в данной группе',
+    );
+  }
 
-      include: {
-        subject: true,
-        group: true,
 
-        teacher: {
-          include: {
-            user: true,
-          },
+  return this.prisma.teacherDisciplineGroup.create({
+    data: {
+      teacherId,
+      subjectId: dto.subjectId,
+      groupId: dto.groupId,
+    },
+
+    include: {
+      subject: true,
+      group: true,
+
+      teacher: {
+        include: {
+          user: true,
         },
       },
-    });
-  }
+    },
+  });
+}
   async deleteTeacherAssignment(teacherId: string, assignmentId: string) {
     const assignment = await this.prisma.teacherDisciplineGroup.findFirst({
       where: {
