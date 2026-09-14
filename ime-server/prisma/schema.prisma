@@ -598,8 +598,6 @@ model Discipline {
   name        String
   description String?
 
-  assignments TeacherDisciplineGroup[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -618,8 +616,6 @@ model TeacherDisciplineGroup {
   group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   createdAt    DateTime    @default(now())
-  Discipline   Discipline? @relation(fields: [disciplineId], references: [id])
-  disciplineId String?
 
   @@unique([teacherId, subjectId, groupId])
   @@index([teacherId])
