@@ -50,7 +50,59 @@ export class AdminService {
 
     return disciplines;
   }
+  async deleteSubject(subjectId: string) {
+    const subject = await this.prisma.subject.findUnique({
+      where: {
+        id: subjectId,
+      },
+    });
 
+    if (!subject) {
+      throw new NotFoundException('Дисциплина не найдена');
+    }
+
+    const [lessons, materials, homeworks, assignments] = await Promise.all([
+      this.prisma.lesson.count({
+        where: {
+          subjectId,
+        },
+      }),
+
+      this.prisma.material.count({
+        where: {
+          subjectId,
+        },
+      }),
+
+      this.prisma.homework.count({
+        where: {
+          subjectId,
+        },
+      }),
+
+      this.prisma.teacherDisciplineGroup.count({
+        where: {
+          subjectId,
+        },
+      }),
+    ]);
+
+    if (lessons > 0 || materials > 0 || homeworks > 0 || assignments > 0) {
+      throw new ConflictException(
+        'Нельзя удалить дисциплину: она используется в учебном процессе',
+      );
+    }
+
+    await this.prisma.subject.delete({
+      where: {
+        id: subjectId,
+      },
+    });
+
+    return {
+      success: true,
+    };
+  }
   async createDiscipline(dto: CreateDisciplineDto) {
     const existing = await this.prisma.discipline.findFirst({
       where: {
@@ -160,7 +212,6 @@ export class AdminService {
 
         teacher: {
           include: {
-            
             user: true,
           },
         },

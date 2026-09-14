@@ -57,7 +57,13 @@ export class AdminController {
   getFaculties() {
     return this.adminService.getFaculties();
   }
-
+  @Delete('subjects/:subjectId')
+  deleteSubject(
+    @Param('subjectId')
+    subjectId: string,
+  ) {
+    return this.adminService.deleteSubject(subjectId);
+  }
   @Post('faculties')
   createFaculty(
     @Body()
