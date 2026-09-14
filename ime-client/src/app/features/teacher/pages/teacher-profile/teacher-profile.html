@@ -1,0 +1,401 @@
+<div class="profile-page">
+
+  <header class="page-header">
+
+    <div>
+      <span class="eyebrow">
+        Личный кабинет
+      </span>
+
+      <h1>
+        Мой профиль
+      </h1>
+
+      <p>
+        Личная и профессиональная информация преподавателя
+      </p>
+    </div>
+
+  </header>
+
+
+  @if (session.loading()) {
+
+    <div class="state">
+      <div class="loader"></div>
+
+      <span>
+        Загружаем профиль...
+      </span>
+    </div>
+
+  } @else if (session.user()) {
+
+    <section class="profile-layout">
+
+
+      <!-- ЛЕВАЯ КАРТОЧКА -->
+
+      <article class="profile-card">
+
+        <div class="profile-cover"></div>
+
+
+        <div class="profile-main">
+
+          <div class="avatar">
+
+            @if (
+              session.user()?.avatarUrl
+            ) {
+
+              <img
+                [src]="
+                  session.user()?.avatarUrl
+                "
+                [alt]="
+                  session.fullName()
+                "
+              />
+
+            } @else {
+
+              <span>
+                {{
+                  session.initials()
+                }}
+              </span>
+
+            }
+
+          </div>
+
+
+          <h2>
+            {{
+              session.fullName()
+            }}
+          </h2>
+
+
+          <span class="role">
+            Преподаватель
+          </span>
+
+
+          <p>
+            {{
+              session.email()
+            }}
+          </p>
+
+        </div>
+
+
+        <div class="profile-summary">
+
+          <div class="summary-item">
+
+            <div class="summary-icon">
+              <mat-icon>
+                account_balance
+              </mat-icon>
+            </div>
+
+            <div>
+              <span>
+                Кафедра
+              </span>
+
+              <strong>
+                {{
+                  session.departmentName()
+                }}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="summary-item">
+
+            <div class="summary-icon">
+              <mat-icon>
+                badge
+              </mat-icon>
+            </div>
+
+            <div>
+              <span>
+                Должность
+              </span>
+
+              <strong>
+                {{
+                  session.position()
+                }}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="summary-item">
+
+            <div
+              class="summary-icon success"
+            >
+              <mat-icon>
+                verified
+              </mat-icon>
+            </div>
+
+            <div>
+              <span>
+                Статус
+              </span>
+
+              <strong
+                class="active"
+              >
+                {{
+                  status() ===
+                  'ACTIVE'
+                    ? 'Активен'
+                    : status()
+                }}
+              </strong>
+            </div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- ПРАВАЯ ЧАСТЬ -->
+
+      <div class="details">
+
+
+        <!-- ЛИЧНЫЕ ДАННЫЕ -->
+
+        <article class="info-card">
+
+          <header>
+
+            <div class="section-icon">
+              <mat-icon>
+                person_outline
+              </mat-icon>
+            </div>
+
+            <div>
+              <h2>
+                Личная информация
+              </h2>
+
+              <p>
+                Основные контактные данные
+              </p>
+            </div>
+
+          </header>
+
+
+          <div class="info-grid">
+
+            <div class="info-item">
+
+              <span>
+                ФИО
+              </span>
+
+              <strong>
+                {{
+                  session.fullName()
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Электронная почта
+              </span>
+
+              <strong>
+                {{
+                  session.email()
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Телефон
+              </span>
+
+              <strong>
+                {{ phone() }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Тип аккаунта
+              </span>
+
+              <strong>
+                Преподаватель
+              </strong>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- РАБОТА -->
+
+        <article class="info-card">
+
+          <header>
+
+            <div
+              class="section-icon professional"
+            >
+              <mat-icon>
+                school
+              </mat-icon>
+            </div>
+
+            <div>
+              <h2>
+                Профессиональная информация
+              </h2>
+
+              <p>
+                Данные преподавателя в университете
+              </p>
+            </div>
+
+          </header>
+
+
+          <div class="info-grid">
+
+            <div class="info-item">
+
+              <span>
+                Кафедра
+              </span>
+
+              <strong>
+                {{
+                  session.departmentName()
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Должность
+              </span>
+
+              <strong>
+                {{
+                  session.position()
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- ДОСТУП -->
+
+        <article class="info-card">
+
+          <header>
+
+            <div
+              class="section-icon security"
+            >
+              <mat-icon>
+                security
+              </mat-icon>
+            </div>
+
+            <div>
+              <h2>
+                Учетная запись
+              </h2>
+
+              <p>
+                Информация о доступе к системе
+              </p>
+            </div>
+
+          </header>
+
+
+          <div class="account-row">
+
+            <div class="account-status">
+
+              <div class="status-dot"></div>
+
+              <div>
+                <strong>
+                  Учетная запись активна
+                </strong>
+
+                <span>
+                  Доступ к кабинету преподавателя разрешен
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  } @else {
+
+    <div class="state">
+
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <strong>
+        Не удалось загрузить профиль
+      </strong>
+
+    </div>
+
+  }
+
+</div>

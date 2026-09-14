@@ -13,7 +13,14 @@ export const TeacherRoutes: Routes = [
         redirectTo: 'dashboard',
         pathMatch: 'full',
       },
-
+      {
+        path:"profile",
+         data: {
+          title: 'Профиль',
+        },
+        loadComponent: () =>
+          import('./pages/teacher-profile/teacher-profile').then((m) => m.TeacherProfile),
+      },
       {
         path: 'dashboard',
         data: {
