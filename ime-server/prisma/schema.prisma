@@ -65,6 +65,41 @@ enum MaterialType {
   LINK
 }
 
+enum PortfolioItemType {
+  PROJECT
+  COURSEWORK
+  RESEARCH
+  PRESENTATION
+  CERTIFICATE
+  DIPLOMA
+  OTHER
+}
+
+model PortfolioItem {
+  id          String            @id @default(cuid())
+  title       String
+  description String?
+  type        PortfolioItemType
+
+  url      String?
+  fileName String?
+  mimeType String?
+  size     Int?
+
+  studentId String
+  subjectId String?
+
+  student Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([subjectId])
+  @@index([type])
+}
+
 model Material {
   id          String       @id @default(cuid())
   title       String
@@ -196,7 +231,8 @@ model Student {
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  submissions HomeworkSubmission[]
+  submissions    HomeworkSubmission[]
+  portfolioItems PortfolioItem[]
 
   @@index([groupId])
   @@map("students")
@@ -244,14 +280,15 @@ model Subject {
   departmentId String
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
 
-  teachers    SubjectTeacher[]
-  lessons     Lesson[]
-  homeworks   Homework[]
-  schedule    ScheduleEntry[]
-  conferences Conference[]
-  groups      GroupSubject[]
-  materials   Material[]
-  assignments TeacherDisciplineGroup[]
+  teachers       SubjectTeacher[]
+  lessons        Lesson[]
+  homeworks      Homework[]
+  schedule       ScheduleEntry[]
+  conferences    Conference[]
+  groups         GroupSubject[]
+  materials      Material[]
+  assignments    TeacherDisciplineGroup[]
+  portfolioItems PortfolioItem[]
 
   @@index([departmentId])
   @@map("subjects")
@@ -615,7 +652,7 @@ model TeacherDisciplineGroup {
 
   group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime    @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([teacherId, subjectId, groupId])
   @@index([teacherId])
