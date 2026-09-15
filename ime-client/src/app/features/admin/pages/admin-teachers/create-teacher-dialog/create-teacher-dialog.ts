@@ -1,30 +1,18 @@
-import {
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 
-import {
-  MatSnackBar,
-  MatSnackBarModule,
-} from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { finalize } from 'rxjs';
 
 import { AdminService } from '../../../services/admin.service';
-
 
 interface DialogData {
   departments: {
@@ -32,7 +20,6 @@ interface DialogData {
     name: string;
   }[];
 }
-
 
 @Component({
   selector: 'app-create-teacher-dialog',
@@ -49,29 +36,18 @@ interface DialogData {
     MatSnackBarModule,
   ],
 
-  templateUrl:
-    './create-teacher-dialog.html',
+  templateUrl: './create-teacher-dialog.html',
 
-  styleUrl:
-    './create-teacher-dialog.scss',
+  styleUrl: './create-teacher-dialog.scss',
 })
 export class CreateTeacherDialog {
-  private readonly adminService =
-    inject(AdminService);
+  private readonly adminService = inject(AdminService);
 
-  private readonly dialogRef =
-    inject(
-      MatDialogRef<CreateTeacherDialog>,
-    );
+  private readonly dialogRef = inject(MatDialogRef<CreateTeacherDialog>);
 
-  private readonly snackBar =
-    inject(MatSnackBar);
+  private readonly snackBar = inject(MatSnackBar);
 
-  readonly data =
-    inject<DialogData>(
-      MAT_DIALOG_DATA,
-    );
-
+  readonly data = inject<DialogData>(MAT_DIALOG_DATA);
 
   fullName = '';
   email = '';
@@ -79,25 +55,17 @@ export class CreateTeacherDialog {
   password = '';
 
   position = '';
-  departmentId = '';
+  departmentIds: string[] = [];
 
+  readonly loading = signal(false);
 
-  readonly loading =
-    signal(false);
+  readonly showPassword = signal(false);
 
-  readonly showPassword =
-    signal(false);
-
-  readonly error =
-    signal<string | null>(null);
-
+  readonly error = signal<string | null>(null);
 
   togglePassword(): void {
-    this.showPassword.update(
-      (value) => !value,
-    );
+    this.showPassword.update((value) => !value);
   }
-
 
   close(): void {
     if (!this.loading()) {
@@ -105,26 +73,15 @@ export class CreateTeacherDialog {
     }
   }
 
-
   create(): void {
-    if (
-      !this.fullName.trim() ||
-      !this.email.trim() ||
-      !this.password
-    ) {
-      this.error.set(
-        'Заполните обязательные поля',
-      );
+    if (!this.fullName.trim() || !this.email.trim() || !this.password) {
+      this.error.set('Заполните обязательные поля');
 
       return;
     }
 
-    if (
-      this.password.length < 6
-    ) {
-      this.error.set(
-        'Пароль должен содержать минимум 6 символов',
-      );
+    if (this.password.length < 6) {
+      this.error.set('Пароль должен содержать минимум 6 символов');
 
       return;
     }
@@ -134,28 +91,17 @@ export class CreateTeacherDialog {
 
     this.adminService
       .createTeacher({
-        fullName:
-          this.fullName.trim(),
+        fullName: this.fullName.trim(),
 
-        email:
-          this.email
-            .trim()
-            .toLowerCase(),
+        email: this.email.trim().toLowerCase(),
 
-        password:
-          this.password,
+        password: this.password,
 
-        phone:
-          this.phone.trim() ||
-          undefined,
+        phone: this.phone.trim(),
 
-        position:
-          this.position.trim() ||
-          undefined,
+        position: this.position.trim(),
 
-        departmentId:
-          this.departmentId ||
-          undefined,
+        departmentIds: this.departmentIds,
       })
       .pipe(
         finalize(() => {
@@ -164,28 +110,17 @@ export class CreateTeacherDialog {
       )
       .subscribe({
         next: () => {
-          this.snackBar.open(
-            'Преподаватель создан',
-            'OK',
-            {
-              duration: 2500,
-            },
-          );
+          this.snackBar.open('Преподаватель создан', 'OK', {
+            duration: 2500,
+          });
 
-          this.dialogRef.close(
-            true,
-          );
+          this.dialogRef.close(true);
         },
 
         error: (error) => {
-          console.error(
-            error,
-          );
+          console.error(error);
 
-          this.error.set(
-            error.error?.message ??
-              'Не удалось создать преподавателя',
-          );
+          this.error.set(error.error?.message ?? 'Не удалось создать преподавателя');
         },
       });
   }

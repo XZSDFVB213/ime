@@ -94,20 +94,76 @@
         <label>
             <span>Кафедра *</span>
 
-            <mat-select [(ngModel)]="departmentId" placeholder="Выберите кафедру">
+            <label class="field">
 
-                @for (
-                department of data.departments;
-                track department.id
-                ) {
+                <span>
+                    Кафедры
+                </span>
 
-                <mat-option [value]="department.id">
-                    {{ department.name }}
-                </mat-option>
+                <mat-select multiple [(ngModel)]="departmentIds" placeholder="Выберите кафедры">
 
-                }
+                    <mat-select-trigger>
 
-            </mat-select>
+                        @if (
+                        departmentIds.length
+                        ) {
+
+                        <div class="selected-departments">
+
+                            @for (
+                            departmentId of
+                            departmentIds;
+                            track departmentId
+                            ) {
+
+                            @if (
+                            getDepartment(
+                            departmentId
+                            );
+                            as department
+                            ) {
+
+                            <span>
+                                {{ department.name }}
+                            </span>
+
+                            }
+
+                            }
+
+                        </div>
+
+                        } @else {
+
+                        <span class="select-placeholder">
+                            Выберите кафедры
+                        </span>
+
+                        }
+
+                    </mat-select-trigger>
+
+
+                    @for (
+                    department of
+                    data.departments;
+                    track department.id
+                    ) {
+
+                    <mat-option [value]="department.id">
+                        {{ department.name }}
+                    </mat-option>
+
+                    }
+
+                </mat-select>
+
+
+                <small>
+                    Можно выбрать несколько кафедр
+                </small>
+
+            </label>
         </label>
 
 

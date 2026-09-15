@@ -3,7 +3,14 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 
 import { TeacherService } from './teacher.service';
+interface Department {
+  id: string;
+  name: string;
+}
 
+interface TeacherDepartment {
+  department: Department;
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -21,7 +28,11 @@ export class TeacherSessionService {
   readonly firstName = computed(() => {
     return this.fullName().trim().split(/\s+/)[0] || 'Преподаватель';
   });
-
+  readonly departments = computed<Department[]>(() => {
+    return (
+      this.user()?.teacher?.departments?.map((item: TeacherDepartment) => item.department) ?? []
+    );
+  });
   readonly email = computed(() => {
     return this.user()?.email ?? '';
   });
@@ -30,8 +41,14 @@ export class TeacherSessionService {
     return this.user()?.teacher?.position ?? 'Преподаватель';
   });
 
-  readonly departmentName = computed(() => {
-    return this.user()?.teacher?.department?.name ?? 'Кафедра не указана';
+  readonly departmentNames = computed(() => {
+    const departments = this.departments();
+
+    if (!departments.length) {
+      return 'Кафедра не указана';
+    }
+
+    return departments.map((department) => department.name).join(', ');
   });
 
   readonly initials = computed(() => {

@@ -24,7 +24,14 @@ import { ChatService } from '../../services/chat.service';
 import { ChatRealtimeService } from '../../services/chat-realtime.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
+interface Department {
+  id: string;
+  name: string;
+}
 
+interface TeacherDepartment {
+  department: Department;
+}
 @Component({
   selector: 'app-messages',
 
@@ -35,6 +42,7 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './messages.html',
   styleUrl: './messages.scss',
 })
+
 export class MessagesComponent {
   private readonly chatService = inject(ChatService);
 
@@ -143,7 +151,9 @@ export class MessagesComponent {
         contact.fullName?.toLocaleLowerCase('ru').includes(query) ||
         contact.email?.toLocaleLowerCase('ru').includes(query) ||
         contact.student?.group?.name?.toLocaleLowerCase('ru').includes(query) ||
-        contact.teacher?.department?.name?.toLocaleLowerCase('ru').includes(query)
+        contact.teacher?.departments?.some((item: TeacherDepartment) =>
+          item.department.name.toLocaleLowerCase('ru').includes(query),
+        )
       );
     });
   });

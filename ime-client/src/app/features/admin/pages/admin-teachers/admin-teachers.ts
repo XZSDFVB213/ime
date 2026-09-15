@@ -26,6 +26,10 @@ interface Department {
   name: string;
 }
 
+interface TeacherDepartment {
+  department: Department;
+}
+
 interface AdminTeacher {
   id: string;
 
@@ -45,12 +49,9 @@ interface AdminTeacher {
 
     position?: string | null;
 
-    departmentId?: string | null;
-
-    department?: Department | null;
+    departments: TeacherDepartment[];
   } | null;
 }
-
 @Component({
   selector: 'app-admin-teachers',
 
@@ -86,77 +87,47 @@ export class AdminTeachers {
   readonly search = signal('');
 
   readonly departmentFilter = signal('ALL');
-  deleteTeacher(
-  teacher: AdminTeacher,
-): void {
-  if (!teacher.teacher?.id) {
-    return;
-  }
+  deleteTeacher(teacher: AdminTeacher): void {
+    if (!teacher.teacher?.id) {
+      return;
+    }
 
+    const confirmed = confirm(`Удалить преподавателя «${teacher.fullName}»?`);
 
-  const confirmed =
-    confirm(
-      `Удалить преподавателя «${teacher.fullName}»?`,
-    );
+    if (!confirmed) {
+      return;
+    }
 
-  if (!confirmed) {
-    return;
-  }
+    this.deletingTeacherId.set(teacher.teacher.id);
 
-
-  this.deletingTeacherId.set(
-    teacher.teacher.id,
-  );
-
-
-  this.adminService
-    .deleteTeacher(
-      teacher.teacher.id,
-    )
-    .subscribe({
+    this.adminService.deleteTeacher(teacher.teacher.id).subscribe({
       next: () => {
-        this.teachers.update(
-          (teachers) =>
-            teachers.filter(
-              (item) =>
-                item.id !==
-                teacher.id,
-            ),
-        );
+        this.teachers.update((teachers) => teachers.filter((item) => item.id !== teacher.id));
 
-        this.deletingTeacherId.set(
-          null,
-        );
+        this.deletingTeacherId.set(null);
 
-        this.snackBar.open(
-          'Преподаватель удалён',
-          'OK',
-          {
-            duration: 2500,
-          },
-        );
+        this.snackBar.open('Преподаватель удалён', 'OK', {
+          duration: 2500,
+        });
       },
 
       error: (error) => {
         console.error(error);
 
-        this.deletingTeacherId.set(
-          null,
-        );
+        this.deletingTeacherId.set(null);
 
-        this.snackBar.open(
-          error.error?.message ??
-            'Не удалось удалить преподавателя',
-          'Закрыть',
-          {
-            duration: 3500,
-          },
-        );
+        this.snackBar.open(error.error?.message ?? 'Не удалось удалить преподавателя', 'Закрыть', {
+          duration: 3500,
+        });
       },
     });
-}
+  }
   openEditTeacher(teacher: AdminTeacher): void {
     if (!teacher.teacher) {
+      this.snackBar.open('У преподавателя отсутствует профиль Teacher', 'Закрыть', {
+        duration: 3000,
+      });
+
       return;
     }
 
@@ -178,7 +149,10 @@ export class AdminTeachers {
 
         position: teacher.teacher.position,
 
-        departmentId: teacher.teacher.departmentId,
+        /*
+         * Вот главное изменение.
+         */
+        departmentIds: teacher.teacher.departments.map((item) => item.department.id),
 
         departments: this.departments(),
       },
@@ -196,7 +170,17 @@ export class AdminTeachers {
     const department = this.departmentFilter();
 
     return this.teachers().filter((teacher) => {
-      if (department !== 'ALL' && teacher.teacher?.department?.id !== department) {
+      /*
+       * Фильтр по кафедре.
+       *
+       * Преподаватель подходит,
+       * если состоит хотя бы
+       * в одной выбранной кафедре.
+       */
+      if (
+        department !== 'ALL' &&
+        !teacher.teacher?.departments?.some((item) => item.department.id === department)
+      ) {
         return false;
       }
 
@@ -204,12 +188,16 @@ export class AdminTeachers {
         return true;
       }
 
+      const matchesDepartment = teacher.teacher?.departments?.some((item) =>
+        item.department.name.toLowerCase().includes(search),
+      );
+
       return (
         teacher.fullName.toLowerCase().includes(search) ||
         teacher.email.toLowerCase().includes(search) ||
         teacher.phone?.toLowerCase().includes(search) ||
         teacher.teacher?.position?.toLowerCase().includes(search) ||
-        teacher.teacher?.department?.name?.toLowerCase().includes(search)
+        matchesDepartment
       );
     });
   });
@@ -219,15 +207,15 @@ export class AdminTeachers {
   );
 
   readonly withoutDepartmentCount = computed(
-    () => this.teachers().filter((teacher) => !teacher.teacher?.department).length,
+    () => this.teachers().filter((teacher) => !teacher.teacher?.departments?.length).length,
   );
 
   readonly departmentsCount = computed(() => {
-    return new Set(
-      this.teachers()
-        .map((teacher) => teacher.teacher?.department?.id)
-        .filter(Boolean),
-    ).size;
+    const ids = this.teachers().flatMap(
+      (teacher) => teacher.teacher?.departments?.map((item) => item.department.id) ?? [],
+    );
+
+    return new Set(ids).size;
   });
 
   constructor() {

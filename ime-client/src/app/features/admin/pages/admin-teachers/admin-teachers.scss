@@ -270,7 +270,6 @@
   white-space: nowrap;
 }
 
-
 .action-button {
   appearance: none;
 
@@ -320,7 +319,6 @@
   }
 }
 
-
 /* Дисциплины */
 
 .action-button.subjects {
@@ -333,7 +331,6 @@
   }
 }
 
-
 /* Редактирование */
 
 .action-button.edit {
@@ -345,7 +342,34 @@
     background: #dceaff;
   }
 }
+.departments-list {
+  max-width: 300px;
 
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 5px;
+}
+
+.department-badge {
+  padding: 5px 8px;
+
+  display: inline-flex;
+  align-items: center;
+
+  color: #3f5876;
+  background: #eef3f9;
+
+  font-size: 11px;
+  font-weight: 650;
+
+  line-height: 1.2;
+
+  border-radius: 7px;
+
+  white-space: nowrap;
+}
 
 /* Удаление */
 

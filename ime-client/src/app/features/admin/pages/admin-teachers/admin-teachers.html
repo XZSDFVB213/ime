@@ -295,13 +295,28 @@
 
                             @if (
                             teacher.teacher
-                            ?.department;
-                            as department
+                            ?.departments
+                            ?.length
                             ) {
 
-                            <span class="department">
-                                {{ department.name }}
-                            </span>
+                            <div class="departments-list">
+
+                                @for (
+                                item of
+                                teacher.teacher!
+                                .departments;
+                                track item.department.id
+                                ) {
+
+                                <span class="department-badge">
+                                    {{
+                                    item.department.name
+                                    }}
+                                </span>
+
+                                }
+
+                            </div>
 
                             } @else {
 

@@ -19,11 +19,7 @@
     </div>
 
 
-    <button
-      type="button"
-      class="close-button"
-      (click)="close()"
-    >
+    <button type="button" class="close-button" (click)="close()">
       <mat-icon>
         close
       </mat-icon>
@@ -32,10 +28,7 @@
   </header>
 
 
-  <form
-    #form="ngForm"
-    (ngSubmit)="create()"
-  >
+  <form #form="ngForm" (ngSubmit)="create()">
 
     <div class="form-grid">
 
@@ -45,13 +38,7 @@
           ФИО *
         </span>
 
-        <input
-          type="text"
-          name="fullName"
-          placeholder="Иван Иванов"
-          [(ngModel)]="fullName"
-          required
-        />
+        <input type="text" name="fullName" placeholder="Иван Иванов" [(ngModel)]="fullName" required />
 
       </label>
 
@@ -62,13 +49,7 @@
           Email *
         </span>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="teacher@ime.ru"
-          [(ngModel)]="email"
-          required
-        />
+        <input type="email" name="email" placeholder="teacher@ime.ru" [(ngModel)]="email" required />
 
       </label>
 
@@ -79,12 +60,7 @@
           Телефон
         </span>
 
-        <input
-          type="tel"
-          name="phone"
-          placeholder="+7 999 123-45-67"
-          [(ngModel)]="phone"
-        />
+        <input type="tel" name="phone" placeholder="+7 999 123-45-67" [(ngModel)]="phone" />
 
       </label>
 
@@ -97,27 +73,18 @@
 
         <div class="password-field">
 
-          <input
-            [type]="
+          <input [type]="
               showPassword()
                 ? 'text'
                 : 'password'
-            "
-            name="password"
-            placeholder="Минимум 6 символов"
-            [(ngModel)]="password"
-            required
-          />
+            " name="password" placeholder="Минимум 6 символов" [(ngModel)]="password" required />
 
-          <button
-            type="button"
-            (click)="togglePassword()"
-          >
+          <button type="button" (click)="togglePassword()">
             <mat-icon>
               {{
-                showPassword()
-                  ? 'visibility_off'
-                  : 'visibility'
+              showPassword()
+              ? 'visibility_off'
+              : 'visibility'
               }}
             </mat-icon>
           </button>
@@ -133,12 +100,7 @@
           Должность
         </span>
 
-        <input
-          type="text"
-          name="position"
-          placeholder="Доцент"
-          [(ngModel)]="position"
-        />
+        <input type="text" name="position" placeholder="Доцент" [(ngModel)]="position" />
 
       </label>
 
@@ -149,31 +111,34 @@
           Кафедра
         </span>
 
-        <mat-select
-          name="departmentId"
-          [(ngModel)]="departmentId"
-          placeholder="Выберите кафедру"
-        >
+        <label class="field">
 
-          <mat-option value="">
-            Без кафедры
-          </mat-option>
+          <span>
+            Кафедры
+          </span>
 
-          @for (
+          <mat-select multiple [(ngModel)]="departmentIds" placeholder="Выберите кафедры">
+
+            @for (
             department of
-              data.departments;
+            data.departments;
             track department.id
-          ) {
+            ) {
 
-            <mat-option
-              [value]="department.id"
-            >
+            <mat-option [value]="department.id">
               {{ department.name }}
             </mat-option>
 
-          }
+            }
 
-        </mat-select>
+          </mat-select>
+
+          <small>
+            Преподаватель может состоять
+            в нескольких кафедрах
+          </small>
+
+        </label>
 
       </label>
 
@@ -182,46 +147,37 @@
 
     @if (error()) {
 
-      <div class="error">
-        <mat-icon>
-          error_outline
-        </mat-icon>
+    <div class="error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
 
-        {{ error() }}
-      </div>
+      {{ error() }}
+    </div>
 
     }
 
 
     <footer class="dialog-actions">
 
-      <button
-        type="button"
-        class="secondary-button"
-        [disabled]="loading()"
-        (click)="close()"
-      >
+      <button type="button" class="secondary-button" [disabled]="loading()" (click)="close()">
         Отмена
       </button>
 
 
-      <button
-        type="submit"
-        class="submit-button"
-        [disabled]="
+      <button type="submit" class="submit-button" [disabled]="
           loading() ||
           form.invalid
-        "
-      >
+        ">
 
         @if (loading()) {
-          Создание...
+        Создание...
         } @else {
-          <mat-icon>
-            person_add
-          </mat-icon>
+        <mat-icon>
+          person_add
+        </mat-icon>
 
-          Создать преподавателя
+        Создать преподавателя
         }
 
       </button>

@@ -50,7 +50,7 @@ export class AdminService {
     password: string;
     phone?: string;
     position?: string;
-    departmentId?: string;
+    departmentIds: string[];
   }) {
     return this.http.post(`${environment.api}/admin/teachers`, dto);
   }
@@ -79,20 +79,22 @@ export class AdminService {
   ) {
     return this.http.post(`${environment.api}/admin/teachers/${teacherId}/assignments`, data);
   }
-  updateTeacher(
-    teacherId: string,
-
-    dto: {
-      fullName: string;
-      email: string;
-      phone?: string;
-      position?: string;
-      departmentId: string;
-      password?: string;
-    },
-  ) {
-    return this.http.patch(`${environment.api}/admin/teachers/${teacherId}`, dto);
-  }
+updateTeacher(
+  teacherId: string,
+  dto: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    position?: string;
+    departmentIds: string[];
+    password?: string;
+  },
+) {
+  return this.http.patch(
+    `${environment.api}/admin/teachers/${teacherId}`,
+    dto,
+  );
+}
   deleteTeacher(teacherId: string) {
     return this.http.delete(`${environment.api}/admin/teachers/${teacherId}`);
   }

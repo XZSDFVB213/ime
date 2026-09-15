@@ -37,7 +37,7 @@ export class EditTeacherDialog {
   email = '';
   phone = '';
   position = '';
-  departmentId = '';
+  departmentIds: string[] = [];
   password = '';
 
   hidePassword = true;
@@ -53,11 +53,12 @@ export class EditTeacherDialog {
 
       fullName: string;
       email: string;
+
       phone?: string | null;
 
       position?: string | null;
 
-      departmentId?: string | null;
+      departmentIds: string[];
 
       departments: Department[];
     },
@@ -70,11 +71,11 @@ export class EditTeacherDialog {
 
     this.position = data.position ?? '';
 
-    this.departmentId = data.departmentId ?? '';
+    this.departmentIds = [...data.departmentIds];
   }
 
   save(): void {
-    if (!this.fullName.trim() || !this.email.trim() || !this.departmentId) {
+    if (!this.fullName.trim() || !this.email.trim()) {
       this.error.set('Заполните обязательные поля');
 
       return;
@@ -94,7 +95,7 @@ export class EditTeacherDialog {
       email: string;
       phone?: string;
       position?: string;
-      departmentId: string;
+      departmentIds: string[];
       password?: string;
     } = {
       fullName: this.fullName.trim(),
@@ -105,10 +106,10 @@ export class EditTeacherDialog {
 
       position: this.position.trim(),
 
-      departmentId: this.departmentId,
+      departmentIds: this.departmentIds,
     };
 
-    if (this.password.trim()) {
+    if (this.password) {
       dto.password = this.password;
     }
 
@@ -133,4 +134,14 @@ export class EditTeacherDialog {
   close(): void {
     this.dialogRef.close();
   }
+  getDepartment(
+  departmentId: string,
+): Department | undefined {
+  return this.data.departments
+    .find(
+      (department) =>
+        department.id ===
+        departmentId,
+    );
+}
 }
