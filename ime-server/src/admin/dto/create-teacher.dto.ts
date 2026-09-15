@@ -4,6 +4,8 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  ArrayUnique,
+  IsArray,
 } from 'class-validator';
 
 export class CreateTeacherDto {
@@ -27,6 +29,10 @@ export class CreateTeacherDto {
   position?: string;
 
   @IsOptional()
-  @IsString()
-  departmentId?: string;
+  @IsArray()
+  @ArrayUnique()
+  @IsString({
+    each: true,
+  })
+  departmentIds?: string[];
 }

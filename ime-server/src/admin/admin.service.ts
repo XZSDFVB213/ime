@@ -263,7 +263,12 @@ export class AdminService {
         teacher: {
           include: {
             user: true,
-            department: true,
+
+            departments: {
+              include: {
+                department: true,
+              },
+            },
           },
         },
 
@@ -281,15 +286,21 @@ export class AdminService {
 
   async findUsers(role?: Role) {
     return this.prisma.user.findMany({
-      where: role
-        ? {
-            roles: {
-              some: {
-                role,
+      where: {
+        status: {
+          not: UserStatus.DELETED,
+        },
+
+        ...(role
+          ? {
+              roles: {
+                some: {
+                  role,
+                },
               },
-            },
-          }
-        : undefined,
+            }
+          : {}),
+      },
 
       select: {
         id: true,
@@ -318,7 +329,11 @@ export class AdminService {
 
         teacher: {
           include: {
-            department: true,
+            departments: {
+              include: {
+                department: true,
+              },
+            },
           },
         },
       },
@@ -422,15 +437,23 @@ export class AdminService {
       throw new NotFoundException('Преподаватель не найден');
     }
 
-    if (dto.departmentId) {
-      const department = await this.prisma.department.findUnique({
+    if (dto.departmentIds) {
+      const uniqueIds = [...new Set(dto.departmentIds)];
+
+      const departments = await this.prisma.department.findMany({
         where: {
-          id: dto.departmentId,
+          id: {
+            in: uniqueIds,
+          },
+        },
+
+        select: {
+          id: true,
         },
       });
 
-      if (!department) {
-        throw new NotFoundException('Кафедра не найдена');
+      if (departments.length !== uniqueIds.length) {
+        throw new NotFoundException('Одна или несколько кафедр не найдены');
       }
     }
 
@@ -453,8 +476,8 @@ export class AdminService {
     if (dto.password) {
       passwordHash = await bcrypt.hash(dto.password, 10);
     }
-    await this.prisma.$transaction([
-      this.prisma.user.update({
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
         where: {
           id: teacher.userId,
         },
@@ -468,7 +491,7 @@ export class AdminService {
 
           ...(dto.email !== undefined
             ? {
-                email: dto.email.trim(),
+                email: dto.email.trim().toLowerCase(),
               }
             : {}),
 
@@ -484,9 +507,9 @@ export class AdminService {
               }
             : {}),
         },
-      }),
+      });
 
-      this.prisma.teacher.update({
+      await tx.teacher.update({
         where: {
           id: teacherId,
         },
@@ -497,16 +520,36 @@ export class AdminService {
                 position: dto.position.trim() || null,
               }
             : {}),
-
-          ...(dto.departmentId !== undefined
-            ? {
-                departmentId: dto.departmentId,
-              }
-            : {}),
         },
-      }),
-    ]);
+      });
 
+      /*
+       * departmentIds === undefined
+       * => кафедры вообще не меняем.
+       *
+       * departmentIds === []
+       * => снимаем преподавателя
+       * со всех кафедр.
+       */
+      if (dto.departmentIds !== undefined) {
+        await tx.teacherDepartment.deleteMany({
+          where: {
+            teacherId,
+          },
+        });
+
+        if (dto.departmentIds.length > 0) {
+          await tx.teacherDepartment.createMany({
+            data: dto.departmentIds.map((departmentId) => ({
+              teacherId,
+              departmentId,
+            })),
+
+            skipDuplicates: true,
+          });
+        }
+      }
+    });
     return this.prisma.user.findUnique({
       where: {
         id: teacher.userId,
@@ -517,7 +560,11 @@ export class AdminService {
 
         teacher: {
           include: {
-            department: true,
+            departments: {
+              include: {
+                department: true,
+              },
+            },
           },
         },
       },
@@ -579,15 +626,23 @@ export class AdminService {
 
     await this.ensureEmailAvailable(email);
 
-    if (dto.departmentId) {
-      const department = await this.prisma.department.findUnique({
+    if (dto.departmentIds) {
+      const uniqueIds = [...new Set(dto.departmentIds)];
+
+      const departments = await this.prisma.department.findMany({
         where: {
-          id: dto.departmentId,
+          id: {
+            in: uniqueIds,
+          },
+        },
+
+        select: {
+          id: true,
         },
       });
 
-      if (!department) {
-        throw new NotFoundException('Кафедра не найдена');
+      if (departments.length !== uniqueIds.length) {
+        throw new NotFoundException('Одна или несколько кафедр не найдены');
       }
     }
 
@@ -613,7 +668,15 @@ export class AdminService {
           create: {
             position: dto.position?.trim() || null,
 
-            departmentId: dto.departmentId || null,
+            departments: {
+              create: (dto.departmentIds ?? []).map((departmentId) => ({
+                department: {
+                  connect: {
+                    id: departmentId,
+                  },
+                },
+              })),
+            },
           },
         },
       },
@@ -634,7 +697,11 @@ export class AdminService {
 
         teacher: {
           include: {
-            department: true,
+            departments: {
+              include: {
+                department: true,
+              },
+            },
           },
         },
       },
@@ -1098,14 +1165,22 @@ export class AdminService {
     });
   }
   async createSubject(dto: CreateSubjectDto) {
-    const department = await this.prisma.department.findUnique({
+    const uniqueIds = [...new Set(dto.departmentId)];
+
+    const departments = await this.prisma.department.findMany({
       where: {
-        id: dto.departmentId,
+        id: {
+          in: uniqueIds,
+        },
+      },
+
+      select: {
+        id: true,
       },
     });
 
-    if (!department) {
-      throw new NotFoundException('Кафедра не найдена');
+    if (departments.length !== uniqueIds.length) {
+      throw new NotFoundException('Одна или несколько кафедр не найдены');
     }
 
     return this.prisma.subject.create({
@@ -1263,14 +1338,22 @@ export class AdminService {
     }
 
     if (dto.departmentId) {
-      const department = await this.prisma.department.findUnique({
+      const uniqueIds = [...new Set(dto.departmentId)];
+
+      const departments = await this.prisma.department.findMany({
         where: {
-          id: dto.departmentId,
+          id: {
+            in: uniqueIds,
+          },
+        },
+
+        select: {
+          id: true,
         },
       });
 
-      if (!department) {
-        throw new NotFoundException('Кафедра не найдена');
+      if (departments.length !== uniqueIds.length) {
+        throw new NotFoundException('Одна или несколько кафедр не найдены');
       }
     }
 
@@ -1319,16 +1402,25 @@ export class AdminService {
   async createGroup(dto: CreateGroupDto) {
     const name = dto.name.trim();
 
-    const department = await this.prisma.department.findUnique({
-      where: {
-        id: dto.departmentId,
-      },
-    });
+    if (dto.departmentId) {
+      const uniqueIds = [...new Set(dto.departmentId)];
 
-    if (!department) {
-      throw new NotFoundException('Кафедра не найдена');
+      const departments = await this.prisma.department.findMany({
+        where: {
+          id: {
+            in: uniqueIds,
+          },
+        },
+
+        select: {
+          id: true,
+        },
+      });
+
+      if (departments.length !== uniqueIds.length) {
+        throw new NotFoundException('Одна или несколько кафедр не найдены');
+      }
     }
-
     const exists = await this.prisma.group.findFirst({
       where: {
         name: {

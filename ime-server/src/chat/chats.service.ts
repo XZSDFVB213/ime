@@ -213,11 +213,14 @@ export class ChatsService {
           select: {
             id: true,
             position: true,
-
-            department: {
+            departments: {
               select: {
-                id: true,
-                name: true,
+                department: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
               },
             },
           },
@@ -392,10 +395,14 @@ export class ChatsService {
                     id: true,
                     position: true,
 
-                    department: {
+                    departments: {
                       select: {
-                        id: true,
-                        name: true,
+                        department: {
+                          select: {
+                            id: true,
+                            name: true,
+                          },
+                        },
                       },
                     },
                   },

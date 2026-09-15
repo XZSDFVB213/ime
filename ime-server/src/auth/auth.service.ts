@@ -276,13 +276,6 @@ export class AuthService {
               select: {
                 id: true,
                 name: true,
-
-                department: {
-                  select: {
-                    id: true,
-                    name: true,
-                  },
-                },
               },
             },
           },
@@ -292,12 +285,15 @@ export class AuthService {
           select: {
             id: true,
             position: true,
-            departmentId: true,
 
-            department: {
+            departments: {
               select: {
-                id: true,
-                name: true,
+                department: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
               },
             },
           },
