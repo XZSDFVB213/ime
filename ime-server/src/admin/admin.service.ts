@@ -1165,22 +1165,14 @@ export class AdminService {
     });
   }
   async createSubject(dto: CreateSubjectDto) {
-    const uniqueIds = [...new Set(dto.departmentId)];
-
-    const departments = await this.prisma.department.findMany({
+    const department = await this.prisma.department.findUnique({
       where: {
-        id: {
-          in: uniqueIds,
-        },
-      },
-
-      select: {
-        id: true,
+        id: dto.departmentId,
       },
     });
 
-    if (departments.length !== uniqueIds.length) {
-      throw new NotFoundException('Одна или несколько кафедр не найдены');
+    if (!department) {
+      throw new NotFoundException('Кафедра не найдена');
     }
 
     return this.prisma.subject.create({
@@ -1338,22 +1330,14 @@ export class AdminService {
     }
 
     if (dto.departmentId) {
-      const uniqueIds = [...new Set(dto.departmentId)];
-
-      const departments = await this.prisma.department.findMany({
+      const department = await this.prisma.department.findUnique({
         where: {
-          id: {
-            in: uniqueIds,
-          },
-        },
-
-        select: {
-          id: true,
+          id: dto.departmentId,
         },
       });
 
-      if (departments.length !== uniqueIds.length) {
-        throw new NotFoundException('Одна или несколько кафедр не найдены');
+      if (!department) {
+        throw new NotFoundException('Кафедра не найдена');
       }
     }
 
@@ -1403,22 +1387,14 @@ export class AdminService {
     const name = dto.name.trim();
 
     if (dto.departmentId) {
-      const uniqueIds = [...new Set(dto.departmentId)];
-
-      const departments = await this.prisma.department.findMany({
+      const department = await this.prisma.department.findUnique({
         where: {
-          id: {
-            in: uniqueIds,
-          },
-        },
-
-        select: {
-          id: true,
+          id: dto.departmentId,
         },
       });
 
-      if (departments.length !== uniqueIds.length) {
-        throw new NotFoundException('Одна или несколько кафедр не найдены');
+      if (!department) {
+        throw new NotFoundException('Кафедра не найдена');
       }
     }
     const exists = await this.prisma.group.findFirst({
