@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req } from '@nestjs/common';
 
 import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
@@ -8,12 +8,18 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 export class SubjectsController {
   constructor(private readonly subjectsService: SubjectsService) {}
   @Get('subjects')
-  getSubjects(
-    @CurrentUser()
-    user: any,
-  ) {
-    return this.subjectsService.getSubjects(user.id);
-  }
+getSubjects(
+  @Req() req: any,
+) {
+  console.log(
+    '[SUBJECTS] req.user:',
+    req.user,
+  );
+
+  return this.subjectsService.getSubjects(
+    req.user.sub,
+  );
+}
   @Post()
   create(@Body() dto: CreateSubjectDto) {
     return this.subjectsService.create(dto);
