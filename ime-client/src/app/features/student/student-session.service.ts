@@ -15,6 +15,7 @@ export class StudentSessionService {
   readonly loaded = signal(false);
 
   readonly fullName = computed(() => {
+    console.log('user', this.user());
     return this.user()?.fullName ?? 'Обучающийся';
   });
 
