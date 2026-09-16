@@ -37,7 +37,9 @@ export class StudentLayout {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly session = inject(StudentSessionService);
-
+readonly fullName = this.session.fullName;
+  readonly firstName = this.session.firstName;
+  readonly groupName = this.session.groupName;
   readonly sidebarOpened = signal(false);
   readonly pageTitle = signal('Главная');
 
