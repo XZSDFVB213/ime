@@ -46,7 +46,7 @@ getSubjects() {
   return this.http.get<
     StudentSubject[]
   >(
-    `${environment.api}/student/subjects`,
+    `${environment.api}/subjects/subjects`,
   );
 }
   getHomeworks() {

@@ -55,7 +55,7 @@ getSubjects() {
   return this.http.get<
     TeacherSubject[]
   >(
-    `${environment.api}/teacher/subjects`,
+    `${environment.api}/subject-teachers/subjects`,
   );
 }
   getMe() {
