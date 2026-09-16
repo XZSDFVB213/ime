@@ -8,8 +8,10 @@ import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { StudentService } from '../../student.service';
-
+import {
+  StudentService,
+  StudentSubject,
+} from '../../student.service';
 type SubjectTab = 'OVERVIEW' | 'LESSONS' | 'HOMEWORKS';
 
 @Component({
@@ -27,7 +29,8 @@ export class StudentSubjectDetails {
 
   readonly allLessons = signal<any[]>([]);
   readonly allHomeworks = signal<any[]>([]);
-
+readonly allSubjects =
+  signal<StudentSubject[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
@@ -47,13 +50,31 @@ export class StudentSubjectDetails {
       ),
   );
 
-  readonly subject = computed(() => {
-    return this.lessons()[0]?.subject ?? this.homeworks()[0]?.subject ?? null;
-  });
+readonly subject = computed(() => {
+  return (
+    this.allSubjects()
+      .find(
+        (subject) =>
+          subject.id ===
+          this.subjectId,
+      ) ?? null
+  );
+});
 
-  readonly teacher = computed(() => {
-    return this.lessons()[0]?.teacher?.user ?? this.homeworks()[0]?.teacher?.user ?? null;
-  });
+ readonly teacher = computed(() => {
+  return (
+    this.subject()
+      ?.teacher
+      ?.user ??
+    this.lessons()[0]
+      ?.teacher
+      ?.user ??
+    this.homeworks()[0]
+      ?.teacher
+      ?.user ??
+    null
+  );
+});
 
   readonly nextLesson = computed(() => {
     const now = Date.now();
@@ -169,28 +190,112 @@ export class StudentSubjectDetails {
   }
 
   private loadSubject(): void {
-    if (!this.subjectId) {
-      this.error.set('Не указан идентификатор дисциплины');
-      this.loading.set(false);
-      return;
-    }
+  if (!this.subjectId) {
+    this.error.set(
+      'Не указан идентификатор дисциплины',
+    );
 
-    this.loading.set(true);
-    this.error.set(null);
+    this.loading.set(false);
 
-    forkJoin({
-      lessons: this.service.getSchedule().pipe(catchError(() => of([]))),
-
-      homeworks: this.service.getHomeworks().pipe(catchError(() => of([]))),
-    })
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe((result) => {
-        this.allLessons.set(result.lessons);
-        this.allHomeworks.set(result.homeworks);
-
-        if (!this.lessons().length && !this.homeworks().length) {
-          this.error.set('Дисциплина не найдена или недоступна');
-        }
-      });
+    return;
   }
+
+
+  this.loading.set(true);
+  this.error.set(null);
+
+
+  forkJoin({
+    /*
+     * Это источник истины:
+     * какие дисциплины доступны студенту.
+     */
+    subjects:
+      this.service.getSubjects(),
+
+    /*
+     * А это уже содержимое
+     * конкретной дисциплины.
+     */
+    lessons:
+      this.service
+        .getSchedule()
+        .pipe(
+          catchError(() =>
+            of([]),
+          ),
+        ),
+
+    homeworks:
+      this.service
+        .getHomeworks()
+        .pipe(
+          catchError(() =>
+            of([]),
+          ),
+        ),
+  })
+    .pipe(
+      finalize(() =>
+        this.loading.set(false),
+      ),
+    )
+    .subscribe({
+      next: (result) => {
+        this.allSubjects.set(
+          result.subjects,
+        );
+
+        this.allLessons.set(
+          result.lessons,
+        );
+
+        this.allHomeworks.set(
+          result.homeworks,
+        );
+
+
+        /*
+         * Проверяем доступ именно
+         * через назначенные дисциплины.
+         */
+        const subjectExists =
+          result.subjects.some(
+            (subject) =>
+              subject.id ===
+              this.subjectId,
+          );
+
+
+        if (!subjectExists) {
+          this.error.set(
+            'Дисциплина не найдена или недоступна',
+          );
+
+          return;
+        }
+
+
+        /*
+         * ВАЖНО:
+         *
+         * отсутствие занятий или ДЗ
+         * больше НЕ является ошибкой.
+         */
+        this.error.set(null);
+      },
+
+
+      error: (error) => {
+        console.error(
+          '[STUDENT SUBJECT DETAILS]',
+          error,
+        );
+
+        this.error.set(
+          'Не удалось загрузить дисциплину',
+        );
+      },
+    });
+}
 }
