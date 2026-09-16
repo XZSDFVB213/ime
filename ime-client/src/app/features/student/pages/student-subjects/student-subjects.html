@@ -80,9 +80,9 @@
             <h2>{{ subject.name }}</h2>
 
             <div class="teacher">
-              @if (subject.teacherAvatar) {
+              @if (subject.teacher.user.avatarUrl) {
                 <img
-                  [src]="subject.teacherAvatar"
+                  [src]="subject.teacher.user.avatarUrl"
                   [alt]="subject.teacher?.user?.fullName || 'Преподаватель не назначен'"
                 />
               } @else {
