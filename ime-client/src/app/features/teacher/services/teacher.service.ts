@@ -1,15 +1,40 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+export interface TeacherSubject {
+  id: string;
 
+  name: string;
+
+  code: string | null;
+
+  description?: string | null;
+
+  credits: number;
+
+  department?: {
+    id: string;
+    name: string;
+  } | null;
+
+  groups: {
+    id: string;
+    name: string;
+  }[];
+}
 @Injectable({
   providedIn: 'root',
 })
 export class TeacherService {
   private http = inject(HttpClient);
 
-  private api = 'http://localhost:3000';
-
+getSubjects() {
+  return this.http.get<
+    TeacherSubject[]
+  >(
+    `${environment.api}/teacher/subjects`,
+  );
+}
   getMe() {
     return this.http.get<any>(`${environment.api}/auth/me`);
   }

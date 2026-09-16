@@ -1,170 +1,154 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 
-import { DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import {
+  DatePipe,
+} from '@angular/common';
 
-import { catchError, finalize, forkJoin, of } from 'rxjs';
+import {
+  RouterLink,
+} from '@angular/router';
 
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import {
+  catchError,
+  finalize,
+  forkJoin,
+  of,
+} from 'rxjs';
 
-import { StudentService } from '../../student.service';
+import {
+  MatIconModule,
+} from '@angular/material/icon';
 
-interface StudentSubject {
-  id: string;
-  name: string;
-  code: string | null;
+import {
+  MatProgressSpinnerModule,
+} from '@angular/material/progress-spinner';
 
-  teacherName: string;
-  teacherAvatar: string | null;
+import {
+  StudentService,
+  StudentSubject,
+} from '../../student.service';
 
-  lessonsCount: number;
-  homeworksCount: number;
-  completedHomeworksCount: number;
-
-  nextLesson: any | null;
-}
 
 @Component({
   selector: 'app-student-subjects',
+
   standalone: true,
-  imports: [DatePipe, RouterLink, MatIconModule, MatProgressSpinnerModule],
-  templateUrl: './student-subjects.html',
-  styleUrl: './student-subjects.scss',
+
+  imports: [
+    DatePipe,
+    RouterLink,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
+
+  templateUrl:
+    './student-subjects.html',
+
+  styleUrl:
+    './student-subjects.scss',
 })
 export class StudentSubjects {
-  private readonly service = inject(StudentService);
+  private readonly service =
+    inject(StudentService);
 
-  readonly lessons = signal<any[]>([]);
-  readonly homeworks = signal<any[]>([]);
 
-  readonly loading = signal(true);
-  readonly error = signal<string | null>(null);
+  readonly subjects =
+    signal<StudentSubject[]>([]);
 
-  readonly search = signal('');
+  readonly loading =
+    signal(true);
 
-  readonly subjects = computed<StudentSubject[]>(() => {
-    const subjectsMap = new Map<string, StudentSubject>();
+  readonly error =
+    signal<string | null>(null);
 
-    for (const lesson of this.lessons()) {
-      const subject = lesson.subject;
+  readonly search =
+    signal('');
 
-      if (!subject?.id) {
-        continue;
+
+  readonly filteredSubjects =
+    computed(() => {
+      const query =
+        this.search()
+          .trim()
+          .toLocaleLowerCase('ru');
+
+
+      if (!query) {
+        return this.subjects();
       }
 
-      const existing = subjectsMap.get(subject.id);
 
-      if (existing) {
-        existing.lessonsCount++;
+      return this.subjects()
+        .filter((subject) => {
+          return (
+            subject.name
+              .toLocaleLowerCase('ru')
+              .includes(query) ||
 
-        if (
-          new Date(lesson.date).getTime() > Date.now() &&
-          (!existing.nextLesson ||
-            new Date(lesson.date).getTime() < new Date(existing.nextLesson.date).getTime())
-        ) {
-          existing.nextLesson = lesson;
-        }
+            subject.code
+              ?.toLocaleLowerCase('ru')
+              .includes(query) ||
 
-        continue;
-      }
+            subject.teacher
+              ?.user
+              ?.fullName
+              ?.toLocaleLowerCase('ru')
+              .includes(query) ||
 
-      const nextLesson = new Date(lesson.date).getTime() > Date.now() ? lesson : null;
-
-      subjectsMap.set(subject.id, {
-        id: subject.id,
-        name: subject.name,
-        code: subject.code ?? null,
-
-        teacherName: lesson.teacher?.user?.fullName ?? 'Преподаватель не указан',
-
-        teacherAvatar: lesson.teacher?.user?.avatarUrl ?? null,
-
-        lessonsCount: 1,
-        homeworksCount: 0,
-        completedHomeworksCount: 0,
-
-        nextLesson,
-      });
-    }
-
-    for (const homework of this.homeworks()) {
-      const subjectId = homework.subject?.id;
-
-      if (!subjectId) {
-        continue;
-      }
-
-      const subject = subjectsMap.get(subjectId);
-
-      if (!subject) {
-        subjectsMap.set(subjectId, {
-          id: subjectId,
-          name: homework.subject.name,
-          code: homework.subject.code ?? null,
-
-          teacherName: homework.teacher?.user?.fullName ?? 'Преподаватель не указан',
-
-          teacherAvatar: homework.teacher?.user?.avatarUrl ?? null,
-
-          lessonsCount: 0,
-          homeworksCount: 1,
-
-          completedHomeworksCount: homework.submissions?.[0]?.status === 'GRADED' ? 1 : 0,
-
-          nextLesson: null,
+            subject.department
+              ?.name
+              ?.toLocaleLowerCase('ru')
+              .includes(query)
+          );
         });
-
-        continue;
-      }
-
-      subject.homeworksCount++;
-
-      if (homework.submissions?.[0]?.status === 'GRADED') {
-        subject.completedHomeworksCount++;
-      }
-    }
-
-    return Array.from(subjectsMap.values()).sort((first, second) =>
-      first.name.localeCompare(second.name, 'ru'),
-    );
-  });
-
-  readonly filteredSubjects = computed(() => {
-    const query = this.search().trim().toLocaleLowerCase('ru');
-
-    if (!query) {
-      return this.subjects();
-    }
-
-    return this.subjects().filter((subject) => {
-      return (
-        subject.name.toLocaleLowerCase('ru').includes(query) ||
-        subject.teacherName.toLocaleLowerCase('ru').includes(query) ||
-        subject.code?.toLocaleLowerCase('ru').includes(query)
-      );
     });
-  });
+
 
   constructor() {
     this.loadSubjects();
   }
 
-  setSearch(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
+
+  setSearch(
+    event: Event,
+  ): void {
+    const value =
+      (
+        event.target as
+          HTMLInputElement
+      ).value;
 
     this.search.set(value);
   }
 
-  homeworkProgress(subject: StudentSubject): number {
-    if (!subject.homeworksCount) {
+
+  homeworkProgress(
+    subject: StudentSubject,
+  ): number {
+    if (
+      !subject.homeworksCount
+    ) {
       return 0;
     }
 
-    return Math.round((subject.completedHomeworksCount / subject.homeworksCount) * 100);
+
+    return Math.round(
+      (
+        subject.completedHomeworksCount /
+        subject.homeworksCount
+      ) * 100,
+    );
   }
 
-  subjectIcon(index: number): string {
+
+  subjectIcon(
+    index: number,
+  ): string {
     const icons = [
       'database',
       'calculate',
@@ -176,35 +160,177 @@ export class StudentSubjects {
       'public',
     ];
 
-    return icons[index % icons.length];
+
+    return icons[
+      index %
+        icons.length
+    ];
   }
 
-  subjectClass(index: number): string {
-    const classes = ['blue', 'purple', 'green', 'orange', 'cyan', 'red'];
 
-    return classes[index % classes.length];
+  subjectClass(
+    index: number,
+  ): string {
+    const classes = [
+      'blue',
+      'purple',
+      'green',
+      'orange',
+      'cyan',
+      'red',
+    ];
+
+
+    return classes[
+      index %
+        classes.length
+    ];
   }
+
 
   private loadSubjects(): void {
     this.loading.set(true);
     this.error.set(null);
 
-    forkJoin({
-      lessons: this.service.getSchedule().pipe(catchError(() => of([]))),
 
-      homeworks: this.service.getHomeworks().pipe(catchError(() => of([]))),
+    forkJoin({
+      /*
+       * Источник истины:
+       * назначения администратором.
+       */
+      subjects:
+        this.service
+          .getSubjects(),
+
+      /*
+       * Эти два нужны только
+       * для статистики карточки.
+       */
+      lessons:
+        this.service
+          .getSchedule()
+          .pipe(
+            catchError(() =>
+              of([]),
+            ),
+          ),
+
+      homeworks:
+        this.service
+          .getHomeworks()
+          .pipe(
+            catchError(() =>
+              of([]),
+            ),
+          ),
     })
-      .pipe(finalize(() => this.loading.set(false)))
+      .pipe(
+        finalize(() => {
+          this.loading.set(false);
+        }),
+      )
       .subscribe({
-        next: (result) => {
-          this.lessons.set(result.lessons);
-          this.homeworks.set(result.homeworks);
+        next: ({
+          subjects,
+          lessons,
+          homeworks,
+        }) => {
+          const result =
+            subjects.map(
+              (subject) => {
+                const subjectLessons =
+                  lessons.filter(
+                    (lesson: any) =>
+                      lesson.subject
+                        ?.id ===
+                      subject.id,
+                  );
+
+
+                const subjectHomeworks =
+                  homeworks.filter(
+                    (homework: any) =>
+                      homework.subject
+                        ?.id ===
+                      subject.id,
+                  );
+
+
+                const completedHomeworksCount =
+                  subjectHomeworks
+                    .filter(
+                      (
+                        homework:
+                          any,
+                      ) =>
+                        homework
+                          .submissions
+                          ?.[0]
+                          ?.status ===
+                        'GRADED',
+                    )
+                    .length;
+
+
+                const nextLesson =
+                  subjectLessons
+                    .filter(
+                      (
+                        lesson:
+                          any,
+                      ) =>
+                        new Date(
+                          lesson.date,
+                        ).getTime() >
+                        Date.now(),
+                    )
+                    .sort(
+                      (
+                        first:
+                          any,
+                        second:
+                          any,
+                      ) =>
+                        new Date(
+                          first.date,
+                        ).getTime() -
+                        new Date(
+                          second.date,
+                        ).getTime(),
+                    )[0] ??
+                  null;
+
+
+                return {
+                  ...subject,
+
+                  lessonsCount:
+                    subjectLessons.length,
+
+                  homeworksCount:
+                    subjectHomeworks.length,
+
+                  completedHomeworksCount,
+
+                  nextLesson,
+                };
+              },
+            );
+
+
+          this.subjects.set(
+            result,
+          );
         },
 
         error: (error) => {
-          console.error(error);
+          console.error(
+            error,
+          );
 
-          this.error.set('Не удалось загрузить дисциплины');
+          this.error.set(
+            'Не удалось загрузить дисциплины',
+          );
         },
       });
   }
