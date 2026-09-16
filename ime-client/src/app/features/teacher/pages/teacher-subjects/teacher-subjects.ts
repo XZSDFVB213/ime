@@ -25,6 +25,7 @@ import {
   TeacherService,
   TeacherSubject,
 } from '../../services/teacher.service';
+import { DatePipe } from '@angular/common';
 
 
 @Component({
@@ -35,6 +36,7 @@ import {
 
   imports: [
     RouterLink,
+        DatePipe,
     MatIconModule,
     MatProgressSpinnerModule,
   ],

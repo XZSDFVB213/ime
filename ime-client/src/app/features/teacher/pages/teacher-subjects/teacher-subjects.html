@@ -1,9 +1,6 @@
-<div class="subjects-page">
-
-  <header class="page-header">
-
-    <div>
-
+<section class="subjects-page">
+  <header class="subjects-hero">
+    <div class="hero-copy">
       <span class="eyebrow">
         Учебный процесс
       </span>
@@ -13,275 +10,454 @@
       </h1>
 
       <p>
-        Назначенные дисциплины
-        и учебные группы
+        Управляйте занятиями,
+        учебными группами,
+        домашними заданиями и
+        успеваемостью обучающихся.
       </p>
-
     </div>
 
+    <div class="hero-icon">
+      <mat-icon>
+        menu_book
+      </mat-icon>
+    </div>
   </header>
 
+  @if (loading()) {
+    <div class="page-state">
+      <mat-spinner
+        diameter="48"
+      />
 
-  <section class="stats-grid">
+      <p>
+        Загружаем дисциплины…
+      </p>
+    </div>
+  } @else if (error()) {
+    <div class="page-state error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
 
-    <article class="stat-card">
+      <p>{{ error() }}</p>
+    </div>
+  } @else {
+    <section class="statistics-grid">
+      <article>
+        <div class="stat-icon blue">
+          <mat-icon>
+            menu_book
+          </mat-icon>
+        </div>
 
-      <div class="stat-icon">
+        <div>
+          <strong>
+            {{ subjects().length }}
+          </strong>
 
-        <mat-icon>
-          menu_book
-        </mat-icon>
+          <span>
+            Дисциплин
+          </span>
+        </div>
+      </article>
 
-      </div>
+      <article>
+        <div class="stat-icon purple">
+          <mat-icon>
+            groups
+          </mat-icon>
+        </div>
 
-      <div>
+        <div>
+          <strong>
+            {{ totalGroups() }}
+          </strong>
 
-        <span>
-          Дисциплин
-        </span>
+          <span>
+            Учебных групп
+          </span>
+        </div>
+      </article>
 
-        <strong>
-          {{ subjects().length }}
-        </strong>
+      <article>
+        <div class="stat-icon green">
+          <mat-icon>
+            assignment
+          </mat-icon>
+        </div>
 
-      </div>
+        <div>
+          <strong>
+            {{ totalHomeworks() }}
+          </strong>
 
-    </article>
+          <span>
+            Домашних заданий
+          </span>
+        </div>
+      </article>
 
+      <article>
+        <div class="stat-icon orange">
+          <mat-icon>
+            pending_actions
+          </mat-icon>
+        </div>
 
-    <article class="stat-card">
+        <div>
+          <strong>
+            {{ totalPending() }}
+          </strong>
 
-      <div class="stat-icon groups">
+          <span>
+            Работ на проверке
+          </span>
+        </div>
+      </article>
+    </section>
 
-        <mat-icon>
-          groups
-        </mat-icon>
-
-      </div>
-
-      <div>
-
-        <span>
-          Учебных групп
-        </span>
-
-        <strong>
-          {{ groupsCount() }}
-        </strong>
-
-      </div>
-
-    </article>
-
-  </section>
-
-
-  <section class="subjects-card">
-
-    <div class="toolbar">
-
-      <div class="search-box">
-
+    <div class="subjects-toolbar">
+      <label class="search-box">
         <mat-icon>
           search
         </mat-icon>
 
         <input
           type="search"
-          placeholder="Поиск по дисциплине, кафедре или группе..."
+          placeholder="Найти дисциплину или группу"
+          [value]="search()"
           (input)="setSearch($event)"
         />
+      </label>
 
-      </div>
-
-    </div>
-
-
-    @if (loading()) {
-
-      <div class="state">
-
-        <mat-spinner
-          diameter="35"
-        ></mat-spinner>
-
-        <span>
-          Загружаем дисциплины...
-        </span>
-
-      </div>
-
-    } @else if (error()) {
-
-      <div class="state error">
-
+      <div class="result-count">
         <mat-icon>
-          error_outline
+          filter_list
         </mat-icon>
 
-        <strong>
-          {{ error() }}
-        </strong>
-
-      </div>
-
-    } @else if (
-      filteredSubjects()
-        .length === 0
-    ) {
-
-      <div class="state">
-
-        <div class="empty-icon">
-
-          <mat-icon>
-            menu_book
-          </mat-icon>
-
-        </div>
+        Показано:
 
         <strong>
-          Дисциплины не найдены
+          {{
+            filteredSubjects()
+              .length
+          }}
         </strong>
-
-        <span>
-          Назначенные преподавателю
-          дисциплины появятся здесь
-        </span>
-
       </div>
+    </div>
 
-    } @else {
-
-      <div class="subjects-grid">
-
-        @for (
-          subject of
-            filteredSubjects();
-          track subject.id;
-          let index = $index
-        ) {
-
-          <article
-            class="subject-card"
+    <div class="subjects-grid">
+      @for (
+        subject of filteredSubjects();
+        track subject.id;
+        let index = $index
+      ) {
+        <article class="subject-card">
+          <header
+            class="subject-cover"
+            [class]="
+              subjectClass(index)
+            "
           >
-
-            <div
-              class="subject-icon"
-              [class]="
-                'subject-icon ' +
-                subjectClass(index)
-              "
-            >
-
+            <div class="subject-icon">
               <mat-icon>
                 {{
-                  subjectIcon(
-                    index
-                  )
+                  subjectIcon(index)
                 }}
               </mat-icon>
-
             </div>
 
+            @if (subject.code) {
+              <span class="subject-code">
+                {{ subject.code }}
+              </span>
+            }
+          </header>
 
-            <div class="subject-content">
-
-              <div class="subject-heading">
-
-                <div>
-
-                  @if (
-                    subject.code
-                  ) {
-
-                    <span class="code">
-                      {{ subject.code }}
-                    </span>
-
-                  }
-
-
-                  <h2>
-                    {{ subject.name }}
-                  </h2>
-
-                </div>
-
-              </div>
-
-
-              @if (
-                subject.department
-              ) {
-
-                <div class="department">
-
-                  <mat-icon>
-                    account_balance
-                  </mat-icon>
-
-                  {{
-                    subject
-                      .department
-                      .name
-                  }}
-
-                </div>
-
-              }
-
+          <div class="subject-content">
+            <div class="subject-heading">
+              <h2>
+                {{ subject.name }}
+              </h2>
 
               @if (
                 subject.description
               ) {
-
-                <p class="description">
+                <p>
                   {{
                     subject.description
                   }}
                 </p>
-
               }
-
-
-              <div class="groups">
-
-                <span class="groups-label">
-                  Группы
-                </span>
-
-
-                <div class="group-list">
-
-                  @for (
-                    group of
-                      subject.groups;
-                    track group.id
-                  ) {
-
-                    <span
-                      class="group-badge"
-                    >
-                      {{ group.name }}
-                    </span>
-
-                  }
-
-                </div>
-
-              </div>
-
             </div>
 
-          </article>
+            @if (subject.credits) {
+              <div class="credits">
+                <mat-icon>
+                  workspace_premium
+                </mat-icon>
 
-        }
+                {{
+                  subject.credits
+                }}
+                зачётных единиц
+              </div>
+            }
 
-      </div>
+            <section class="groups-section">
+              <span class="section-label">
+                Учебные группы
+              </span>
 
-    }
+              <div class="groups-list">
+                @for (
+                  group of subject.groups;
+                  track group.id
+                ) {
+                  <span
+                    class="group-chip"
+                  >
+                    <mat-icon>
+                      groups
+                    </mat-icon>
 
-  </section>
+                    {{ group.name }}
+                  </span>
+                } @empty {
+                  <span
+                    class="empty-value"
+                  >
+                    Группы не указаны
+                  </span>
+                }
+              </div>
+            </section>
 
-</div>
+            <section class="subject-statistics">
+              <div>
+                <mat-icon>
+                  calendar_month
+                </mat-icon>
+
+                <div>
+                  <strong>
+                    {{
+                      subject.lessonsCount
+                    }}
+                  </strong>
+
+                  <span>
+                    занятий
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <mat-icon>
+                  assignment
+                </mat-icon>
+
+                <div>
+                  <strong>
+                    {{
+                      subject.homeworksCount
+                    }}
+                  </strong>
+
+                  <span>
+                    заданий
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <mat-icon>
+                  grading
+                </mat-icon>
+
+                <div>
+                  <strong>
+                    {{
+                      subject.submissionsCount
+                    }}
+                  </strong>
+
+                  <span>
+                    работ
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            <section class="performance">
+              <header>
+                <div>
+                  <span>
+                    Средний результат
+                  </span>
+
+                  <strong
+                    [class]="
+                      resultClass(
+                        subject.averagePercent
+                      )
+                    "
+                  >
+                    {{
+                      subject.averagePercent
+                    }}%
+                  </strong>
+                </div>
+
+                <small
+                  [class]="
+                    resultClass(
+                      subject.averagePercent
+                    )
+                  "
+                >
+                  {{
+                    resultLabel(
+                      subject.averagePercent
+                    )
+                  }}
+                </small>
+              </header>
+
+              <div class="progress-track">
+                <span
+                  [class]="
+                    resultClass(
+                      subject.averagePercent
+                    )
+                  "
+                  [style.width.%]="
+                    subject.averagePercent
+                  "
+                ></span>
+              </div>
+            </section>
+
+            @if (
+              subject.pendingCount > 0
+            ) {
+              <div class="pending-notice">
+                <mat-icon>
+                  pending_actions
+                </mat-icon>
+
+                <div>
+                  <strong>
+                    {{
+                      subject.pendingCount
+                    }}
+                    {{
+                      subject.pendingCount === 1
+                        ? 'работа'
+                        : 'работ'
+                    }}
+                  </strong>
+
+                  <span>
+                    ожидают проверки
+                  </span>
+                </div>
+              </div>
+            }
+
+            @if (
+              subject.nextLesson;
+              as lesson
+            ) {
+              <div class="next-lesson">
+                <div class="next-icon">
+                  <mat-icon>
+                    schedule
+                  </mat-icon>
+                </div>
+
+                <div>
+                  <span>
+                    Следующее занятие
+                  </span>
+
+                  <strong>
+                    {{
+                      lesson.date
+                        | date:
+                          'dd MMMM, HH:mm'
+                    }}
+                  </strong>
+
+                  <small>
+                    {{
+                      lesson.group?.name
+                    }}
+                    ·
+                    Ауд.
+                    {{
+                      lesson.location ||
+                      '—'
+                    }}
+                  </small>
+                </div>
+              </div>
+            } @else {
+              <div
+                class="
+                  next-lesson
+                  empty
+                "
+              >
+                <div class="next-icon">
+                  <mat-icon>
+                    event_available
+                  </mat-icon>
+                </div>
+
+                <div>
+                  <span>
+                    Следующее занятие
+                  </span>
+
+                  <strong>
+                    Не запланировано
+                  </strong>
+                </div>
+              </div>
+            }
+
+            <a
+              class="open-subject"
+              [routerLink]="[
+                '/teacher/subjects',
+                subject.id
+              ]"
+            >
+              Открыть дисциплину
+
+              <mat-icon>
+                arrow_forward
+              </mat-icon>
+            </a>
+          </div>
+        </article>
+      } @empty {
+        <div class="page-state compact">
+          <mat-icon>
+            search_off
+          </mat-icon>
+
+          <h2>
+            Ничего не найдено
+          </h2>
+
+          <p>
+            Измените поисковый запрос.
+          </p>
+        </div>
+      }
+    </div>
+  }
+</section>
