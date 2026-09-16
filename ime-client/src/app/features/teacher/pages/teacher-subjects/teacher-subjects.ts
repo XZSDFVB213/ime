@@ -199,39 +199,108 @@ export class TeacherSubjects {
 
 
   private loadSubjects(): void {
-    this.loading.set(true);
-    this.error.set(null);
+  this.loading.set(true);
+  this.error.set(null);
+
+  this.service
+    .getSubjects()
+    .pipe(
+      finalize(() => {
+        this.loading.set(false);
+      }),
+    )
+    .subscribe({
+      next: (subjects) => {
+        this.subjects.set(
+          subjects.map((subject) => ({
+            ...subject,
+
+            lessonsCount:
+              subject.lessonsCount ?? 0,
+
+            homeworksCount:
+              subject.homeworksCount ?? 0,
+
+            submissionsCount:
+              subject.submissionsCount ?? 0,
+
+            pendingCount:
+              subject.pendingCount ?? 0,
+
+            averagePercent:
+              subject.averagePercent ?? 0,
+
+            nextLesson:
+              subject.nextLesson ?? null,
+          })),
+        );
+      },
+
+      error: (error) => {
+        console.error(error);
+
+        this.error.set(
+          'Не удалось загрузить дисциплины',
+        );
+      },
+    });
+}
+readonly totalGroups = computed(() => {
+  const ids =
+    this.subjects().flatMap((subject) =>
+      subject.groups.map((group) => group.id),
+    );
+
+  return new Set(ids).size;
+});
 
 
-    this.service
-      .getSubjects()
-      .pipe(
-        finalize(() => {
-          this.loading.set(
-            false,
-          );
-        }),
-      )
-      .subscribe({
-        next: (
-          subjects,
-        ) => {
-          this.subjects.set(
-            subjects,
-          );
-        },
+readonly totalHomeworks = computed(() => {
+  return this.subjects().reduce(
+    (total, subject) =>
+      total + subject.homeworksCount,
+    0,
+  );
+});
 
-        error: (
-          error,
-        ) => {
-          console.error(
-            error,
-          );
 
-          this.error.set(
-            'Не удалось загрузить дисциплины',
-          );
-        },
-      });
+readonly totalPending = computed(() => {
+  return this.subjects().reduce(
+    (total, subject) =>
+      total + subject.pendingCount,
+    0,
+  );
+});
+resultClass(percent: number): string {
+  if (percent >= 80) {
+    return 'excellent';
   }
+
+  if (percent >= 60) {
+    return 'good';
+  }
+
+  if (percent >= 40) {
+    return 'average';
+  }
+
+  return 'low';
+}
+
+
+resultLabel(percent: number): string {
+  if (percent >= 80) {
+    return 'Отлично';
+  }
+
+  if (percent >= 60) {
+    return 'Хорошо';
+  }
+
+  if (percent >= 40) {
+    return 'Удовлетворительно';
+  }
+
+  return 'Требует внимания';
+}
 }

@@ -21,6 +21,29 @@ export interface TeacherSubject {
     id: string;
     name: string;
   }[];
+
+  lessonsCount: number;
+
+  homeworksCount: number;
+
+  submissionsCount: number;
+
+  pendingCount: number;
+
+  averagePercent: number;
+
+  nextLesson: {
+    id?: string;
+
+    date: string;
+
+    location?: string | null;
+
+    group?: {
+      id: string;
+      name: string;
+    } | null;
+  } | null;
 }
 @Injectable({
   providedIn: 'root',
