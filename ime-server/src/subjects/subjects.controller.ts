@@ -1,25 +1,39 @@
-import { Controller, Get, Post, Body, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Req, UseGuards } from '@nestjs/common';
 
 import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('subjects')
 export class SubjectsController {
   constructor(private readonly subjectsService: SubjectsService) {}
-  @Get('subjects')
-getSubjects(
-  @Req() req: any,
-) {
-  console.log(
-    '[SUBJECTS] req.user:',
-    req.user,
-  );
+    @Get('subjects')
+  @UseGuards(JwtAuthGuard)
+  getSubjects(
+    @Req() req: any,
+  ) {
+    console.log(
+      '[SUBJECTS HTTP USER]',
+      req.user,
+    );
 
-  return this.subjectsService.getSubjects(
-    req.user.sub,
-  );
-}
+    const userId =
+      req.user?.id ??
+      req.user?.sub;
+
+
+    if (!userId) {
+      throw new Error(
+        'JWT userId отсутствует в req.user',
+      );
+    }
+
+
+    return this.subjectsService.getSubjects(
+      userId,
+    );
+  }
   @Post()
   create(@Body() dto: CreateSubjectDto) {
     return this.subjectsService.create(dto);
