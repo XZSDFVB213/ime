@@ -83,7 +83,7 @@
               @if (subject.teacherAvatar) {
                 <img
                   [src]="subject.teacherAvatar"
-                  [alt]="subject.teacherName"
+                  [alt]="subject.teacher?.user?.fullName || 'Преподаватель не назначен'"
                 />
               } @else {
                 <div class="teacher-avatar">
@@ -94,7 +94,10 @@
               <div>
                 <span>Преподаватель</span>
                 <strong>
-                  {{ subject.teacherName }}
+                  {{
+  subject.teacher?.user?.fullName ||
+    'Преподаватель не назначен'
+}}
                 </strong>
               </div>
             </div>
