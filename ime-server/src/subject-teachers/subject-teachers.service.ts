@@ -9,8 +9,11 @@ import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class SubjectTeachersService {
   constructor(private prisma: PrismaService) {}
-  async getSubjects(userId: string) {
-    const teacher = await this.prisma.teacher.findUnique({
+ async getSubjects(
+  userId: string,
+) {
+  const teacher =
+    await this.prisma.teacher.findUnique({
       where: {
         userId,
       },
@@ -20,18 +23,21 @@ export class SubjectTeachersService {
       },
     });
 
-    if (!teacher) {
-      throw new NotFoundException('Профиль преподавателя не найден');
-    }
 
-    const assignments = await this.prisma.teacherDisciplineGroup.findMany({
+  if (!teacher) {
+    throw new NotFoundException(
+      'Профиль преподавателя не найден',
+    );
+  }
+
+
+  const assignments =
+    await this.prisma.teacherDisciplineGroup.findMany({
       where: {
         teacherId: teacher.id,
       },
 
       select: {
-        id: true,
-
         subject: {
           select: {
             id: true,
@@ -62,57 +68,54 @@ export class SubjectTeachersService {
       },
     });
 
-    /*
-     * Одна дисциплина может быть
-     * у преподавателя в нескольких
-     * группах.
-     *
-     * Возвращаем одну дисциплину
-     * + массив её групп.
-     */
-    const subjects = new Map<
-      string,
-      {
-        id: string;
-        name: string;
-        code: string;
-        description: string | null;
-        credits: number;
 
-        department: {
-          id: string;
-          name: string;
-        };
+  const subjects =
+    new Map<string, any>();
 
-        groups: {
-          id: string;
-          name: string;
-        }[];
-      }
-    >();
 
-    for (const assignment of assignments) {
-      const existing = subjects.get(assignment.subject.id);
+  for (const assignment of assignments) {
+    const existing =
+      subjects.get(
+        assignment.subject.id,
+      );
 
-      if (existing) {
-        if (
-          !existing.groups.some((group) => group.id === assignment.group.id)
-        ) {
-          existing.groups.push(assignment.group);
-        }
 
-        continue;
+    if (existing) {
+      const groupAlreadyAdded =
+        existing.groups.some(
+          (group: { id: string }) =>
+            group.id ===
+            assignment.group.id,
+        );
+
+
+      if (!groupAlreadyAdded) {
+        existing.groups.push(
+          assignment.group,
+        );
       }
 
-      subjects.set(assignment.subject.id, {
-        ...assignment.subject,
-
-        groups: [assignment.group],
-      });
+      continue;
     }
 
-    return Array.from(subjects.values());
+
+    subjects.set(
+      assignment.subject.id,
+      {
+        ...assignment.subject,
+
+        groups: [
+          assignment.group,
+        ],
+      },
+    );
   }
+
+
+  return Array.from(
+    subjects.values(),
+  );
+}
   async create(dto: CreateSubjectTeacherDto) {
     const subject = await this.prisma.subject.findUnique({
       where: {

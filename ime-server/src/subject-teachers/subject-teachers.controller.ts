@@ -6,10 +6,13 @@ import {
   // Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { SubjectTeachersService } from './subject-teachers.service';
 import { CreateSubjectTeacherDto } from './dto/create-subject-teacher.dto';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 // import { UpdateSubjectTeacherDto } from './dto/update-subject-teacher.dto';
 
 @Controller('subject-teachers')
@@ -18,11 +21,11 @@ export class SubjectTeachersController {
     private readonly subjectTeachersService: SubjectTeachersService,
   ) {}
   @Get('subjects')
-  getSubjects(
-    @CurrentUser()
-    user: any,
-  ) {
-    return this.subjectTeachersService.getSubjects(user.id);
+  @UseGuards(JwtAuthGuard)
+  getSubjects(@Req() req: any) {
+    console.log('[TEACHER SUBJECTS USER]', req.user);
+
+    return this.subjectTeachersService.getSubjects(req.user.id);
   }
   @Post()
   create(@Body() createSubjectTeacherDto: CreateSubjectTeacherDto) {
