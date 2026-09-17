@@ -74,50 +74,53 @@ export class TeacherCreateHomework {
 
 
   readonly form = new FormGroup({
-    lessonId: new FormControl('', {
-      nonNullable: true,
-      validators: [
-        Validators.required,
-      ],
-    }),
+  lessonId: new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+    ],
+  }),
 
-    title: new FormControl('', {
-      nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.minLength(3),
-        Validators.maxLength(150),
-      ],
-    }),
+  title: new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(150),
+    ],
+  }),
 
-    description: new FormControl('', {
-      nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.minLength(5),
-      ],
-    }),
+  description: new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      Validators.minLength(5),
+    ],
+  }),
 
-    deadline: new FormControl('', {
-      nonNullable: true,
-      validators: [
-        Validators.required,
-      ],
-    }),
+  deadline: new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+    ],
+  }),
 
-    maxScore: new FormControl(100, {
-      nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.min(1),
-        Validators.max(1000),
-      ],
-    }),
-  });
-
+  maxScore: new FormControl(100, {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      Validators.min(1),
+      Validators.max(1000),
+    ],
+  }),
+});
 selectedLesson(): any | null {
   const lessonId =
     this.form.controls.lessonId.value;
+
+  if (!lessonId) {
+    return null;
+  }
 
   return (
     this.lessons().find(
