@@ -1,6 +1,32 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+export interface TeacherSemester {
+  id: string;
+  name: string;
+  number: number;
+}
+
+
+export interface CreateLessonDto {
+  subjectId: string;
+  groupId: string;
+  semesterId: string;
+
+  title: string;
+
+  type:
+    | 'LECTURE'
+    | 'PRACTICE'
+    | 'SEMINAR'
+    | 'LAB';
+
+  date: string;
+  duration: number;
+
+  description?: string;
+  location?: string;
+}
 export interface TeacherSubject {
   id: string;
 
@@ -61,7 +87,23 @@ getSubjects() {
   getMe() {
     return this.http.get<any>(`${environment.api}/auth/me`);
   }
+getSemesters() {
+  return this.http.get<
+    TeacherSemester[]
+  >(
+    `${environment.api}/lessons/teacher/semesters`,
+  );
+}
 
+
+createLesson(
+  dto: CreateLessonDto,
+) {
+  return this.http.post<any>(
+    `${environment.api}/lessons`,
+    dto,
+  );
+}
   getLessons() {
     return this.http.get<any[]>(`${environment.api}/lessons/teacher/my-lessons`);
   }

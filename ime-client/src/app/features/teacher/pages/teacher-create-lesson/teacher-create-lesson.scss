@@ -1,0 +1,645 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.create-lesson-page {
+  min-height: 100%;
+  padding: 28px 38px 48px;
+
+  background: #f4f7fc;
+  color: #172746;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.page-header {
+  position: relative;
+  overflow: hidden;
+
+  margin-bottom: 22px;
+  padding: 30px 34px;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #174fc0 0%,
+      #1d66dc 55%,
+      #317ff1 100%
+    );
+
+  color: #fff;
+
+  box-shadow:
+    0 12px 30px
+    rgba(28, 91, 207, 0.16);
+
+  &::after {
+    content: '';
+
+    position: absolute;
+    top: -80px;
+    right: -70px;
+
+    width: 230px;
+    height: 230px;
+
+    border-radius: 50%;
+
+    background:
+      rgba(255, 255, 255, 0.07);
+
+    pointer-events: none;
+  }
+
+  &::before {
+    content: '';
+
+    position: absolute;
+    right: 75px;
+    bottom: -110px;
+
+    width: 190px;
+    height: 190px;
+
+    border-radius: 50%;
+
+    background:
+      rgba(255, 255, 255, 0.05);
+
+    pointer-events: none;
+  }
+
+  > div {
+    position: relative;
+    z-index: 1;
+  }
+
+  h1 {
+    margin: 10px 0 6px;
+
+    font-size: 32px;
+    line-height: 1.15;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    margin: 0;
+
+    font-size: 15px;
+    line-height: 1.6;
+
+    color: rgba(255, 255, 255, 0.78);
+  }
+}
+
+.back {
+  width: fit-content;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  color: rgba(255, 255, 255, 0.82);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-decoration: none;
+
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+
+    font-size: 18px;
+    line-height: 18px;
+  }
+
+  &:hover {
+    color: #fff;
+    transform: translateX(-2px);
+  }
+}
+
+.eyebrow {
+  margin-top: 20px;
+
+  display: block;
+
+  color: rgba(255, 255, 255, 0.72);
+
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+
+/* =========================
+   FORM
+========================= */
+
+.lesson-form {
+  width: 100%;
+}
+
+.form-card {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 22px 20px;
+
+  padding: 30px 32px;
+
+  border: 1px solid #e4eaf3;
+  border-radius: 18px;
+
+  background: #fff;
+
+  box-shadow:
+    0 8px 30px
+    rgba(33, 61, 110, 0.06);
+
+  h2 {
+    grid-column: 1 / -1;
+
+    margin: 0 0 4px;
+
+    color: #172746;
+
+    font-size: 20px;
+    line-height: 1.2;
+    font-weight: 750;
+  }
+
+  label {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    > span {
+      color: #344461;
+
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    > small {
+      margin-top: -2px;
+
+      color: #8c99ad;
+
+      font-size: 11px;
+      line-height: 1.4;
+    }
+  }
+
+  /*
+   * Название и описание
+   * растягиваем на всю ширину.
+   */
+  label:nth-of-type(4),
+  label:nth-of-type(5) {
+    grid-column: 1 / -1;
+  }
+}
+
+
+/* =========================
+   INPUTS
+========================= */
+
+input,
+select,
+textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid #dce4ef;
+  border-radius: 10px;
+
+  outline: none;
+
+  background: #fff;
+  color: #172746;
+
+  font: inherit;
+  font-size: 13px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    border-color: #c4d0e0;
+  }
+
+  &:focus {
+    border-color: #2972e6;
+
+    box-shadow:
+      0 0 0 3px
+      rgba(41, 114, 230, 0.1);
+  }
+
+  &::placeholder {
+    color: #a6b1c1;
+  }
+}
+
+input,
+select {
+  height: 46px;
+
+  padding: 0 13px;
+}
+
+textarea {
+  min-height: 105px;
+
+  padding: 12px 13px;
+
+  resize: vertical;
+
+  line-height: 1.55;
+}
+
+
+/* =========================
+   SELECT
+========================= */
+
+select {
+  cursor: pointer;
+
+  appearance: none;
+
+  padding-right: 40px;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%237b8aa2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+  background-repeat: no-repeat;
+  background-position:
+    right 12px center;
+  background-size: 17px;
+}
+
+
+/* =========================
+   DATETIME / NUMBER
+========================= */
+
+input[type='datetime-local'] {
+  cursor: pointer;
+}
+
+input[type='number'] {
+  appearance: textfield;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    opacity: 1;
+  }
+}
+
+
+/* =========================
+   INVALID
+========================= */
+
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border-color: #df5a5a;
+
+  background: #fffafa;
+
+  &:focus {
+    box-shadow:
+      0 0 0 3px
+      rgba(223, 90, 90, 0.09);
+  }
+}
+
+
+/* =========================
+   ACTIONS
+========================= */
+
+.form-actions {
+  margin-top: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding: 18px 22px;
+
+  border: 1px solid #e4eaf3;
+  border-radius: 16px;
+
+  background: #fff;
+
+  box-shadow:
+    0 6px 24px
+    rgba(33, 61, 110, 0.05);
+}
+
+.cancel-button,
+.submit-button {
+  min-height: 42px;
+
+  padding: 0 17px;
+
+  border-radius: 9px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+
+  text-decoration: none;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+
+    font-size: 18px;
+    line-height: 18px;
+  }
+}
+
+.cancel-button {
+  border: 1px solid #dfe6ef;
+
+  background: #f6f8fb;
+  color: #64728a;
+
+  &:hover {
+    border-color: #ccd6e4;
+
+    background: #eef2f7;
+    color: #344461;
+  }
+}
+
+.submit-button {
+  min-width: 160px;
+
+  border: 1px solid #1d68e3;
+
+  background: #1769e8;
+  color: #fff;
+
+  box-shadow:
+    0 6px 15px
+    rgba(23, 105, 232, 0.2);
+
+  &:hover:not(:disabled) {
+    background: #125dcc;
+
+    transform:
+      translateY(-1px);
+
+    box-shadow:
+      0 8px 18px
+      rgba(23, 105, 232, 0.25);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    border-color: #b8c9e5;
+
+    background: #a9bfdf;
+    color: rgba(255, 255, 255, 0.85);
+
+    box-shadow: none;
+
+    cursor: not-allowed;
+  }
+
+  mat-spinner {
+    display: inline-flex;
+  }
+
+  ::ng-deep {
+    .mdc-circular-progress__indeterminate-circle-graphic {
+      stroke: #fff;
+    }
+  }
+}
+
+
+/* =========================
+   STATE
+========================= */
+
+.page-state {
+  min-height: 350px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  padding: 30px;
+
+  border: 1px solid #e4eaf3;
+  border-radius: 18px;
+
+  background: #fff;
+
+  color: #8390a5;
+
+  text-align: center;
+
+  box-shadow:
+    0 8px 30px
+    rgba(33, 61, 110, 0.05);
+
+  p {
+    margin: 0;
+
+    font-size: 14px;
+  }
+
+  mat-icon {
+    width: 46px;
+    height: 46px;
+
+    font-size: 46px;
+    line-height: 46px;
+
+    color: #8ca8cf;
+  }
+
+  &.error {
+    border-color: #f0d1d1;
+
+    background: #fffafa;
+
+    color: #ca5e5e;
+
+    mat-icon {
+      color: #cf5656;
+    }
+  }
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+  .create-lesson-page {
+    padding:
+      22px 22px 40px;
+  }
+
+  .page-header {
+    padding:
+      26px 26px;
+
+    h1 {
+      font-size: 28px;
+    }
+  }
+
+  .form-card {
+    padding:
+      25px 24px;
+  }
+}
+
+
+@media (max-width: 700px) {
+  .create-lesson-page {
+    padding:
+      16px 14px 30px;
+  }
+
+  .page-header {
+    margin-bottom: 16px;
+
+    padding:
+      22px 20px;
+
+    border-radius: 16px;
+
+    h1 {
+      margin-top: 9px;
+
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 13px;
+    }
+  }
+
+  .eyebrow {
+    margin-top: 16px;
+  }
+
+  .form-card {
+    grid-template-columns:
+      1fr;
+
+    gap: 18px;
+
+    padding:
+      22px 18px;
+
+    border-radius: 15px;
+
+    h2,
+    label:nth-of-type(4),
+    label:nth-of-type(5) {
+      grid-column: auto;
+    }
+  }
+
+  input,
+  select {
+    height: 45px;
+  }
+
+  .form-actions {
+    margin-top: 14px;
+
+    padding: 14px;
+
+    flex-direction: column-reverse;
+
+    border-radius: 14px;
+  }
+
+  .cancel-button,
+  .submit-button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+
+@media (max-width: 420px) {
+  .create-lesson-page {
+    padding:
+      12px 10px 24px;
+  }
+
+  .page-header {
+    padding:
+      20px 17px;
+
+    h1 {
+      font-size: 22px;
+    }
+  }
+
+  .form-card {
+    padding:
+      20px 15px;
+  }
+}

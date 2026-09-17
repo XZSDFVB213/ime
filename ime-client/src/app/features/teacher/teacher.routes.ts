@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { TeacherLayout } from '../../core/layouts/teacher-layout/teacher-layout';
+import { TeacherCreateHomework } from './pages/teacher-create-homework/teacher-create-homework';
 
 export const TeacherRoutes: Routes = [
   {
@@ -13,6 +14,21 @@ export const TeacherRoutes: Routes = [
         redirectTo: 'dashboard',
         pathMatch: 'full',
       },
+      {
+  path: 'homeworks/create',
+  component: TeacherCreateHomework,
+},{
+  path:
+    'subjects/:subjectId/lessons/create',
+
+  loadComponent: () =>
+    import(
+      './features/teacher/pages/teacher-create-lesson/teacher-create-lesson'
+    ).then(
+      (m) =>
+        m.TeacherCreateLesson,
+    ),
+},
       {
         path:"profile",
          data: {

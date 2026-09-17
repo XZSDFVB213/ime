@@ -1,0 +1,290 @@
+<section class="create-lesson-page">
+
+  @if (loading()) {
+
+    <div class="page-state">
+      <mat-spinner diameter="44" />
+
+      <p>
+        Загружаем данные…
+      </p>
+    </div>
+
+  } @else if (error()) {
+
+    <div class="page-state error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <p>
+        {{ error() }}
+      </p>
+    </div>
+
+  } @else if (subject(); as subject) {
+
+    <header class="page-header">
+
+      <div>
+
+        <a
+          class="back"
+          [routerLink]="[
+            '/teacher/subjects',
+            subject.id
+          ]"
+        >
+          <mat-icon>
+            arrow_back
+          </mat-icon>
+
+          К дисциплине
+        </a>
+
+
+        <span class="eyebrow">
+          {{ subject.code }}
+        </span>
+
+        <h1>
+          Новое занятие
+        </h1>
+
+        <p>
+          {{ subject.name }}
+        </p>
+
+      </div>
+
+    </header>
+
+
+    <form
+      class="lesson-form"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+    >
+
+      <section class="form-card">
+
+        <h2>
+          Основные данные
+        </h2>
+
+
+        <label>
+          <span>
+            Учебная группа *
+          </span>
+
+          <select
+            formControlName="groupId"
+          >
+
+            <option
+              value=""
+              disabled
+            >
+              Выберите группу
+            </option>
+
+            @for (
+              group of subject.groups;
+              track group.id
+            ) {
+
+              <option
+                [value]="group.id"
+              >
+                {{ group.name }}
+              </option>
+
+            }
+
+          </select>
+        </label>
+
+
+        <label>
+          <span>
+            Семестр *
+          </span>
+
+          <select
+            formControlName="semesterId"
+          >
+
+            <option
+              value=""
+              disabled
+            >
+              Выберите семестр
+            </option>
+
+            @for (
+              semester of semesters();
+              track semester.id
+            ) {
+
+              <option
+                [value]="semester.id"
+              >
+                {{ semester.name }}
+              </option>
+
+            }
+
+          </select>
+        </label>
+
+
+        <label>
+          <span>
+            Тип занятия *
+          </span>
+
+          <select
+            formControlName="type"
+          >
+
+            <option value="LECTURE">
+              Лекция
+            </option>
+
+            <option value="PRACTICE">
+              Практическое занятие
+            </option>
+
+            <option value="SEMINAR">
+              Семинар
+            </option>
+
+            <option value="LAB">
+              Лабораторная работа
+            </option>
+
+          </select>
+        </label>
+
+
+        <label>
+          <span>
+            Название *
+          </span>
+
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Например: Архитектура процессоров"
+          />
+        </label>
+
+
+        <label>
+          <span>
+            Описание
+          </span>
+
+          <textarea
+            formControlName="description"
+            rows="4"
+            placeholder="Описание занятия"
+          ></textarea>
+        </label>
+
+
+        <label>
+          <span>
+            Дата и время *
+          </span>
+
+          <input
+            type="datetime-local"
+            formControlName="date"
+          />
+        </label>
+
+
+        <label>
+          <span>
+            Продолжительность *
+          </span>
+
+          <input
+            type="number"
+            min="15"
+            step="5"
+            formControlName="duration"
+          />
+
+          <small>
+            В минутах
+          </small>
+        </label>
+
+
+        <label>
+          <span>
+            Аудитория
+          </span>
+
+          <input
+            type="text"
+            formControlName="location"
+            placeholder="Например: 305"
+          />
+        </label>
+
+      </section>
+
+
+      <div class="form-actions">
+
+        <a
+          class="cancel-button"
+          [routerLink]="[
+            '/teacher/subjects',
+            subject.id
+          ]"
+        >
+          Отмена
+        </a>
+
+
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="
+            form.invalid ||
+            submitting()
+          "
+        >
+
+          @if (submitting()) {
+
+            <mat-spinner
+              diameter="18"
+            />
+
+            Создаём…
+
+          } @else {
+
+            <mat-icon>
+              add
+            </mat-icon>
+
+            Создать занятие
+
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  }
+
+</section>

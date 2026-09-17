@@ -511,6 +511,21 @@
               Расписание занятий
               по дисциплине
             </p>
+             <a
+    class="create-button"
+    [routerLink]="[
+      '/teacher/subjects',
+      subjectId,
+      'lessons',
+      'create'
+    ]"
+  >
+    <mat-icon>
+      add
+    </mat-icon>
+
+    Создать занятие
+  </a>
           </div>
         </header>
 

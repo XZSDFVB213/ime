@@ -8,7 +8,53 @@
 
   color: #122140;
 }
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
+  gap: 20px;
+}
+
+
+.create-button {
+  height: 42px;
+  padding: 0 16px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  border-radius: 10px;
+
+  background: #1769e8;
+  color: #fff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  text-decoration: none;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 6px 16px
+    rgba(23, 105, 232, 0.18);
+
+
+  mat-icon {
+    width: 19px;
+    height: 19px;
+
+    font-size: 19px;
+  }
+
+
+  &:hover {
+    background: #125dcc;
+  }
+}
 .back-link {
   width: fit-content;
   margin-bottom: 20px;

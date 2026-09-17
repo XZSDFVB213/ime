@@ -65,7 +65,59 @@
             </p>
           </div>
         </header>
+        <div class="form-field">
 
+  <label for="lessonId">
+    Занятие
+  </label>
+
+  <select
+    id="lessonId"
+    formControlName="lessonId"
+  >
+
+    <option
+      value=""
+      disabled
+    >
+      Выберите занятие
+    </option>
+
+    @for (
+      lesson of lessons();
+      track lesson.id
+    ) {
+
+      <option
+        [value]="lesson.id"
+      >
+        {{ lesson.subject?.name }}
+        —
+        {{ lesson.group?.name }}
+        —
+        {{
+          lesson.date
+            | date:'dd.MM.yyyy HH:mm'
+        }}
+      </option>
+
+    }
+
+  </select>
+
+
+  @if (
+    form.controls.lessonId.touched &&
+    form.controls.lessonId.invalid
+  ) {
+
+    <small class="field-error">
+      Выберите занятие
+    </small>
+
+  }
+
+</div>
         <div class="field">
           <label for="title">
             Название задания
