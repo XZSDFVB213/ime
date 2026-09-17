@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { TeacherService } from '../../services/teacher.service';
+import { TeacherService, TeacherSubject } from '../../services/teacher.service';
 
 type SubjectTab = 'OVERVIEW' | 'LESSONS' | 'HOMEWORKS' | 'PERFORMANCE';
 
@@ -39,6 +39,8 @@ interface StudentPerformance {
 })
 export class TeacherSubjectDetails {
   private readonly route = inject(ActivatedRoute);
+readonly allSubjects =
+  signal<TeacherSubject[]>([]);
 
   private readonly teacherService = inject(TeacherService);
 
@@ -52,38 +54,48 @@ export class TeacherSubjectDetails {
 
   readonly activeTab = signal<SubjectTab>('OVERVIEW');
 
-  readonly subjectLessons = computed(() => {
-    return this.lessons()
-      .filter(
-        (lesson) => lesson.subject?.id === this.subjectId || lesson.subjectId === this.subjectId,
-      )
-      .sort((first, second) => new Date(first.date).getTime() - new Date(second.date).getTime());
-  });
+ readonly subjectLessons = computed(() => {
+  return this.lessons()
+    .filter(
+      (lesson) =>
+        lesson.subject?.id === this.subjectId ||
+        lesson.subjectId === this.subjectId,
+    )
+    .sort(
+      (first, second) =>
+        new Date(first.date).getTime() -
+        new Date(second.date).getTime(),
+    );
+});
 
-  readonly subjectHomeworks = computed(() => {
-    return this.homeworks()
-      .filter(
-        (homework) =>
-          homework.subject?.id === this.subjectId || homework.subjectId === this.subjectId,
-      )
-      .sort(
-        (first, second) =>
-          new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime(),
-      );
-  });
 
-  readonly subject = computed(() => {
-    const lessonSubject = this.subjectLessons()[0]?.subject;
+readonly subjectHomeworks = computed(() => {
+  return this.homeworks()
+    .filter(
+      (homework) =>
+        homework.subject?.id === this.subjectId ||
+        homework.subjectId === this.subjectId,
+    )
+    .sort(
+      (first, second) =>
+        new Date(second.createdAt).getTime() -
+        new Date(first.createdAt).getTime(),
+    );
+});
 
-    if (lessonSubject) {
-      return lessonSubject;
-    }
-
-    return this.subjectHomeworks()[0]?.subject ?? null;
+readonly subject =
+  computed<TeacherSubject | null>(() => {
+    return (
+      this.allSubjects().find(
+        (subject) =>
+          subject.id === this.subjectId,
+      ) ?? null
+    );
   });
 
   readonly groups = computed(() => {
-    const map = new Map<
+  const map =
+    new Map<
       string,
       {
         id: string;
@@ -91,32 +103,80 @@ export class TeacherSubjectDetails {
       }
     >();
 
-    for (const lesson of this.subjectLessons()) {
-      const group = lesson.group;
 
-      if (group?.id) {
-        map.set(group.id, {
-          id: group.id,
-          name: group.name,
-        });
-      }
-    }
-
-    for (const homework of this.subjectHomeworks()) {
-      const group = homework.lesson?.group;
-
-      if (group?.id) {
-        map.set(group.id, {
-          id: group.id,
-          name: group.name,
-        });
-      }
-    }
-
-    return Array.from(map.values()).sort((first, second) =>
-      first.name.localeCompare(second.name, 'ru'),
+  /*
+   * Главный источник —
+   * назначения преподавателя.
+   */
+  for (
+    const group of
+      this.subject()?.groups ?? []
+  ) {
+    map.set(
+      group.id,
+      {
+        id: group.id,
+        name: group.name,
+      },
     );
-  });
+  }
+
+
+  /*
+   * Дополнительно собираем
+   * из существующих занятий.
+   */
+  for (
+    const lesson of
+      this.subjectLessons()
+  ) {
+    const group =
+      lesson.group;
+
+    if (group?.id) {
+      map.set(
+        group.id,
+        {
+          id: group.id,
+          name: group.name,
+        },
+      );
+    }
+  }
+
+
+  /*
+   * И из домашних заданий.
+   */
+  for (
+    const homework of
+      this.subjectHomeworks()
+  ) {
+    const group =
+      homework.lesson?.group;
+
+    if (group?.id) {
+      map.set(
+        group.id,
+        {
+          id: group.id,
+          name: group.name,
+        },
+      );
+    }
+  }
+
+
+  return Array.from(
+    map.values(),
+  ).sort(
+    (first, second) =>
+      first.name.localeCompare(
+        second.name,
+        'ru',
+      ),
+  );
+});
 
   readonly allSubmissions = computed(() => {
     return this.subjectHomeworks().flatMap((homework) => homework.submissions ?? []);
@@ -337,38 +397,121 @@ export class TeacherSubjectDetails {
   }
 
   private loadData(): void {
-    if (!this.subjectId) {
-      this.error.set('Не указан ID дисциплины');
+  if (!this.subjectId) {
+    this.error.set(
+      'Не указан ID дисциплины',
+    );
 
-      this.loading.set(false);
-      return;
-    }
+    this.loading.set(false);
 
-    this.loading.set(true);
-    this.error.set(null);
-
-    forkJoin({
-      lessons: this.teacherService.getLessons().pipe(catchError(() => of([]))),
-
-      homeworks: this.teacherService.getHomeworks().pipe(catchError(() => of([]))),
-    })
-      .pipe(finalize(() => this.loading.set(false)))
-      .subscribe({
-        next: (response) => {
-          this.lessons.set(response.lessons ?? []);
-
-          this.homeworks.set(response.homeworks ?? []);
-
-          if (!this.subject()) {
-            this.error.set('Дисциплина не найдена');
-          }
-        },
-
-        error: (error) => {
-          console.error(error);
-
-          this.error.set('Не удалось загрузить дисциплину');
-        },
-      });
+    return;
   }
+
+
+  this.loading.set(true);
+  this.error.set(null);
+
+
+  forkJoin({
+    /*
+     * Назначенные преподавателю дисциплины.
+     *
+     * ЭТО источник истины для проверки
+     * доступа к дисциплине.
+     */
+    subjects:
+      this.teacherService.getSubjects(),
+
+    /*
+     * Занятия и ДЗ теперь только
+     * наполнение дисциплины.
+     */
+    lessons:
+      this.teacherService
+        .getLessons()
+        .pipe(
+          catchError(() =>
+            of([]),
+          ),
+        ),
+
+    homeworks:
+      this.teacherService
+        .getHomeworks()
+        .pipe(
+          catchError(() =>
+            of([]),
+          ),
+        ),
+  })
+    .pipe(
+      finalize(() => {
+        this.loading.set(false);
+      }),
+    )
+    .subscribe({
+      next: ({
+        subjects,
+        lessons,
+        homeworks,
+      }) => {
+        this.allSubjects.set(
+          subjects ?? [],
+        );
+
+        this.lessons.set(
+          lessons ?? [],
+        );
+
+        this.homeworks.set(
+          homeworks ?? [],
+        );
+
+
+        /*
+         * Проверяем именно назначение
+         * преподавателю, а НЕ наличие
+         * Lesson/Homework.
+         */
+        const subjectExists =
+          subjects.some(
+            (subject) =>
+              subject.id ===
+              this.subjectId,
+          );
+
+
+        if (!subjectExists) {
+          this.error.set(
+            'Дисциплина не найдена или недоступна',
+          );
+
+          return;
+        }
+
+
+        /*
+         * Даже если по дисциплине:
+         *
+         * lessons = []
+         * homeworks = []
+         *
+         * это НЕ ошибка.
+         */
+        this.error.set(null);
+      },
+
+
+      error: (error) => {
+        console.error(
+          '[TEACHER SUBJECT DETAILS]',
+          error,
+        );
+
+        this.error.set(
+          'Не удалось загрузить дисциплину',
+        );
+      },
+    });
+}
 }
