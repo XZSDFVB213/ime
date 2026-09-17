@@ -46,11 +46,51 @@ import { CreateDepartmentDto } from './dto/create-departament.dto';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { CreateAcademicYearDto } from './dto/create-academic-year.dto';
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
+  @Post('semesters')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+createSemester(
+  @Body()
+  dto: {
+    name: string;
+    number: number;
+  },
+) {
+  return this.adminService
+    .createSemester(dto);
+}
+@Post('academic-years')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+createAcademicYear(
+  @Body()
+  dto: CreateAcademicYearDto,
+) {
+  return this.adminService
+    .createAcademicYear(dto);
+}
+
+
+@Get('academic-years')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+getAcademicYears() {
+  return this.adminService
+    .getAcademicYears();
+}
+@Get('semesters')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+getSemesters() {
+  return this.adminService
+    .getSemesters();
+}
   @Get('disciplines')
   getDisciplines() {
     return this.adminService.getDisciplines();

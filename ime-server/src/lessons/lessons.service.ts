@@ -104,11 +104,25 @@ getSemesters() {
       id: true,
       name: true,
       number: true,
+
+      academicYear: {
+        select: {
+          id: true,
+          year: true,
+        },
+      },
     },
 
-    orderBy: {
-      number: 'asc',
-    },
+    orderBy: [
+      {
+        academicYear: {
+          year: 'desc',
+        },
+      },
+      {
+        number: 'asc',
+      },
+    ],
   });
 }
   findAll() {

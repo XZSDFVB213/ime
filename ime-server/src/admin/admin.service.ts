@@ -343,7 +343,107 @@ export class AdminService {
       },
     });
   }
+  async createSemester(dto: { name: string; number: number }) {
+    return this.prisma.semester.create({
+      data: {
+        name: dto.name.trim(),ыу
 
+        number: dto.number,
+      },
+    });
+  }
+  async createAcademicYear(
+  dto: CreateAcademicYearDto,
+) {
+  const existing =
+    await this.prisma.academicYear
+      .findUnique({
+        where: {
+          year: dto.year,
+        },
+
+        select: {
+          id: true,
+        },
+      });
+
+
+  if (existing) {
+    throw new ConflictException(
+      `Учебный год ${dto.year}/${dto.year + 1} уже существует`,
+    );
+  }
+
+
+  return this.prisma.$transaction(
+    async (tx) => {
+      const academicYear =
+        await tx.academicYear.create({
+          data: {
+            year: dto.year,
+          },
+        });
+
+
+      await tx.semester.createMany({
+        data: [
+          {
+            name: '1 семестр',
+            number: 1,
+            academicYearId:
+              academicYear.id,
+          },
+
+          {
+            name: '2 семестр',
+            number: 2,
+            academicYearId:
+              academicYear.id,
+          },
+        ],
+      });
+
+
+      return tx.academicYear.findUnique({
+        where: {
+          id: academicYear.id,
+        },
+
+        include: {
+          semesters: {
+            orderBy: {
+              number: 'asc',
+            },
+          },
+        },
+      });
+    },
+  );
+}
+
+
+getAcademicYears() {
+  return this.prisma.academicYear.findMany({
+    include: {
+      semesters: {
+        orderBy: {
+          number: 'asc',
+        },
+      },
+    },
+
+    orderBy: {
+      year: 'desc',
+    },
+  });
+}
+  getSemesters() {
+    return this.prisma.semester.findMany({
+      orderBy: {
+        number: 'asc',
+      },
+    });
+  }
   // ==========================================
   // CREATE STUDENT
   // ==========================================
