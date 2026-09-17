@@ -3,7 +3,22 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { environment } from '../../../environments/environment';
+export interface AdminSemester {
+  id: string;
+  name: string;
+  number: number;
+  academicYearId: string;
+  createdAt: string;
+}
 
+
+export interface AdminAcademicYear {
+  id: string;
+  year: number;
+  createdAt: string;
+
+  semesters: AdminSemester[];
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -17,7 +32,27 @@ export class AdminService {
 
     return this.http.get<any[]>(url);
   }
+getAcademicYears() {
+  return this.http.get<
+    AdminAcademicYear[]
+  >(
+    `${environment.api}/admin/academic-years`,
+  );
+}
 
+
+createAcademicYear(
+  year: number,
+) {
+  return this.http.post<
+    AdminAcademicYear
+  >(
+    `${environment.api}/admin/academic-years`,
+    {
+      year,
+    },
+  );
+}
   getStudents() {
     return this.getUsers('STUDENT');
   }

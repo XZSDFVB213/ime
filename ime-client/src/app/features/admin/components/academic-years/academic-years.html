@@ -1,0 +1,170 @@
+<section class="academic-years-card">
+
+  <header class="card-header">
+
+    <div class="heading">
+
+      <div class="heading-icon">
+        <mat-icon>
+          calendar_month
+        </mat-icon>
+      </div>
+
+
+      <div>
+
+        <h2>
+          Учебные годы
+        </h2>
+
+        <p>
+          Управление учебными периодами
+          и семестрами
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="add-button"
+      (click)="openCreate()"
+    >
+      <mat-icon>
+        add
+      </mat-icon>
+
+      Добавить учебный год
+    </button>
+
+  </header>
+
+
+  @if (loading()) {
+
+    <div class="state">
+      <mat-spinner
+        diameter="34"
+      />
+
+      <span>
+        Загружаем учебные годы…
+      </span>
+    </div>
+
+  } @else if (error()) {
+
+    <div class="state error">
+
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      <span>
+        {{ error() }}
+      </span>
+
+    </div>
+
+  } @else {
+
+    <div class="years-list">
+
+      @for (
+        academicYear of
+          academicYears();
+        track academicYear.id
+      ) {
+
+        <article class="year-row">
+
+          <div class="year-information">
+
+            <div class="year-icon">
+              <mat-icon>
+                school
+              </mat-icon>
+            </div>
+
+
+            <div>
+
+              <span>
+                Учебный год
+              </span>
+
+              <strong>
+                {{ academicYear.year }}/{{ academicYear.year + 1 }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="semester-list">
+
+            @for (
+              semester of
+                academicYear.semesters;
+              track semester.id
+            ) {
+
+              <span class="semester-chip">
+
+                <mat-icon>
+                  event_note
+                </mat-icon>
+
+                {{ semester.name }}
+
+              </span>
+
+            }
+
+          </div>
+
+        </article>
+
+      } @empty {
+
+        <div class="empty">
+
+          <div class="empty-icon">
+            <mat-icon>
+              calendar_month
+            </mat-icon>
+          </div>
+
+          <strong>
+            Учебных годов пока нет
+          </strong>
+
+          <p>
+            Создайте учебный год,
+            чтобы преподаватели могли
+            планировать занятия.
+          </p>
+
+          <button
+            type="button"
+            (click)="openCreate()"
+          >
+            <mat-icon>
+              add
+            </mat-icon>
+
+            Создать учебный год
+          </button>
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</section>

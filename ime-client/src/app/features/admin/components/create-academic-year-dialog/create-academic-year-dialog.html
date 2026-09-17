@@ -1,0 +1,140 @@
+import {
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
+
+import {
+  FormControl,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+
+import {
+  MatDialogRef,
+} from '@angular/material/dialog';
+
+import {
+  MatIconModule,
+} from '@angular/material/icon';
+
+import {
+  MatProgressSpinnerModule,
+} from '@angular/material/progress-spinner';
+
+import {
+  finalize,
+} from 'rxjs';
+
+import {
+  AdminService,
+} from '../../admin.service';
+
+
+@Component({
+  selector:
+    'app-create-academic-year-dialog',
+
+  standalone: true,
+
+  imports: [
+    ReactiveFormsModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
+
+  templateUrl:
+    './create-academic-year-dialog.html',
+
+  styleUrl:
+    './create-academic-year-dialog.scss',
+})
+export class CreateAcademicYearDialog {
+  private readonly dialogRef =
+    inject(
+      MatDialogRef<CreateAcademicYearDialog>,
+    );
+
+  private readonly adminService =
+    inject(AdminService);
+
+
+  readonly submitting =
+    signal(false);
+
+  readonly error =
+    signal<string | null>(null);
+
+
+  readonly year =
+    new FormControl(
+      new Date().getFullYear(),
+      {
+        nonNullable: true,
+
+        validators: [
+          Validators.required,
+          Validators.min(2020),
+          Validators.max(2100),
+        ],
+      },
+    );
+
+
+  get nextYear(): number {
+    return this.year.value + 1;
+  }
+
+
+  close(): void {
+    this.dialogRef.close(false);
+  }
+
+
+  submit(): void {
+    if (
+      this.year.invalid ||
+      this.submitting()
+    ) {
+      this.year.markAsTouched();
+
+      return;
+    }
+
+
+    this.submitting.set(true);
+    this.error.set(null);
+
+
+    this.adminService
+      .createAcademicYear(
+        this.year.value,
+      )
+      .pipe(
+        finalize(() => {
+          this.submitting.set(false);
+        }),
+      )
+      .subscribe({
+        next: (
+          academicYear,
+        ) => {
+          this.dialogRef.close(
+            academicYear,
+          );
+        },
+
+        error: (error) => {
+          console.error(
+            'Ошибка создания учебного года',
+            error,
+          );
+
+          this.error.set(
+            error.error?.message ??
+              'Не удалось создать учебный год',
+          );
+        },
+      });
+  }
+}

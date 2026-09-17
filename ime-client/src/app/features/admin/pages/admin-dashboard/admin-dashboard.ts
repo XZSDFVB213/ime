@@ -11,6 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { forkJoin } from 'rxjs';
 
 import { AdminService } from '../../services/admin.service';
+import { AcademicYears } from '../../components/academic-years/academic-years';
 
 interface DashboardUser {
   id: string;
@@ -75,7 +76,8 @@ interface Dashboardsubject {
 
   standalone: true,
 
-  imports: [CommonModule, RouterLink, MatIconModule, MatSnackBarModule],
+  imports: [CommonModule, RouterLink, MatIconModule, MatSnackBarModule,  AcademicYears,
+],
 
   templateUrl: './admin-dashboard.html',
 

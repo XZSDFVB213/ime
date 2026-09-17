@@ -5,6 +5,11 @@ export interface TeacherSemester {
   id: string;
   name: string;
   number: number;
+
+  academicYear: {
+    id: string;
+    year: number;
+  };
 }
 
 

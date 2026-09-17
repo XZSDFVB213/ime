@@ -128,10 +128,12 @@
             ) {
 
               <option
-                [value]="semester.id"
-              >
-                {{ semester.name }}
-              </option>
+  [value]="semester.id"
+>
+  {{ semester.name }}
+  —
+  {{ semester.academicYear.year }}/{{ semester.academicYear.year + 1 }}
+</option>
 
             }
 
