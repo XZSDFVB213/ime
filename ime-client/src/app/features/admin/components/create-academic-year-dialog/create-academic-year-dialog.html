@@ -1,140 +1,142 @@
-import {
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
+<section class="dialog">
 
-import {
-  FormControl,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+  <header>
 
-import {
-  MatDialogRef,
-} from '@angular/material/dialog';
+    <div class="dialog-icon">
+      <mat-icon>
+        calendar_month
+      </mat-icon>
+    </div>
 
-import {
-  MatIconModule,
-} from '@angular/material/icon';
+    <div>
+      <h2>
+        Новый учебный год
+      </h2>
 
-import {
-  MatProgressSpinnerModule,
-} from '@angular/material/progress-spinner';
+      <p>
+        Семестры будут созданы
+        автоматически
+      </p>
+    </div>
 
-import {
-  finalize,
-} from 'rxjs';
-
-import {
-  AdminService,
-} from '../../admin.service';
+  </header>
 
 
-@Component({
-  selector:
-    'app-create-academic-year-dialog',
+  <div class="content">
 
-  standalone: true,
+    <label>
 
-  imports: [
-    ReactiveFormsModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-  ],
+      <span>
+        Начальный год
+      </span>
 
-  templateUrl:
-    './create-academic-year-dialog.html',
+      <input
+        type="number"
+        min="2020"
+        max="2100"
+        [formControl]="year"
+      />
 
-  styleUrl:
-    './create-academic-year-dialog.scss',
-})
-export class CreateAcademicYearDialog {
-  private readonly dialogRef =
-    inject(
-      MatDialogRef<CreateAcademicYearDialog>,
-    );
-
-  private readonly adminService =
-    inject(AdminService);
+    </label>
 
 
-  readonly submitting =
-    signal(false);
+    <div class="preview">
 
-  readonly error =
-    signal<string | null>(null);
+      <span>
+        Будет создан учебный год
+      </span>
 
+      <strong>
+        {{ year.value }}/{{ nextYear }}
+      </strong>
 
-  readonly year =
-    new FormControl(
-      new Date().getFullYear(),
-      {
-        nonNullable: true,
-
-        validators: [
-          Validators.required,
-          Validators.min(2020),
-          Validators.max(2100),
-        ],
-      },
-    );
+    </div>
 
 
-  get nextYear(): number {
-    return this.year.value + 1;
-  }
+    <div class="semesters-preview">
+
+      <div>
+        <mat-icon>
+          looks_one
+        </mat-icon>
+
+        <span>
+          1 семестр
+        </span>
+      </div>
 
 
-  close(): void {
-    this.dialogRef.close(false);
-  }
+      <div>
+        <mat-icon>
+          looks_two
+        </mat-icon>
+
+        <span>
+          2 семестр
+        </span>
+      </div>
+
+    </div>
 
 
-  submit(): void {
-    if (
-      this.year.invalid ||
-      this.submitting()
-    ) {
-      this.year.markAsTouched();
+    @if (error()) {
 
-      return;
+      <div class="error-message">
+
+        <mat-icon>
+          error_outline
+        </mat-icon>
+
+        {{ error() }}
+
+      </div>
+
     }
 
-
-    this.submitting.set(true);
-    this.error.set(null);
+  </div>
 
 
-    this.adminService
-      .createAcademicYear(
-        this.year.value,
-      )
-      .pipe(
-        finalize(() => {
-          this.submitting.set(false);
-        }),
-      )
-      .subscribe({
-        next: (
-          academicYear,
-        ) => {
-          this.dialogRef.close(
-            academicYear,
-          );
-        },
+  <footer>
 
-        error: (error) => {
-          console.error(
-            'Ошибка создания учебного года',
-            error,
-          );
+    <button
+      type="button"
+      class="cancel"
+      (click)="close()"
+    >
+      Отмена
+    </button>
 
-          this.error.set(
-            error.error?.message ??
-              'Не удалось создать учебный год',
-          );
-        },
-      });
-  }
-}
+
+    <button
+      type="button"
+      class="submit"
+      [disabled]="
+        year.invalid ||
+        submitting()
+      "
+      (click)="submit()"
+    >
+
+      @if (submitting()) {
+
+        <mat-spinner
+          diameter="18"
+        />
+
+        Создаём…
+
+      } @else {
+
+        <mat-icon>
+          add
+        </mat-icon>
+
+        Создать
+
+      }
+
+    </button>
+
+  </footer>
+
+</section>
