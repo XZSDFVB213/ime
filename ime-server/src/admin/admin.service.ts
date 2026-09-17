@@ -24,6 +24,7 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { CreateAcademicYearDto } from './dto/create-academic-year.dto';
 
 @Injectable()
 export class AdminService {
@@ -343,15 +344,7 @@ export class AdminService {
       },
     });
   }
-  async createSemester(dto: { name: string; number: number }) {
-    return this.prisma.semester.create({
-      data: {
-        name: dto.name.trim(),ыу
 
-        number: dto.number,
-      },
-    });
-  }
   async createAcademicYear(
   dto: CreateAcademicYearDto,
 ) {
@@ -437,13 +430,25 @@ getAcademicYears() {
     },
   });
 }
-  getSemesters() {
-    return this.prisma.semester.findMany({
-      orderBy: {
+ getSemesters() {
+  return this.prisma.semester.findMany({
+    include: {
+      academicYear: true,
+    },
+
+    orderBy: [
+      {
+        academicYear: {
+          year: 'desc',
+        },
+      },
+      {
         number: 'asc',
       },
-    });
-  }
+    ],
+  });
+}
+  
   // ==========================================
   // CREATE STUDENT
   // ==========================================
