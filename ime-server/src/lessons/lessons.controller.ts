@@ -19,10 +19,18 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 @Controller('lessons')
 export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) {}
-
+@Get('teacher/semesters')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.TEACHER)
+getSemesters() {
+  return this.lessonsService
+    .getSemesters();
+}
   @Post()
-  create(@Body() createLessonDto: CreateLessonDto) {
-    return this.lessonsService.create(createLessonDto);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TEACHER)
+  create(@Req() req, @Body() dto: CreateLessonDto) {
+    return this.lessonsService.create(req.user.teacher.id, dto);
   }
   @Get('by-student')
   @UseGuards(JwtAuthGuard, RolesGuard)
