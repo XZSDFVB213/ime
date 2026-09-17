@@ -52,19 +52,6 @@ import { CreateAcademicYearDto } from './dto/create-academic-year.dto';
 @Roles(Role.ADMIN)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
-  @Post('semesters')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
-createSemester(
-  @Body()
-  dto: {
-    name: string;
-    number: number;
-  },
-) {
-  return this.adminService
-    .createSemester(dto);
-}
 @Post('academic-years')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
