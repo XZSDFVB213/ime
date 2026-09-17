@@ -23,7 +23,7 @@ export const TeacherRoutes: Routes = [
 
   loadComponent: () =>
     import(
-      './features/teacher/pages/teacher-create-lesson/teacher-create-lesson'
+      './pages/teacher-create-lesson/teacher-create-lesson'
     ).then(
       (m) =>
         m.TeacherCreateLesson,
