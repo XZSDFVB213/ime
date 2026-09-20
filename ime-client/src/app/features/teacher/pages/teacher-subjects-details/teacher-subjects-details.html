@@ -353,38 +353,63 @@
 
         <div class="lesson-actions">
 
-          @if (
-          isAssessmentLesson(lesson)
-          ) {
+          <div class="lesson-actions">
 
-          <a class="assessment-button" [routerLink]="[
+            @if (
+            isAssessmentLesson(lesson)
+            ) {
+
+            <a class="assessment-button" [routerLink]="[
         '/teacher/lessons',
         lesson.id,
         'assessments'
       ]">
-            <mat-icon>
-              fact_check
-            </mat-icon>
+              <mat-icon>
+                fact_check
+              </mat-icon>
 
-            Оценить
-          </a>
+              Оценить
+            </a>
 
-          } @else if (
-          canCreateHomework(lesson)
-          ) {
+            } @else if (
+            canCreateHomework(lesson)
+            ) {
 
-          <a class="create-homework" [routerLink]="[
+            <a class="create-homework" [routerLink]="[
         '/teacher/homeworks/create',
         lesson.id
       ]">
-            <mat-icon>
-              add_task
-            </mat-icon>
+              <mat-icon>
+                add_task
+              </mat-icon>
 
-            Создать задание
-          </a>
+              Создать задание
+            </a>
 
-          }
+            }
+
+
+            <button type="button" class="delete-lesson" [disabled]="
+      deletingLessonId() === lesson.id
+    " (click)="deleteLesson(lesson)">
+
+              @if (
+              deletingLessonId() === lesson.id
+              ) {
+
+              <mat-spinner diameter="17" />
+
+              } @else {
+
+              <mat-icon>
+                delete_outline
+              </mat-icon>
+
+              }
+
+            </button>
+
+          </div>
 
 
           <button type="button" class="delete-lesson" [disabled]="
