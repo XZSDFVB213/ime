@@ -1,62 +1,48 @@
-import {
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 
-import {
-  MatIconModule,
-} from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 
-import {
-  MatDialog,
-  MatDialogModule,
-} from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
-import {
-  MatSnackBar,
-  MatSnackBarModule,
-} from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
-import {
-  MatSelectModule,
-} from '@angular/material/select';
+import { MatSelectModule } from '@angular/material/select';
 
-import {
-  AdminService,
-} from '../../services/admin.service';
+import { forkJoin } from 'rxjs';
 
-import {
-  CreateMaterialDialogComponent,
-} from './create-material-dialog/create-material-dialog';
+import { AdminService } from '../../services/admin.service';
 
+import { CreateMaterialDialogComponent } from './create-material-dialog/create-material-dialog';
 
 interface Subject {
   id: string;
   name: string;
 }
 
-
 interface Material {
   id: string;
 
   title: string;
+
   description?: string | null;
 
-  type:
-    | 'FILE'
-    | 'LINK';
+  type: 'FILE' | 'LINK';
 
   url: string;
 
   fileName?: string | null;
+
   mimeType?: string | null;
+
   size?: number | null;
 
   createdAt: string;
 
-  subject: Subject;
+  /*
+   * Теперь материал может быть
+   * общим и не иметь дисциплины.
+   */
+  subject: Subject | null;
 
   teacher?: {
     user: {
@@ -70,261 +56,218 @@ interface Material {
   } | null;
 }
 
+type MaterialTypeFilter = 'ALL' | 'FILE' | 'LINK';
+
+type MaterialSubjectFilter = 'ALL' | 'GENERAL' | string;
 
 @Component({
-  selector:
-    'app-admin-materials',
+  selector: 'app-admin-materials',
 
   standalone: true,
 
-  imports: [
-    MatIconModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatSelectModule,
-  ],
+  imports: [MatIconModule, MatDialogModule, MatSnackBarModule, MatSelectModule],
 
-  templateUrl:
-    './admin-materials.html',
+  templateUrl: './admin-materials.html',
 
-  styleUrl:
-    './admin-materials.scss',
+  styleUrl: './admin-materials.scss',
 })
 export class AdminMaterials {
-  private readonly adminService =
-    inject(AdminService);
+  private readonly adminService = inject(AdminService);
 
-  private readonly dialog =
-    inject(MatDialog);
+  private readonly dialog = inject(MatDialog);
 
-  private readonly snackBar =
-    inject(MatSnackBar);
+  private readonly snackBar = inject(MatSnackBar);
 
+  readonly materials = signal<Material[]>([]);
 
-  readonly materials =
-    signal<Material[]>([]);
+  readonly subjects = signal<Subject[]>([]);
 
-  readonly subjects =
-    signal<Subject[]>([]);
+  readonly loading = signal(true);
 
-  readonly loading =
-    signal(true);
+  readonly search = signal('');
 
-  readonly search =
-    signal('');
+  readonly typeFilter = signal<MaterialTypeFilter>('ALL');
 
-  readonly typeFilter =
-    signal('ALL');
+  readonly subjectFilter = signal<MaterialSubjectFilter>('ALL');
 
-  readonly subjectFilter =
-    signal('ALL');
+  readonly filteredMaterials = computed(() => {
+    const search = this.search().trim().toLocaleLowerCase('ru');
 
+    const type = this.typeFilter();
 
-  readonly filteredMaterials =
-    computed(() => {
-      const search =
-        this.search()
-          .trim()
-          .toLowerCase();
+    const subject = this.subjectFilter();
 
-      const type =
-        this.typeFilter();
+    return this.materials()
+      .filter((material) => {
+        /*
+         * Тип материала.
+         */
+        if (type !== 'ALL' && material.type !== type) {
+          return false;
+        }
 
-      const subject =
-        this.subjectFilter();
+        /*
+         * Только общие материалы.
+         */
+        if (subject === 'GENERAL' && material.subject !== null) {
+          return false;
+        }
 
-      return this.materials()
-        .filter(
-          (material) => {
-            if (
-              type !== 'ALL' &&
-              material.type !== type
-            ) {
-              return false;
-            }
+        /*
+         * Конкретная дисциплина.
+         */
+        if (subject !== 'ALL' && subject !== 'GENERAL' && material.subject?.id !== subject) {
+          return false;
+        }
 
-            if (
-              subject !== 'ALL' &&
-              material.subject.id !==
-                subject
-            ) {
-              return false;
-            }
+        /*
+         * Без поиска дальше
+         * проверять нечего.
+         */
+        if (!search) {
+          return true;
+        }
 
-            if (!search) {
-              return true;
-            }
+        const title = material.title?.toLocaleLowerCase('ru') ?? '';
 
-            return (
-              material.title
-                .toLowerCase()
-                .includes(search) ||
+        const description = material.description?.toLocaleLowerCase('ru') ?? '';
 
-              material.subject.name
-                .toLowerCase()
-                .includes(search) ||
+        const subjectName = material.subject?.name?.toLocaleLowerCase('ru') ?? '';
 
-              material.description
-                ?.toLowerCase()
-                .includes(search)
-            );
-          },
+        const fileName = material.fileName?.toLocaleLowerCase('ru') ?? '';
+
+        return (
+          title.includes(search) ||
+          description.includes(search) ||
+          subjectName.includes(search) ||
+          fileName.includes(search)
         );
-    });
+      })
+      .sort(
+        (first, second) =>
+          new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime(),
+      );
+  });
 
+  readonly filesCount = computed(
+    () => this.materials().filter((item) => item.type === 'FILE').length,
+  );
 
-  readonly filesCount =
-    computed(
-      () =>
-        this.materials().filter(
-          (item) =>
-            item.type === 'FILE',
-        ).length,
-    );
+  readonly linksCount = computed(
+    () => this.materials().filter((item) => item.type === 'LINK').length,
+  );
 
-
-  readonly linksCount =
-    computed(
-      () =>
-        this.materials().filter(
-          (item) =>
-            item.type === 'LINK',
-        ).length,
-    );
-
+  readonly generalCount = computed(() => this.materials().filter((item) => !item.subject).length);
 
   constructor() {
     this.load();
   }
 
-
   load(): void {
     this.loading.set(true);
 
-    this.adminService
-      .getMaterialSubjects()
-      .subscribe({
-        next: (subjects) => {
-          this.subjects.set(
-            subjects,
-          );
-        },
-      });
+    forkJoin({
+      subjects: this.adminService.getMaterialSubjects(),
 
-    this.adminService
-      .getMaterials()
-      .subscribe({
-        next: (materials) => {
-          this.materials.set(
-            materials as Material[],
-          );
+      materials: this.adminService.getMaterials(),
+    }).subscribe({
+      next: ({ subjects, materials }) => {
+        this.subjects.set(subjects ?? []);
 
-          this.loading.set(false);
-        },
+        this.materials.set((materials ?? []) as Material[]);
 
-        error: () => {
-          this.loading.set(false);
+        this.loading.set(false);
+      },
 
-          this.snackBar.open(
-            'Не удалось загрузить материалы',
-            'Закрыть',
-            {
-              duration: 3000,
-            },
-          );
-        },
-      });
+      error: (error) => {
+        console.error('Ошибка загрузки материалов', error);
+
+        this.loading.set(false);
+
+        this.snackBar.open('Не удалось загрузить материалы', 'Закрыть', {
+          duration: 3000,
+        });
+      },
+    });
   }
 
+  setSearch(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    this.search.set(input.value);
+  }
+
+  setTypeFilter(type: MaterialTypeFilter): void {
+    this.typeFilter.set(type);
+  }
+
+  setSubjectFilter(subjectId: string): void {
+    this.subjectFilter.set(subjectId);
+  }
 
   openCreate(): void {
-    const ref =
-      this.dialog.open(
-        CreateMaterialDialogComponent,
-        {
-          width: '600px',
+    const ref = this.dialog.open(CreateMaterialDialogComponent, {
+      width: '600px',
 
-          maxWidth:
-            'calc(100vw - 32px)',
+      maxWidth: 'calc(100vw - 32px)',
 
-          autoFocus: false,
+      autoFocus: false,
 
-          data: {
-            subjects:
-              this.subjects(),
-          },
-        },
-      );
+      data: {
+        subjects: this.subjects(),
+      },
+    });
 
-    ref.afterClosed()
-      .subscribe(
-        (created) => {
-          if (created) {
-            this.load();
-          }
-        },
-      );
+    ref.afterClosed().subscribe((created) => {
+      if (created) {
+        this.load();
+      }
+    });
   }
 
-
-  deleteMaterial(
-    material: Material,
-  ): void {
-    const confirmed =
-      confirm(
-        `Удалить материал «${material.title}»?`,
-      );
+  deleteMaterial(material: Material): void {
+    const confirmed = confirm(`Удалить материал «${material.title}»?`);
 
     if (!confirmed) {
       return;
     }
 
-    this.adminService
-      .deleteMaterial(
-        material.id,
-      )
-      .subscribe({
-        next: () => {
-          this.materials.update(
-            (items) =>
-              items.filter(
-                (item) =>
-                  item.id !==
-                  material.id,
-              ),
-          );
-        },
+    this.adminService.deleteMaterial(material.id).subscribe({
+      next: () => {
+        this.materials.update((items) => items.filter((item) => item.id !== material.id));
 
-        error: () => {
-          this.snackBar.open(
-            'Не удалось удалить материал',
-            'Закрыть',
-            {
-              duration: 3000,
-            },
-          );
-        },
-      });
+        this.snackBar.open('Материал удалён', 'Закрыть', {
+          duration: 2500,
+        });
+      },
+
+      error: (error) => {
+        console.error('Ошибка удаления материала', error);
+
+        this.snackBar.open(error.error?.message ?? 'Не удалось удалить материал', 'Закрыть', {
+          duration: 3000,
+        });
+      },
+    });
   }
 
+  subjectName(material: Material): string {
+    return material.subject?.name ?? 'Общий материал';
+  }
 
-  formatSize(
-    size?: number | null,
-  ): string {
+  formatSize(size?: number | null): string {
     if (!size) {
       return '';
     }
 
-    if (size < 1024 * 1024) {
-      return `${Math.round(
-        size / 1024,
-      )} КБ`;
+    if (size < 1024) {
+      return `${size} Б`;
     }
 
-    return `${(
-      size /
-      1024 /
-      1024
-    ).toFixed(1)} МБ`;
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} КБ`;
+    }
+
+    return `${(size / 1024 / 1024).toFixed(1)} МБ`;
   }
 }

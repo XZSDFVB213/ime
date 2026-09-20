@@ -1,33 +1,30 @@
 <div class="dialog">
 
-<header>
+  <header>
 
-  <div class="header-icon">
-    <mat-icon>
-      upload_file
-    </mat-icon>
-  </div>
+    <div class="header-icon">
+      <mat-icon>
+        upload_file
+      </mat-icon>
+    </div>
 
-  <div>
-    <h2>
-      Новый материал
-    </h2>
+    <div>
+      <h2>
+        Новый материал
+      </h2>
 
-    <p>
-      Добавление материала в дисциплину
-    </p>
-  </div>
+      <p>
+        Добавление материала в дисциплину
+      </p>
+    </div>
 
-  <button
-    type="button"
-    (click)="close()"
-  >
-    <mat-icon>
-      close
-    </mat-icon>
-  </button>
+    <button type="button" (click)="close()">
+      <mat-icon>
+        close
+      </mat-icon>
+    </button>
 
-</header>
+  </header>
 
 
   <div class="form">
@@ -36,10 +33,10 @@
       <span>
         Тип материала
       </span>
-
-      <mat-select
-        [(ngModel)]="type"
-      >
+      <mat-option value="">
+        Без привязки к дисциплине
+      </mat-option>
+      <mat-select [(ngModel)]="type">
         <mat-option value="FILE">
           Файл
         </mat-option>
@@ -53,22 +50,17 @@
 
     <label>
       <span>
-        Дисциплина *
+        Дисциплина
       </span>
 
-      <mat-select
-        [(ngModel)]="subjectId"
-        placeholder="Выберите дисциплину"
-      >
+      <mat-select [(ngModel)]="subjectId" placeholder="Выберите дисциплину">
         @for (
-          subject of data.subjects;
-          track subject.id
+        subject of data.subjects;
+        track subject.id
         ) {
-          <mat-option
-            [value]="subject.id"
-          >
-            {{ subject.name }}
-          </mat-option>
+        <mat-option [value]="subject.id">
+          {{ subject.name }}
+        </mat-option>
         }
       </mat-select>
     </label>
@@ -79,10 +71,7 @@
         Название *
       </span>
 
-      <input
-        [(ngModel)]="title"
-        placeholder="Лекция №1"
-      />
+      <input [(ngModel)]="title" placeholder="Лекция №1" />
     </label>
 
 
@@ -91,57 +80,47 @@
         Описание
       </span>
 
-      <textarea
-        [(ngModel)]="description"
-        rows="4"
-        placeholder="Описание материала..."
-      ></textarea>
+      <textarea [(ngModel)]="description" rows="4" placeholder="Описание материала..."></textarea>
     </label>
 
 
     @if (type === 'FILE') {
 
-      <label>
-        <span>
-          Файл *
-        </span>
+    <label>
+      <span>
+        Файл *
+      </span>
 
-        <input
-          type="file"
-          (change)="selectFile($event)"
-        />
-      </label>
+      <input type="file" (change)="selectFile($event)" />
+    </label>
 
-      @if (file) {
-        <div class="selected-file">
-          <mat-icon>
-            description
-          </mat-icon>
+    @if (file) {
+    <div class="selected-file">
+      <mat-icon>
+        description
+      </mat-icon>
 
-          {{ file.name }}
-        </div>
-      }
+      {{ file.name }}
+    </div>
+    }
 
     } @else {
 
-      <label>
-        <span>
-          Ссылка *
-        </span>
+    <label>
+      <span>
+        Ссылка *
+      </span>
 
-        <input
-          [(ngModel)]="url"
-          placeholder="https://..."
-        />
-      </label>
+      <input [(ngModel)]="url" placeholder="https://..." />
+    </label>
 
     }
 
 
     @if (error()) {
-      <div class="error">
-        {{ error() }}
-      </div>
+    <div class="error">
+      {{ error() }}
+    </div>
     }
 
   </div>
@@ -149,28 +128,19 @@
 
   <footer>
 
-    <button
-      type="button"
-      class="cancel"
-      (click)="close()"
-    >
+    <button type="button" class="cancel" (click)="close()">
       Отмена
     </button>
 
-    <button
-      type="button"
-      class="save"
-      [disabled]="saving()"
-      (click)="save()"
-    >
+    <button type="button" class="save" [disabled]="saving()" (click)="save()">
       <mat-icon>
         upload
       </mat-icon>
 
       {{
-        saving()
-          ? 'Сохранение...'
-          : 'Добавить материал'
+      saving()
+      ? 'Сохранение...'
+      : 'Добавить материал'
       }}
     </button>
 

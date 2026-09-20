@@ -11,7 +11,6 @@ export interface AdminSemester {
   createdAt: string;
 }
 
-
 export interface AdminAcademicYear {
   id: string;
   year: number;
@@ -32,27 +31,15 @@ export class AdminService {
 
     return this.http.get<any[]>(url);
   }
-getAcademicYears() {
-  return this.http.get<
-    AdminAcademicYear[]
-  >(
-    `${environment.api}/admin/academic-years`,
-  );
-}
+  getAcademicYears() {
+    return this.http.get<AdminAcademicYear[]>(`${environment.api}/admin/academic-years`);
+  }
 
-
-createAcademicYear(
-  year: number,
-) {
-  return this.http.post<
-    AdminAcademicYear
-  >(
-    `${environment.api}/admin/academic-years`,
-    {
+  createAcademicYear(year: number) {
+    return this.http.post<AdminAcademicYear>(`${environment.api}/admin/academic-years`, {
       year,
-    },
-  );
-}
+    });
+  }
   getStudents() {
     return this.getUsers('STUDENT');
   }
@@ -114,22 +101,19 @@ createAcademicYear(
   ) {
     return this.http.post(`${environment.api}/admin/teachers/${teacherId}/assignments`, data);
   }
-updateTeacher(
-  teacherId: string,
-  dto: {
-    fullName: string;
-    email: string;
-    phone?: string;
-    position?: string;
-    departmentIds: string[];
-    password?: string;
-  },
-) {
-  return this.http.patch(
-    `${environment.api}/admin/teachers/${teacherId}`,
-    dto,
-  );
-}
+  updateTeacher(
+    teacherId: string,
+    dto: {
+      fullName: string;
+      email: string;
+      phone?: string;
+      position?: string;
+      departmentIds: string[];
+      password?: string;
+    },
+  ) {
+    return this.http.patch(`${environment.api}/admin/teachers/${teacherId}`, dto);
+  }
   deleteTeacher(teacherId: string) {
     return this.http.delete(`${environment.api}/admin/teachers/${teacherId}`);
   }
@@ -166,16 +150,22 @@ updateTeacher(
     return this.http.get<any[]>(`${environment.api}/admin/material-subjects`);
   }
 
-  createLinkMaterial(dto: { title: string; description?: string; subjectId: string; url: string }) {
+  createLinkMaterial(dto: {
+    title: string;
+    description?: string;
+    subjectId?: string;
+    url: string;
+  }) {
     return this.http.post(`${environment.api}/admin/materials/link`, dto);
   }
 
-  createFileMaterial(dto: { title: string; description?: string; subjectId: string; file: File }) {
+  createFileMaterial(dto: { title: string; description?: string; subjectId?: string; file: File }) {
     const formData = new FormData();
 
     formData.append('title', dto.title);
-
-    formData.append('subjectId', dto.subjectId);
+    if (dto.subjectId) {
+      formData.append('subjectId', dto.subjectId);
+    }
 
     if (dto.description) {
       formData.append('description', dto.description);
