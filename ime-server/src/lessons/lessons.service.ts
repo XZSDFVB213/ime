@@ -1,7 +1,22 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { CreateLessonDto } from './dto/create-lesson.dto';
-import { UpdateLessonDto } from './dto/update-lesson.dto';
 import { PrismaService } from 'src/prisma.service';
+
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+
+import { AssessmentResult, LessonType } from '@prisma/client';
+
+import { SaveLessonAssessmentsDto } from './dto/save-lesson-assessments.dto';
+
 @Injectable()
 export class LessonsService {
   constructor(private prisma: PrismaService) {}
@@ -98,37 +113,252 @@ export class LessonsService {
       },
     });
   }
-getSemesters() {
-  return this.prisma.semester.findMany({
-    select: {
-      id: true,
-      name: true,
-      number: true,
+  getSemesters() {
+    return this.prisma.semester.findMany({
+      select: {
+        id: true,
+        name: true,
+        number: true,
 
-      academicYear: {
-        select: {
-          id: true,
-          year: true,
-        },
-      },
-    },
-
-    orderBy: [
-      {
         academicYear: {
-          year: 'desc',
+          select: {
+            id: true,
+            year: true,
+          },
         },
       },
-      {
-        number: 'asc',
-      },
-    ],
-  });
-}
+
+      orderBy: [
+        {
+          academicYear: {
+            year: 'desc',
+          },
+        },
+        {
+          number: 'asc',
+        },
+      ],
+    });
+  }
   findAll() {
     return this.prisma.lesson.findMany({ include: { subject: true } });
   }
+  private validateAssessmentResult(
+    lessonType: LessonType,
+    result: AssessmentResult,
+  ): void {
+    const examResults: AssessmentResult[] = [
+      AssessmentResult.EXCELLENT,
+      AssessmentResult.GOOD,
+      AssessmentResult.SATISFACTORY,
+      AssessmentResult.UNSATISFACTORY,
+    ];
 
+    const creditResults: AssessmentResult[] = [
+      AssessmentResult.PASSED,
+      AssessmentResult.NOT_PASSED,
+    ];
+
+    if (lessonType === LessonType.EXAM && !examResults.includes(result)) {
+      throw new BadRequestException(
+        'Для экзамена доступны только оценки: отлично, хорошо, удовлетворительно и неудовлетворительно',
+      );
+    }
+
+    if (lessonType === LessonType.CREDIT && !creditResults.includes(result)) {
+      throw new BadRequestException(
+        'Для зачёта доступны только результаты «Зачтено» и «Не зачтено»',
+      );
+    }
+  }
+  async saveLessonAssessments(
+    teacherId: string,
+    lessonId: string,
+    dto: SaveLessonAssessmentsDto,
+  ) {
+    const lesson = await this.prisma.lesson.findFirst({
+      where: {
+        id: lessonId,
+        teacherId,
+      },
+
+      select: {
+        id: true,
+        type: true,
+        groupId: true,
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException('Занятие не найдено или недоступно');
+    }
+
+    if (lesson.type !== LessonType.EXAM && lesson.type !== LessonType.CREDIT) {
+      throw new BadRequestException(
+        'Оценивание доступно только для экзамена или зачёта',
+      );
+    }
+
+    /*
+     * Не позволяем одному студенту
+     * прийти в DTO дважды.
+     */
+    const studentIds = [
+      ...new Set(dto.assessments.map((item) => item.studentId)),
+    ];
+
+    if (studentIds.length !== dto.assessments.length) {
+      throw new BadRequestException('Один студент указан несколько раз');
+    }
+
+    /*
+     * Проверяем, что все студенты
+     * реально принадлежат группе занятия.
+     */
+    const students = await this.prisma.student.findMany({
+      where: {
+        id: {
+          in: studentIds,
+        },
+
+        groupId: lesson.groupId,
+      },
+
+      select: {
+        id: true,
+      },
+    });
+
+    if (students.length !== studentIds.length) {
+      throw new ForbiddenException(
+        'Один или несколько студентов не принадлежат группе занятия',
+      );
+    }
+
+    /*
+     * Проверяем допустимые результаты.
+     */
+    for (const assessment of dto.assessments) {
+      this.validateAssessmentResult(lesson.type, assessment.result);
+    }
+
+    /*
+     * У студента на конкретном
+     * экзамене/зачёте одна актуальная
+     * оценка, поэтому upsert.
+     */
+    await this.prisma.$transaction(
+      dto.assessments.map((assessment) =>
+        this.prisma.lessonAssessment.upsert({
+          where: {
+            lessonId_studentId: {
+              lessonId,
+              studentId: assessment.studentId,
+            },
+          },
+
+          create: {
+            lessonId,
+
+            studentId: assessment.studentId,
+
+            result: assessment.result,
+
+            comment: assessment.comment?.trim() || null,
+          },
+
+          update: {
+            result: assessment.result,
+
+            comment: assessment.comment?.trim() || null,
+          },
+        }),
+      ),
+    );
+
+    return this.getLessonAssessments(teacherId, lessonId);
+  }
+  async getLessonAssessments(teacherId: string, lessonId: string) {
+    const lesson = await this.prisma.lesson.findFirst({
+      where: {
+        id: lessonId,
+        teacherId,
+      },
+
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        date: true,
+
+        subject: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
+
+        group: {
+          select: {
+            id: true,
+            name: true,
+
+            students: {
+              where: {
+                user: {
+                  status: {
+                    not: 'DELETED',
+                  },
+                },
+              },
+
+              select: {
+                id: true,
+
+                user: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    avatarUrl: true,
+                  },
+                },
+              },
+
+              orderBy: {
+                user: {
+                  fullName: 'asc',
+                },
+              },
+            },
+          },
+        },
+
+        assessments: {
+          select: {
+            id: true,
+            studentId: true,
+            result: true,
+            comment: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException('Занятие не найдено или недоступно');
+    }
+
+    if (lesson.type !== LessonType.EXAM && lesson.type !== LessonType.CREDIT) {
+      throw new BadRequestException(
+        'Оценивание доступно только для экзамена или зачёта',
+      );
+    }
+
+    return lesson;
+  }
   findAllByGroup(groupId: string) {
     return this.prisma.lesson.findMany({
       where: {

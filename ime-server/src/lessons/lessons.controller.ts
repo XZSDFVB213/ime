@@ -5,7 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseGuards,
   Req,
 } from '@nestjs/common';
@@ -15,6 +14,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { SaveLessonAssessmentsDto } from './dto/save-lesson-assessments.dto';
 
 @Controller('lessons')
 export class LessonsController {
@@ -49,6 +49,37 @@ getSemesters() {
   @Roles(Role.TEACHER)
   findMyLessons(@Req() req) {
     return this.lessonsService.findMyLessons(req.user.teacher.id);
+  }
+  @Get('teacher/:lessonId/assessments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TEACHER)
+  getLessonAssessments(
+    @Req() req,
+    @Param('lessonId')
+    lessonId: string,
+  ) {
+    return this.lessonsService.getLessonAssessments(
+      req.user.teacher.id,
+      lessonId,
+    );
+  }
+
+  @Patch('teacher/:lessonId/assessments')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TEACHER)
+  saveLessonAssessments(
+    @Req() req,
+    @Param('lessonId')
+    lessonId: string,
+
+    @Body()
+    dto: SaveLessonAssessmentsDto,
+  ) {
+    return this.lessonsService.saveLessonAssessments(
+      req.user.teacher.id,
+      lessonId,
+      dto,
+    );
   }
   // @Get()
   // findAll() {

@@ -23,6 +23,90 @@ export class MaterialsService {
 
     private readonly notifications: NotificationsService,
   ) {}
+  async getStudentSubjectMaterials(studentId: string, subjectId: string) {
+    const student = await this.prisma.student.findUnique({
+      where: {
+        id: studentId,
+      },
+
+      select: {
+        groupId: true,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Студент не найден');
+    }
+
+    if (!student.groupId) {
+      return [];
+    }
+
+    /*
+     * Проверяем, что эта дисциплина
+     * вообще назначена группе студента.
+     */
+    const assignment = await this.prisma.teacherDisciplineGroup.findFirst({
+      where: {
+        groupId: student.groupId,
+
+        subjectId,
+      },
+
+      select: {
+        id: true,
+      },
+    });
+
+    if (!assignment) {
+      throw new ForbiddenException('Дисциплина недоступна');
+    }
+
+    return this.prisma.material.findMany({
+      where: {
+        subjectId,
+      },
+
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        type: true,
+        url: true,
+        fileName: true,
+        mimeType: true,
+        size: true,
+        createdAt: true,
+
+        lesson: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+
+        teacher: {
+          select: {
+            user: {
+              select: {
+                fullName: true,
+              },
+            },
+          },
+        },
+
+        uploadedByUser: {
+          select: {
+            fullName: true,
+          },
+        },
+      },
+
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
   async createLink(teacherId: string, dto: CreateLinkMaterialDto) {
     await this.validateAccess(teacherId, dto.subjectId, dto.lessonId);
 

@@ -27,8 +27,20 @@ enum LessonType {
   PRACTICE
   SEMINAR
   LAB
+
   EXAM
+  CREDIT
   CONSULTATION
+}
+
+enum AssessmentResult {
+  EXCELLENT
+  GOOD
+  SATISFACTORY
+  UNSATISFACTORY
+
+  PASSED
+  NOT_PASSED
 }
 
 enum SubmissionStatus {
@@ -98,6 +110,29 @@ model PortfolioItem {
   @@index([studentId])
   @@index([subjectId])
   @@index([type])
+}
+
+model LessonAssessment {
+  id String @id @default(cuid())
+
+  lessonId  String
+  studentId String
+
+  result AssessmentResult
+
+  comment String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, studentId])
+  @@index([lessonId])
+  @@index([studentId])
+  @@map("lesson_assessments")
 }
 
 model Material {
@@ -248,6 +283,7 @@ model Student {
 
   submissions    HomeworkSubmission[]
   portfolioItems PortfolioItem[]
+  assessments    LessonAssessment[]
 
   @@index([groupId])
   @@map("students")
@@ -365,11 +401,11 @@ model Lesson {
   lecture     Lecture?
   video       Video?
   attachments MessageAttachment[]
-
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  homework  Homework[]
-  materials Material[]
+  assessments LessonAssessment[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  homework    Homework[]
+  materials   Material[]
 
   @@index([subjectId])
   @@index([teacherId])

@@ -61,7 +61,18 @@ export class MaterialsController {
   ) {
     return this.service.createLink(req.user.teacher.id, dto);
   }
-
+  @Get('student/by-subject/:subjectId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.STUDENT)
+  getStudentSubjectMaterials(
+    @Req() req,
+    @Param('subjectId') subjectId: string,
+  ) {
+    return this.service.getStudentSubjectMaterials(
+      req.user.student.id,
+      subjectId,
+    );
+  }
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
   @Post('upload')
