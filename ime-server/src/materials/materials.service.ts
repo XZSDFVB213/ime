@@ -110,7 +110,7 @@ export class MaterialsService {
       data: {
         teacherId,
 
-        subjectId: dto.subjectId,
+        subjectId: dto.subjectId || null,
 
         lessonId: dto.lessonId || null,
 
@@ -166,7 +166,7 @@ export class MaterialsService {
       data: {
         teacherId,
 
-        subjectId: dto.subjectId,
+        subjectId: dto.subjectId || null,
 
         lessonId: dto.lessonId || null,
 
@@ -368,19 +368,27 @@ export class MaterialsService {
 
   private async validateAccess(
     teacherId: string,
-    subjectId: string,
+    subjectId?: string,
     lessonId?: string,
-  ) {
+  ): Promise<void> {
     /*
-     * Если материал привязывается
-     * к конкретному занятию.
+     * Материал конкретного занятия.
      */
     if (lessonId) {
       const lesson = await this.prisma.lesson.findFirst({
         where: {
           id: lessonId,
           teacherId,
-          subjectId,
+
+          ...(subjectId
+            ? {
+                subjectId,
+              }
+            : {}),
+        },
+
+        select: {
+          id: true,
         },
       });
 
@@ -394,38 +402,55 @@ export class MaterialsService {
     }
 
     /*
-     * Если материал общий
-     * для дисциплины —
-     * проверяем, что преподаватель
-     * реально ведёт эту дисциплину.
+     * Общий материал вообще
+     * без дисциплины.
      */
-    const lesson = await this.prisma.lesson.findFirst({
+    if (!subjectId) {
+      return;
+    }
+
+    /*
+     * Материал дисциплины.
+     *
+     * Проверяем назначение преподавателя,
+     * а не наличие созданных занятий.
+     */
+    const assignment = await this.prisma.teacherDisciplineGroup.findFirst({
       where: {
         teacherId,
         subjectId,
       },
+
+      select: {
+        id: true,
+      },
     });
 
-    if (!lesson) {
+    if (!assignment) {
       throw new ForbiddenException('Вы не ведёте эту дисциплину');
     }
   }
   private async notifyStudents(material: {
     id: string;
     title: string;
-    subjectId: string;
+    subjectId: string | null;
     lessonId: string | null;
     teacherId: string | null;
   }) {
+    const subjectId = material.subjectId;
     /*
      * Название дисциплины получаем отдельно.
      *
      * Это работает и для материала преподавателя,
      * и для материала администратора.
      */
+    if (!subjectId) {
+      return;
+    }
+
     const subject = await this.prisma.subject.findUnique({
       where: {
-        id: material.subjectId,
+        id: subjectId,
       },
 
       select: {
@@ -504,7 +529,7 @@ export class MaterialsService {
      */
     const lessons = await this.prisma.lesson.findMany({
       where: {
-        subjectId: material.subjectId,
+        subjectId: subjectId,
 
         ...(material.teacherId
           ? {

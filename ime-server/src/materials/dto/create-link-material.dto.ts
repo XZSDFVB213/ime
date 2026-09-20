@@ -9,8 +9,9 @@ export class CreateLinkMaterialDto {
   @IsString()
   description?: string;
 
+  @IsOptional()
   @IsString()
-  subjectId!: string;
+  subjectId?: string;
 
   @IsOptional()
   @IsString()
