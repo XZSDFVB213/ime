@@ -170,12 +170,11 @@
         <div class="field">
           <label>
             Дисциплина
-            <span>*</span>
           </label>
 
           <select formControlName="subjectId">
-            <option value="" disabled>
-              Выберите дисциплину
+            <option value="">
+              Без привязки к дисциплине
             </option>
 
             @for (
@@ -186,18 +185,30 @@
               {{ subject.name }}
 
               @if (subject.code) {
-              — {{ subject.code }}
+              —
+              {{ subject.code }}
               }
             </option>
             }
           </select>
+
+          <small>
+            Можно оставить без дисциплины,
+            например для расписания или общего документа.
+          </small>
         </div>
 
         <div class="field">
+          <option value="">
+            Не привязывать к занятию
+          </option>
           <label>
             Занятие
           </label>
-
+          <small>
+            Занятие можно выбрать только
+            после выбора дисциплины.
+          </small>
           <select formControlName="lessonId" [disabled]="
                 !form.controls.subjectId.value
               ">
@@ -424,8 +435,8 @@
 
               <span class="subject">
                 {{
-                material.subject
-                ?.name
+                material.subject?.name ||
+                'Общий материал'
                 }}
               </span>
             </div>
@@ -469,7 +480,8 @@
                 .group?.name
                 }}
               </span>
-              } @else {
+              } @else if (material.subject) {
+
               <span>
                 <mat-icon>
                   menu_book
@@ -477,6 +489,17 @@
 
                 Для всей дисциплины
               </span>
+
+              } @else {
+
+              <span>
+                <mat-icon>
+                  public
+                </mat-icon>
+
+                Общий материал
+              </span>
+
               }
 
               <span>

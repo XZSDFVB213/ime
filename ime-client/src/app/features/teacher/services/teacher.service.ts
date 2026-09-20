@@ -140,13 +140,13 @@ export class TeacherService {
   createLinkMaterial(dto: {
     title: string;
     description?: string;
-    subjectId: string;
+    subjectId?: string;
     lessonId?: string;
     url: string;
   }) {
     return this.http.post<any>(`${environment.api}/materials/link`, dto);
   }
- 
+
   deleteHomework(homeworkId: string) {
     return this.http.delete(`${environment.api}/homeworks/${homeworkId}`);
   }

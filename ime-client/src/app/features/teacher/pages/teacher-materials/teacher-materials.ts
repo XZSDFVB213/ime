@@ -74,7 +74,6 @@ export class TeacherMaterials {
 
     subjectId: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required],
     }),
 
     lessonId: new FormControl('', {
@@ -243,8 +242,9 @@ export class TeacherMaterials {
         formData.append('description', description.trim());
       }
 
-      formData.append('subjectId', subjectId);
-
+      if (subjectId) {
+        formData.append('subjectId', subjectId);
+      }
       if (lessonId) {
         formData.append('lessonId', lessonId);
       }
@@ -269,7 +269,7 @@ export class TeacherMaterials {
 
       description: description.trim() || undefined,
 
-      subjectId,
+      subjectId: subjectId || undefined,
 
       lessonId: lessonId || undefined,
 
@@ -420,7 +420,7 @@ export class TeacherMaterials {
   private createLink(dto: {
     title: string;
     description?: string;
-    subjectId: string;
+    subjectId?: string;
     lessonId?: string;
     url: string;
   }): void {
