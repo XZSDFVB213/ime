@@ -1,7 +1,6 @@
 <div class="dialog">
 
   <header>
-
     <div class="header-icon">
       <mat-icon>
         upload_file
@@ -14,16 +13,18 @@
       </h2>
 
       <p>
-        Добавление материала в дисциплину
+        Добавление учебного или общего материала
       </p>
     </div>
 
-    <button type="button" (click)="close()">
+    <button
+      type="button"
+      (click)="close()"
+    >
       <mat-icon>
         close
       </mat-icon>
     </button>
-
   </header>
 
 
@@ -31,12 +32,13 @@
 
     <label>
       <span>
-        Тип материала
+        Тип материала *
       </span>
-      <mat-option value="">
-        Без привязки к дисциплине
-      </mat-option>
-      <mat-select [(ngModel)]="type">
+
+      <mat-select
+        [ngModel]="type"
+        (ngModelChange)="setType($event)"
+      >
         <mat-option value="FILE">
           Файл
         </mat-option>
@@ -53,16 +55,31 @@
         Дисциплина
       </span>
 
-      <mat-select [(ngModel)]="subjectId" placeholder="Выберите дисциплину">
-        @for (
-        subject of data.subjects;
-        track subject.id
-        ) {
-        <mat-option [value]="subject.id">
-          {{ subject.name }}
+      <mat-select
+        [(ngModel)]="subjectId"
+        placeholder="Без привязки к дисциплине"
+      >
+        <mat-option value="">
+          Без привязки к дисциплине
         </mat-option>
+
+        @for (
+          subject of data.subjects;
+          track subject.id
+        ) {
+          <mat-option
+            [value]="subject.id"
+          >
+            {{ subject.name }}
+          </mat-option>
         }
       </mat-select>
+
+      <small class="field-hint">
+        Можно не выбирать дисциплину,
+        например для расписания,
+        объявления или общего документа.
+      </small>
     </label>
 
 
@@ -71,7 +88,10 @@
         Название *
       </span>
 
-      <input [(ngModel)]="title" placeholder="Лекция №1" />
+      <input
+        [(ngModel)]="title"
+        placeholder="Например: Расписание занятий"
+      />
     </label>
 
 
@@ -80,70 +100,99 @@
         Описание
       </span>
 
-      <textarea [(ngModel)]="description" rows="4" placeholder="Описание материала..."></textarea>
+      <textarea
+        [(ngModel)]="description"
+        rows="4"
+        placeholder="Описание материала..."
+      ></textarea>
     </label>
 
 
     @if (type === 'FILE') {
 
-    <label>
-      <span>
-        Файл *
-      </span>
+      <label>
+        <span>
+          Файл *
+        </span>
 
-      <input type="file" (change)="selectFile($event)" />
-    </label>
+        <input
+          type="file"
+          (change)="selectFile($event)"
+        />
+      </label>
 
-    @if (file) {
-    <div class="selected-file">
-      <mat-icon>
-        description
-      </mat-icon>
+      @if (file) {
+        <div class="selected-file">
+          <mat-icon>
+            description
+          </mat-icon>
 
-      {{ file.name }}
-    </div>
-    }
+          <div>
+            <strong>
+              {{ file.name }}
+            </strong>
+
+            <span>
+              Файл выбран
+            </span>
+          </div>
+        </div>
+      }
 
     } @else {
 
-    <label>
-      <span>
-        Ссылка *
-      </span>
+      <label>
+        <span>
+          Ссылка *
+        </span>
 
-      <input [(ngModel)]="url" placeholder="https://..." />
-    </label>
+        <input
+          [(ngModel)]="url"
+          placeholder="https://..."
+        />
+      </label>
 
     }
 
 
     @if (error()) {
-    <div class="error">
-      {{ error() }}
-    </div>
+      <div class="error">
+        <mat-icon>
+          error_outline
+        </mat-icon>
+
+        {{ error() }}
+      </div>
     }
 
   </div>
 
 
   <footer>
-
-    <button type="button" class="cancel" (click)="close()">
+    <button
+      type="button"
+      class="cancel"
+      (click)="close()"
+    >
       Отмена
     </button>
 
-    <button type="button" class="save" [disabled]="saving()" (click)="save()">
-      <mat-icon>
-        upload
-      </mat-icon>
+    <button
+      type="button"
+      class="save"
+      [disabled]="saving()"
+      (click)="save()"
+    >
+      @if (saving()) {
+        Сохранение…
+      } @else {
+        <mat-icon>
+          upload
+        </mat-icon>
 
-      {{
-      saving()
-      ? 'Сохранение...'
-      : 'Добавить материал'
-      }}
+        Добавить материал
+      }
     </button>
-
   </footer>
 
 </div>
