@@ -9,6 +9,7 @@ import {
   Param,
   UseGuards,
   Req,
+  Delete,
 } from '@nestjs/common';
 import { LessonsService } from './lessons.service';
 import { CreateLessonDto } from './dto/create-lesson.dto';
@@ -27,6 +28,7 @@ export class LessonsController {
   getSemesters() {
     return this.lessonsService.getSemesters();
   }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
@@ -81,6 +83,12 @@ export class LessonsController {
       lessonId,
       dto,
     );
+  }
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TEACHER)
+  removeLesson(@Req() req: any, @Param('id') lessonId: string) {
+    return this.lessonsService.removeLesson(req.user.teacher.id, lessonId);
   }
   // @Get()
   // findAll() {

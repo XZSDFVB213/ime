@@ -8,6 +8,7 @@ import { PrismaService } from 'src/prisma.service';
 
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -20,7 +21,61 @@ import { SaveLessonAssessmentsDto } from './dto/save-lesson-assessments.dto';
 @Injectable()
 export class LessonsService {
   constructor(private prisma: PrismaService) {}
+  async removeLesson(teacherId: string, lessonId: string) {
+    const lesson = await this.prisma.lesson.findFirst({
+      where: {
+        id: lessonId,
+        teacherId,
+      },
 
+      select: {
+        id: true,
+        title: true,
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException('Занятие не найдено или недоступно');
+    }
+
+    const [homeworksCount, materialsCount, assessmentsCount] =
+      await Promise.all([
+        this.prisma.homework.count({
+          where: {
+            lessonId,
+          },
+        }),
+
+        this.prisma.material.count({
+          where: {
+            lessonId,
+          },
+        }),
+
+        this.prisma.lessonAssessment.count({
+          where: {
+            lessonId,
+          },
+        }),
+      ]);
+
+    if (homeworksCount > 0 || materialsCount > 0 || assessmentsCount > 0) {
+      throw new ConflictException(
+        'Нельзя удалить занятие: к нему уже привязаны задания, материалы или результаты аттестации',
+      );
+    }
+
+    await this.prisma.lesson.delete({
+      where: {
+        id: lessonId,
+      },
+    });
+
+    return {
+      success: true,
+      id: lessonId,
+    };
+  }
   async create(teacherId: string, dto: CreateLessonDto) {
     /*
      * Проверяем:
