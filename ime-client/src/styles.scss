@@ -111,3 +111,84 @@ h4 {
 .mat-mdc-snack-bar-container {
   font-family: var(--app-font) !important;
 }
+.mat-mdc-select-panel {
+  background: #ffffff !important;
+
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+
+  box-shadow:
+    0 12px 30px
+    rgba(15, 23, 42, 0.14) !important;
+
+  padding: 6px !important;
+}
+
+
+/* Элементы списка */
+.mat-mdc-option {
+  min-height: 44px !important;
+
+  border-radius: 8px !important;
+
+  color: #172746 !important;
+
+  font-family: inherit !important;
+
+  transition:
+    background 0.15s ease !important;
+}
+
+
+/* Hover */
+.mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background: #f3f6fb !important;
+}
+
+
+/* Выбранный элемент */
+.mat-mdc-option.mdc-list-item--selected {
+  background: #edf4ff !important;
+
+  color: #1769e8 !important;
+}
+
+
+/* Текст выбранного значения */
+.mat-mdc-select-value {
+  color: #172746 !important;
+}
+
+
+/* Стрелка */
+.mat-mdc-select-arrow {
+  color: #708198 !important;
+}
+.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    background: #ffffff !important;
+  }
+}
+.mat-mdc-form-field {
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #dce4ef !important;
+  }
+
+  &:hover {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #bdcada !important;
+    }
+  }
+
+  &.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #1769e8 !important;
+    }
+  }
+}
