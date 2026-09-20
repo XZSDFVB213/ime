@@ -39,8 +39,7 @@ interface StudentPerformance {
 })
 export class TeacherSubjectDetails {
   private readonly route = inject(ActivatedRoute);
-readonly allSubjects =
-  signal<TeacherSubject[]>([]);
+  readonly allSubjects = signal<TeacherSubject[]>([]);
 
   private readonly teacherService = inject(TeacherService);
 
@@ -54,48 +53,32 @@ readonly allSubjects =
 
   readonly activeTab = signal<SubjectTab>('OVERVIEW');
 
- readonly subjectLessons = computed(() => {
-  return this.lessons()
-    .filter(
-      (lesson) =>
-        lesson.subject?.id === this.subjectId ||
-        lesson.subjectId === this.subjectId,
-    )
-    .sort(
-      (first, second) =>
-        new Date(first.date).getTime() -
-        new Date(second.date).getTime(),
-    );
-});
+  readonly subjectLessons = computed(() => {
+    return this.lessons()
+      .filter(
+        (lesson) => lesson.subject?.id === this.subjectId || lesson.subjectId === this.subjectId,
+      )
+      .sort((first, second) => new Date(first.date).getTime() - new Date(second.date).getTime());
+  });
 
+  readonly subjectHomeworks = computed(() => {
+    return this.homeworks()
+      .filter(
+        (homework) =>
+          homework.subject?.id === this.subjectId || homework.subjectId === this.subjectId,
+      )
+      .sort(
+        (first, second) =>
+          new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime(),
+      );
+  });
 
-readonly subjectHomeworks = computed(() => {
-  return this.homeworks()
-    .filter(
-      (homework) =>
-        homework.subject?.id === this.subjectId ||
-        homework.subjectId === this.subjectId,
-    )
-    .sort(
-      (first, second) =>
-        new Date(second.createdAt).getTime() -
-        new Date(first.createdAt).getTime(),
-    );
-});
-
-readonly subject =
-  computed<TeacherSubject | null>(() => {
-    return (
-      this.allSubjects().find(
-        (subject) =>
-          subject.id === this.subjectId,
-      ) ?? null
-    );
+  readonly subject = computed<TeacherSubject | null>(() => {
+    return this.allSubjects().find((subject) => subject.id === this.subjectId) ?? null;
   });
 
   readonly groups = computed(() => {
-  const map =
-    new Map<
+    const map = new Map<
       string,
       {
         id: string;
@@ -103,80 +86,50 @@ readonly subject =
       }
     >();
 
-
-  /*
-   * Главный источник —
-   * назначения преподавателя.
-   */
-  for (
-    const group of
-      this.subject()?.groups ?? []
-  ) {
-    map.set(
-      group.id,
-      {
+    /*
+     * Главный источник —
+     * назначения преподавателя.
+     */
+    for (const group of this.subject()?.groups ?? []) {
+      map.set(group.id, {
         id: group.id,
         name: group.name,
-      },
+      });
+    }
+
+    /*
+     * Дополнительно собираем
+     * из существующих занятий.
+     */
+    for (const lesson of this.subjectLessons()) {
+      const group = lesson.group;
+
+      if (group?.id) {
+        map.set(group.id, {
+          id: group.id,
+          name: group.name,
+        });
+      }
+    }
+
+    /*
+     * И из домашних заданий.
+     */
+    for (const homework of this.subjectHomeworks()) {
+      const group = homework.lesson?.group;
+
+      if (group?.id) {
+        map.set(group.id, {
+          id: group.id,
+          name: group.name,
+        });
+      }
+    }
+
+    return Array.from(map.values()).sort((first, second) =>
+      first.name.localeCompare(second.name, 'ru'),
     );
-  }
-
-
-  /*
-   * Дополнительно собираем
-   * из существующих занятий.
-   */
-  for (
-    const lesson of
-      this.subjectLessons()
-  ) {
-    const group =
-      lesson.group;
-
-    if (group?.id) {
-      map.set(
-        group.id,
-        {
-          id: group.id,
-          name: group.name,
-        },
-      );
-    }
-  }
-
-
-  /*
-   * И из домашних заданий.
-   */
-  for (
-    const homework of
-      this.subjectHomeworks()
-  ) {
-    const group =
-      homework.lesson?.group;
-
-    if (group?.id) {
-      map.set(
-        group.id,
-        {
-          id: group.id,
-          name: group.name,
-        },
-      );
-    }
-  }
-
-
-  return Array.from(
-    map.values(),
-  ).sort(
-    (first, second) =>
-      first.name.localeCompare(
-        second.name,
-        'ru',
-      ),
-  );
-});
+  });
 
   readonly allSubmissions = computed(() => {
     return this.subjectHomeworks().flatMap((homework) => homework.submissions ?? []);
@@ -276,7 +229,48 @@ readonly subject =
 
     return Array.from(students.values()).sort((first, second) => second.percent - first.percent);
   });
+  readonly deletingLessonId = signal<string | null>(null);
 
+  isAssessmentLesson(lesson: any): boolean {
+    return lesson.type === 'EXAM' || lesson.type === 'CREDIT';
+  }
+
+  canCreateHomework(lesson: any): boolean {
+    return lesson.type !== 'EXAM' && lesson.type !== 'CREDIT' && lesson.type !== 'CONSULTATION';
+  }
+
+  deleteLesson(lesson: any): void {
+    if (this.deletingLessonId()) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Удалить занятие «${lesson.title}»?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingLessonId.set(lesson.id);
+
+    this.teacherService
+      .deleteLesson(lesson.id)
+      .pipe(
+        finalize(() => {
+          this.deletingLessonId.set(null);
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.lessons.update((lessons) => lessons.filter((item) => item.id !== lesson.id));
+        },
+
+        error: (error) => {
+          console.error('Ошибка удаления занятия', error);
+
+          window.alert(error.error?.message ?? 'Не удалось удалить занятие');
+        },
+      });
+  }
   constructor() {
     this.loadData();
   }
@@ -292,32 +286,32 @@ readonly subject =
   }
 
   lessonType(type: string): string {
-  switch (type) {
-    case 'LECTURE':
-      return 'Лекция';
+    switch (type) {
+      case 'LECTURE':
+        return 'Лекция';
 
-    case 'PRACTICE':
-      return 'Практическое занятие';
+      case 'PRACTICE':
+        return 'Практическое занятие';
 
-    case 'SEMINAR':
-      return 'Семинар';
+      case 'SEMINAR':
+        return 'Семинар';
 
-    case 'LAB':
-      return 'Лабораторная работа';
+      case 'LAB':
+        return 'Лабораторная работа';
 
-    case 'CONSULTATION':
-      return 'Консультация';
+      case 'CONSULTATION':
+        return 'Консультация';
 
-    case 'CREDIT':
-      return 'Зачёт';
+      case 'CREDIT':
+        return 'Зачёт';
 
-    case 'EXAM':
-      return 'Экзамен';
+      case 'EXAM':
+        return 'Экзамен';
 
-    default:
-      return 'Занятие';
+      default:
+        return 'Занятие';
+    }
   }
-}
 
   homeworkPendingCount(homework: any): number {
     return (
@@ -406,121 +400,76 @@ readonly subject =
   }
 
   private loadData(): void {
-  if (!this.subjectId) {
-    this.error.set(
-      'Не указан ID дисциплины',
-    );
+    if (!this.subjectId) {
+      this.error.set('Не указан ID дисциплины');
 
-    this.loading.set(false);
+      this.loading.set(false);
 
-    return;
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set(null);
+
+    forkJoin({
+      /*
+       * Назначенные преподавателю дисциплины.
+       *
+       * ЭТО источник истины для проверки
+       * доступа к дисциплине.
+       */
+      subjects: this.teacherService.getSubjects(),
+
+      /*
+       * Занятия и ДЗ теперь только
+       * наполнение дисциплины.
+       */
+      lessons: this.teacherService.getLessons().pipe(catchError(() => of([]))),
+
+      homeworks: this.teacherService.getHomeworks().pipe(catchError(() => of([]))),
+    })
+      .pipe(
+        finalize(() => {
+          this.loading.set(false);
+        }),
+      )
+      .subscribe({
+        next: ({ subjects, lessons, homeworks }) => {
+          this.allSubjects.set(subjects ?? []);
+
+          this.lessons.set(lessons ?? []);
+
+          this.homeworks.set(homeworks ?? []);
+
+          /*
+           * Проверяем именно назначение
+           * преподавателю, а НЕ наличие
+           * Lesson/Homework.
+           */
+          const subjectExists = subjects.some((subject) => subject.id === this.subjectId);
+
+          if (!subjectExists) {
+            this.error.set('Дисциплина не найдена или недоступна');
+
+            return;
+          }
+
+          /*
+           * Даже если по дисциплине:
+           *
+           * lessons = []
+           * homeworks = []
+           *
+           * это НЕ ошибка.
+           */
+          this.error.set(null);
+        },
+
+        error: (error) => {
+          console.error('[TEACHER SUBJECT DETAILS]', error);
+
+          this.error.set('Не удалось загрузить дисциплину');
+        },
+      });
   }
-
-
-  this.loading.set(true);
-  this.error.set(null);
-
-
-  forkJoin({
-    /*
-     * Назначенные преподавателю дисциплины.
-     *
-     * ЭТО источник истины для проверки
-     * доступа к дисциплине.
-     */
-    subjects:
-      this.teacherService.getSubjects(),
-
-    /*
-     * Занятия и ДЗ теперь только
-     * наполнение дисциплины.
-     */
-    lessons:
-      this.teacherService
-        .getLessons()
-        .pipe(
-          catchError(() =>
-            of([]),
-          ),
-        ),
-
-    homeworks:
-      this.teacherService
-        .getHomeworks()
-        .pipe(
-          catchError(() =>
-            of([]),
-          ),
-        ),
-  })
-    .pipe(
-      finalize(() => {
-        this.loading.set(false);
-      }),
-    )
-    .subscribe({
-      next: ({
-        subjects,
-        lessons,
-        homeworks,
-      }) => {
-        this.allSubjects.set(
-          subjects ?? [],
-        );
-
-        this.lessons.set(
-          lessons ?? [],
-        );
-
-        this.homeworks.set(
-          homeworks ?? [],
-        );
-
-
-        /*
-         * Проверяем именно назначение
-         * преподавателю, а НЕ наличие
-         * Lesson/Homework.
-         */
-        const subjectExists =
-          subjects.some(
-            (subject) =>
-              subject.id ===
-              this.subjectId,
-          );
-
-
-        if (!subjectExists) {
-          this.error.set(
-            'Дисциплина не найдена или недоступна',
-          );
-
-          return;
-        }
-
-
-        /*
-         * Даже если по дисциплине:
-         *
-         * lessons = []
-         * homeworks = []
-         *
-         * это НЕ ошибка.
-         */
-        this.error.set(null);
-      },
-
-
-      error: (error) => {
-        console.error(
-          '[TEACHER SUBJECT DETAILS]',
-          error,
-        );
-
-        this.error.set(
-          'Не удалось загрузить дисциплину',
-        );
-      },
-    });
-}
 }

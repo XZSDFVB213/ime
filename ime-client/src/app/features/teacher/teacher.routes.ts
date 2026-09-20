@@ -17,7 +17,20 @@ export const TeacherRoutes: Routes = [
       {
   path: 'homeworks/create',
   component: TeacherCreateHomework,
-},{
+},
+{
+  path:
+    'lessons/:lessonId/assessments',
+
+  loadComponent: () =>
+    import(
+      './pages/teacher-lesson-assessments/teacher-lesson-assessments'
+    ).then(
+      (m) =>
+        m.TeacherLessonAssessments,
+    ),
+},
+{
   path:
     'subjects/:subjectId/lessons/create',
 

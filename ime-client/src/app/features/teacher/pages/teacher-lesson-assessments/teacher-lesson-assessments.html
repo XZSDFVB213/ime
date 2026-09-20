@@ -1,0 +1,188 @@
+<section class="assessment-page">
+
+  @if (loading()) {
+
+    <div class="page-state">
+      <mat-spinner
+        diameter="44"
+      />
+
+      <p>
+        Загружаем ведомость…
+      </p>
+    </div>
+
+  } @else if (error()) {
+
+    <div class="page-state error">
+      <mat-icon>
+        error_outline
+      </mat-icon>
+
+      {{ error() }}
+    </div>
+
+  } @else if (lesson(); as lesson) {
+
+    <a
+      class="back-link"
+      [routerLink]="[
+        '/teacher/subjects',
+        lesson.subject.id
+      ]"
+    >
+      <mat-icon>
+        arrow_back
+      </mat-icon>
+
+      К дисциплине
+    </a>
+
+
+    <header class="assessment-hero">
+
+      <div>
+
+        <span>
+          {{
+            lesson.type === 'CREDIT'
+              ? 'Зачёт'
+              : 'Экзамен'
+          }}
+        </span>
+
+        <h1>
+          {{ lesson.subject.name }}
+        </h1>
+
+        <p>
+          Группа
+          {{ lesson.group.name }}
+        </p>
+
+      </div>
+
+    </header>
+
+
+    <section class="assessment-card">
+
+      <header>
+
+        <div>
+          <h2>
+            Ведомость
+          </h2>
+
+          <p>
+            {{
+              lesson.group.students.length
+            }}
+            обучающихся
+          </p>
+        </div>
+
+      </header>
+
+
+      <div class="students">
+
+        @for (
+          student of
+            lesson.group.students;
+          track student.id
+        ) {
+
+          <article class="student-row">
+
+            <div class="student-info">
+
+              <div class="avatar">
+                {{
+                  student.user.fullName
+                    .charAt(0)
+                }}
+              </div>
+
+
+              <div>
+
+                <strong>
+                  {{
+                    student.user
+                      .fullName
+                  }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <select
+              [value]="
+                results()[student.id]
+              "
+              (change)="
+                setResult(
+                  student.id,
+                  $event
+                )
+              "
+            >
+              <option value="">
+                Результат не выставлен
+              </option>
+
+              @for (
+                option of
+                  resultOptions();
+                track option.value
+              ) {
+
+                <option
+                  [value]="
+                    option.value
+                  "
+                >
+                  {{ option.label }}
+                </option>
+
+              }
+
+            </select>
+
+          </article>
+
+        }
+
+      </div>
+
+
+      <footer>
+
+        <button
+          type="button"
+          [disabled]="saving()"
+          (click)="save()"
+        >
+
+          @if (saving()) {
+            Сохраняем…
+          } @else {
+            <mat-icon>
+              save
+            </mat-icon>
+
+            Сохранить результаты
+          }
+
+        </button>
+
+      </footer>
+
+    </section>
+
+  }
+
+</section>

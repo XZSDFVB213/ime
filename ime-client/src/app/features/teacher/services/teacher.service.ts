@@ -11,6 +11,14 @@ export interface TeacherSemester {
     year: number;
   };
 }
+export type AssessmentResult =
+  'EXCELLENT' | 'GOOD' | 'SATISFACTORY' | 'UNSATISFACTORY' | 'PASSED' | 'NOT_PASSED';
+
+export interface LessonAssessmentDto {
+  studentId: string;
+  result: AssessmentResult;
+  comment?: string;
+}
 
 export interface CreateLessonDto {
   subjectId: string;
@@ -138,6 +146,7 @@ export class TeacherService {
   }) {
     return this.http.post<any>(`${environment.api}/materials/link`, dto);
   }
+ 
   deleteHomework(homeworkId: string) {
     return this.http.delete(`${environment.api}/homeworks/${homeworkId}`);
   }
@@ -147,5 +156,19 @@ export class TeacherService {
 
   deleteMaterial(id: string) {
     return this.http.delete<any>(`${environment.api}/materials/${id}`);
+  }
+
+  getLessonAssessments(lessonId: string) {
+    return this.http.get<any>(`${environment.api}/lessons/teacher/${lessonId}/assessments`);
+  }
+
+  saveLessonAssessments(lessonId: string, assessments: LessonAssessmentDto[]) {
+    return this.http.patch<any>(`${environment.api}/lessons/teacher/${lessonId}/assessments`, {
+      assessments,
+    });
+  }
+
+  deleteLesson(lessonId: string) {
+    return this.http.delete(`${environment.api}/lessons/${lessonId}`);
   }
 }

@@ -16,7 +16,136 @@
   gap: 20px;
 }
 
+.lesson-actions {
+  margin-left: auto;
 
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  flex: 0 0 auto;
+}
+
+.assessment-button,
+.create-homework {
+  min-height: 36px;
+
+  padding:
+    0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  border-radius: 9px;
+
+  text-decoration: none;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+
+  mat-icon {
+    width: 17px;
+    height: 17px;
+
+    font-size: 17px;
+  }
+
+  &:hover {
+    transform:
+      translateY(-1px);
+  }
+}
+
+.create-homework {
+  background: #edf4ff;
+  color: #1769e8;
+
+  &:hover {
+    background: #deebff;
+  }
+}
+
+.assessment-button {
+  background: #ebf8f0;
+  color: #218a51;
+
+  &:hover {
+    background: #daf2e4;
+  }
+}
+
+.delete-lesson {
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+
+  flex: 0 0 auto;
+
+  border:
+    1px solid #efd1d1;
+
+  border-radius: 9px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #fff;
+  color: #c54a4a;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+
+    font-size: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: #e5aaaa;
+
+    background: #fff2f2;
+    color: #ae3434;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+
+    cursor: not-allowed;
+  }
+}
+
+@media (
+  max-width: 700px
+) {
+  .lesson-actions {
+    width: 100%;
+
+    margin-left: 0;
+
+    margin-top: 10px;
+  }
+
+  .assessment-button,
+  .create-homework {
+    flex: 1;
+  }
+}
 .create-button {
   height: 42px;
   padding: 0 16px;

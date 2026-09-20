@@ -1,0 +1,543 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.assessment-page {
+  min-height: 100%;
+  padding: 26px 38px 50px;
+
+  background: #f4f7fc;
+  color: #172746;
+}
+
+
+/* =========================
+   BACK
+========================= */
+
+.back-link {
+  width: fit-content;
+
+  margin-bottom: 18px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #60718c;
+
+  font-size: 13px;
+  font-weight: 650;
+
+  text-decoration: none;
+
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+
+    font-size: 18px;
+    line-height: 18px;
+  }
+
+  &:hover {
+    color: #1769e8;
+
+    transform:
+      translateX(-2px);
+  }
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.assessment-hero {
+  position: relative;
+  overflow: hidden;
+
+  margin-bottom: 20px;
+  padding: 30px 34px;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #174fc0 0%,
+      #1c67dd 55%,
+      #2f80ed 100%
+    );
+
+  color: #fff;
+
+  box-shadow:
+    0 12px 30px
+    rgba(28, 91, 207, 0.16);
+
+  &::after {
+    content: '';
+
+    position: absolute;
+    top: -90px;
+    right: -60px;
+
+    width: 240px;
+    height: 240px;
+
+    border-radius: 50%;
+
+    background:
+      rgba(255, 255, 255, 0.07);
+  }
+
+  > div {
+    position: relative;
+    z-index: 1;
+  }
+
+  span {
+    display: inline-flex;
+
+    margin-bottom: 9px;
+    padding: 5px 9px;
+
+    border-radius: 7px;
+
+    background:
+      rgba(255, 255, 255, 0.13);
+
+    color:
+      rgba(255, 255, 255, 0.9);
+
+    font-size: 11px;
+    font-weight: 750;
+
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  h1 {
+    margin: 0;
+
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 800;
+
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    margin: 8px 0 0;
+
+    color:
+      rgba(255, 255, 255, 0.8);
+
+    font-size: 14px;
+  }
+}
+
+
+/* =========================
+   CARD
+========================= */
+
+.assessment-card {
+  overflow: hidden;
+
+  border:
+    1px solid #e3e9f2;
+
+  border-radius: 18px;
+
+  background: #fff;
+
+  box-shadow:
+    0 8px 30px
+    rgba(33, 61, 110, 0.06);
+
+  > header {
+    padding: 22px 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    border-bottom:
+      1px solid #edf1f6;
+
+    h2 {
+      margin: 0;
+
+      color: #172746;
+
+      font-size: 19px;
+      font-weight: 750;
+    }
+
+    p {
+      margin: 5px 0 0;
+
+      color: #8a97aa;
+
+      font-size: 12px;
+    }
+  }
+}
+
+
+/* =========================
+   STUDENTS
+========================= */
+
+.students {
+  padding:
+    6px 26px;
+}
+
+.student-row {
+  min-height: 76px;
+
+  padding:
+    13px 0;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(250px, 1fr)
+    minmax(240px, 320px);
+
+  align-items: center;
+
+  gap: 24px;
+
+  border-bottom:
+    1px solid #edf1f6;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.student-info {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #1a2b49;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+
+/* =========================
+   AVATAR
+========================= */
+
+.avatar {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #edf4ff;
+  color: #1769e8;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+
+/* =========================
+   SELECT
+========================= */
+
+.student-row select {
+  width: 100%;
+  height: 44px;
+
+  box-sizing: border-box;
+
+  padding:
+    0 40px 0 13px;
+
+  border:
+    1px solid #dbe3ee;
+
+  border-radius: 10px;
+
+  outline: none;
+
+  appearance: none;
+
+  background-color: #fff;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23798aa3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+
+  background-repeat:
+    no-repeat;
+
+  background-position:
+    right 12px center;
+
+  background-size:
+    17px;
+
+  color: #172746;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    border-color: #bfcbdc;
+  }
+
+  &:focus {
+    border-color: #1769e8;
+
+    box-shadow:
+      0 0 0 3px
+      rgba(23, 105, 232, 0.1);
+  }
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.assessment-card > footer {
+  padding:
+    18px 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  border-top:
+    1px solid #edf1f6;
+
+  background: #fbfcfe;
+
+  button {
+    min-width: 190px;
+    height: 43px;
+
+    padding:
+      0 17px;
+
+    border: none;
+    border-radius: 10px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    background: #1769e8;
+    color: #fff;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 750;
+
+    cursor: pointer;
+
+    box-shadow:
+      0 6px 15px
+      rgba(23, 105, 232, 0.2);
+
+    transition:
+      background 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+
+      font-size: 18px;
+      line-height: 18px;
+    }
+
+    &:hover:not(:disabled) {
+      background: #125dcc;
+
+      transform:
+        translateY(-1px);
+
+      box-shadow:
+        0 8px 19px
+        rgba(23, 105, 232, 0.25);
+    }
+
+    &:disabled {
+      opacity: 0.55;
+
+      cursor: not-allowed;
+
+      box-shadow: none;
+    }
+  }
+}
+
+
+/* =========================
+   STATE
+========================= */
+
+.page-state {
+  min-height: 360px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 13px;
+
+  padding: 30px;
+
+  border:
+    1px solid #e3e9f2;
+
+  border-radius: 18px;
+
+  background: #fff;
+
+  color: #8795aa;
+
+  text-align: center;
+
+  box-shadow:
+    0 8px 30px
+    rgba(33, 61, 110, 0.05);
+
+  p {
+    margin: 0;
+
+    font-size: 13px;
+  }
+
+  &.error {
+    color: #c74e4e;
+
+    background: #fffafa;
+
+    border-color: #f0d3d3;
+
+    mat-icon {
+      color: #ce5555;
+    }
+  }
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (
+  max-width: 850px
+) {
+  .assessment-page {
+    padding:
+      22px 22px 40px;
+  }
+
+  .student-row {
+    grid-template-columns:
+      minmax(200px, 1fr)
+      minmax(200px, 260px);
+  }
+}
+
+
+@media (
+  max-width: 650px
+) {
+  .assessment-page {
+    padding:
+      16px 14px 30px;
+  }
+
+  .assessment-hero {
+    padding:
+      24px 20px;
+
+    border-radius: 16px;
+
+    h1 {
+      font-size: 24px;
+    }
+  }
+
+  .assessment-card {
+    border-radius: 15px;
+
+    > header {
+      padding:
+        19px 18px;
+    }
+  }
+
+  .students {
+    padding:
+      4px 18px;
+  }
+
+  .student-row {
+    grid-template-columns:
+      1fr;
+
+    gap: 11px;
+
+    padding:
+      16px 0;
+  }
+
+  .assessment-card > footer {
+    padding:
+      15px 18px;
+
+    button {
+      width: 100%;
+    }
+  }
+}
