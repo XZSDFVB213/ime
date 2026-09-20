@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   Body,
   Controller,
@@ -39,7 +41,6 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 
 import { randomUUID } from 'crypto';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { CreateGroupDto } from './dto/create-group.dto';

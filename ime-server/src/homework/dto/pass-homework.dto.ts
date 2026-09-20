@@ -1,6 +1,7 @@
-import { IsString } from 'class-validator';
+import { IsString, MinLength } from 'class-validator';
 
 export class PassHomeworkDto {
   @IsString()
-  answer!: string;
+  @MinLength(5)
+  content!: string;
 }

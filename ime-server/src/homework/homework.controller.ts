@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-
 import {
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
   Param,
@@ -23,6 +22,7 @@ import { GradeHomeworkDto } from './dto/grade-homework.dto';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { PassHomeworkDto } from './dto/pass-homework.dto';
 
 @Controller('homeworks')
 export class HomeworksController {
@@ -114,12 +114,12 @@ export class HomeworksController {
   @Post(':id/pass')
   passHomework(
     @Req() req: any,
-    @Param('id') homeworkId: string,
+
+    @Param('id')
+    homeworkId: string,
+
     @Body()
-    dto: {
-      content: string;
-      answer: string;
-    },
+    dto: PassHomeworkDto,
   ) {
     if (!req.user.student) {
       throw new ForbiddenException(
@@ -129,7 +129,17 @@ export class HomeworksController {
 
     return this.service.passHomework(homeworkId, req.user.student.id, dto);
   }
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TEACHER)
+  @Delete(':id')
+  removeHomework(
+    @Req() req: any,
 
+    @Param('id')
+    homeworkId: string,
+  ) {
+    return this.service.removeHomework(homeworkId, req.user.teacher.id);
+  }
   @Get()
   findAll() {
     return this.service.findAll();

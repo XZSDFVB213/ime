@@ -10,7 +10,7 @@ import { PrismaService } from '../prisma.service';
 import { CreateHomeworkDto } from './dto/create-homework.dto';
 import { PassHomeworkDto } from './dto/pass-homework.dto';
 import { GradeHomeworkDto } from './dto/grade-homework.dto';
-import { SubmissionStatus } from '@prisma/client';
+import { LessonType, SubmissionStatus } from '@prisma/client';
 import { NotificationType } from '@prisma/client';
 
 import { NotificationsService } from '../notifications/notifications.service';
@@ -57,7 +57,11 @@ export class HomeworksService {
         'Занятие не найдено или не принадлежит преподавателю',
       );
     }
-
+    if (lesson.type === LessonType.CREDIT || lesson.type === LessonType.EXAM) {
+      throw new BadRequestException(
+        'Для экзамена и зачёта домашнее задание создавать нельзя',
+      );
+    }
     /*
      * Создаём ДЗ.
      *
@@ -269,7 +273,7 @@ export class HomeworksService {
           },
         },
 
-        content: dto.answer,
+        content: dto.content.trim(),
 
         status: 'SUBMITTED',
 
@@ -290,6 +294,34 @@ export class HomeworksService {
         },
       },
     });
+  }
+  async removeHomework(homeworkId: string, teacherId: string) {
+    const homework = await this.prisma.homework.findFirst({
+      where: {
+        id: homeworkId,
+        teacherId,
+      },
+
+      select: {
+        id: true,
+        title: true,
+      },
+    });
+
+    if (!homework) {
+      throw new NotFoundException('Домашнее задание не найдено или недоступно');
+    }
+
+    await this.prisma.homework.delete({
+      where: {
+        id: homeworkId,
+      },
+    });
+
+    return {
+      success: true,
+      id: homeworkId,
+    };
   }
   findMyTeacherHomeworks(teacherId: string) {
     return this.prisma.homework.findMany({
