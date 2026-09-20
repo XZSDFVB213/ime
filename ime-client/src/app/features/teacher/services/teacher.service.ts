@@ -12,7 +12,6 @@ export interface TeacherSemester {
   };
 }
 
-
 export interface CreateLessonDto {
   subjectId: string;
   groupId: string;
@@ -20,11 +19,7 @@ export interface CreateLessonDto {
 
   title: string;
 
-  type:
-    | 'LECTURE'
-    | 'PRACTICE'
-    | 'SEMINAR'
-    | 'LAB';
+  type: 'LECTURE' | 'PRACTICE' | 'SEMINAR' | 'LAB' | 'CONSULTATION' | 'CREDIT' | 'EXAM';
 
   date: string;
   duration: number;
@@ -82,33 +77,19 @@ export interface TeacherSubject {
 export class TeacherService {
   private http = inject(HttpClient);
 
-getSubjects() {
-  return this.http.get<
-    TeacherSubject[]
-  >(
-    `${environment.api}/subject-teachers/subjects`,
-  );
-}
+  getSubjects() {
+    return this.http.get<TeacherSubject[]>(`${environment.api}/subject-teachers/subjects`);
+  }
   getMe() {
     return this.http.get<any>(`${environment.api}/auth/me`);
   }
-getSemesters() {
-  return this.http.get<
-    TeacherSemester[]
-  >(
-    `${environment.api}/lessons/teacher/semesters`,
-  );
-}
+  getSemesters() {
+    return this.http.get<TeacherSemester[]>(`${environment.api}/lessons/teacher/semesters`);
+  }
 
-
-createLesson(
-  dto: CreateLessonDto,
-) {
-  return this.http.post<any>(
-    `${environment.api}/lessons`,
-    dto,
-  );
-}
+  createLesson(dto: CreateLessonDto) {
+    return this.http.post<any>(`${environment.api}/lessons`, dto);
+  }
   getLessons() {
     return this.http.get<any[]>(`${environment.api}/lessons/teacher/my-lessons`);
   }
