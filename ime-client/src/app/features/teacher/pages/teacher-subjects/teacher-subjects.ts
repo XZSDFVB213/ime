@@ -51,7 +51,6 @@ export class TeacherSubjects {
   private readonly service =
     inject(TeacherService);
 
-
   readonly subjects =
     signal<
       TeacherSubject[]
@@ -78,7 +77,7 @@ export class TeacherSubjects {
             'ru',
           );
 
-
+        
       if (!query) {
         return this.subjects();
       }
@@ -117,7 +116,7 @@ export class TeacherSubjects {
         );
     });
 
-
+  
   readonly groupsCount =
     computed(() => {
       const ids =
@@ -138,6 +137,7 @@ export class TeacherSubjects {
 
   constructor() {
     this.loadSubjects();
+    console.log(this.filteredSubjects)
   }
 
 
