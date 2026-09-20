@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -84,7 +84,9 @@ export class TeacherCreateHomework {
   constructor() {
     this.loadLessons();
   }
-
+  readonly homeworkLessons = computed(() => {
+    return this.lessons().filter((lesson) => lesson.type !== 'CREDIT' && lesson.type !== 'EXAM');
+  });
   selectedLesson(): any | null {
     const lessonId = this.form.controls.lessonId.value;
 

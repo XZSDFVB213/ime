@@ -138,7 +138,9 @@ export class TeacherService {
   }) {
     return this.http.post<any>(`${environment.api}/materials/link`, dto);
   }
-
+  deleteHomework(homeworkId: string) {
+    return this.http.delete(`${environment.api}/homeworks/${homeworkId}`);
+  }
   uploadMaterial(formData: FormData) {
     return this.http.post<any>(`${environment.api}/materials/upload`, formData);
   }
