@@ -12,9 +12,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
-import { TeacherService } from '../../services/teacher.service';
+import { TeacherService, TeacherSubject } from '../../services/teacher.service';
 import { environment } from '../../../../environments/environment';
-
 
 type MaterialMode = 'FILE' | 'LINK';
 
@@ -62,7 +61,7 @@ export class TeacherMaterials {
   readonly search = signal('');
 
   readonly selectedFile = signal<File | null>(null);
-
+  readonly subjects = signal<TeacherSubject[]>([]);
   readonly form = new FormGroup({
     title: new FormControl('', {
       nonNullable: true,
@@ -85,20 +84,6 @@ export class TeacherMaterials {
     url: new FormControl('', {
       nonNullable: true,
     }),
-  });
-
-  readonly subjects = computed(() => {
-    const map = new Map<string, any>();
-
-    for (const lesson of this.lessons()) {
-      if (lesson.subject?.id) {
-        map.set(lesson.subject.id, lesson.subject);
-      }
-    }
-
-    return Array.from(map.values()).sort((first, second) =>
-      first.name.localeCompare(second.name, 'ru'),
-    );
   });
 
   readonly availableLessons = computed(() => {
@@ -220,7 +205,17 @@ export class TeacherMaterials {
       this.form.controls.title.setValue(name);
     }
   }
+  readonly subjectLessons = computed(() => {
+    const subjectId = this.form.controls.subjectId.value;
 
+    if (!subjectId) {
+      return [];
+    }
+
+    return this.lessons().filter(
+      (lesson) => lesson.subjectId === subjectId || lesson.subject?.id === subjectId,
+    );
+  });
   submit(): void {
     if (this.form.invalid || this.saving()) {
       this.form.markAllAsTouched();
@@ -476,22 +471,30 @@ export class TeacherMaterials {
     this.error.set(null);
 
     forkJoin({
+      subjects: this.teacherService.getSubjects().pipe(catchError(() => of([]))),
+
       materials: this.teacherService.getMaterials().pipe(catchError(() => of([]))),
 
       lessons: this.teacherService.getLessons().pipe(catchError(() => of([]))),
     })
-      .pipe(finalize(() => this.loading.set(false)))
+      .pipe(
+        finalize(() => {
+          this.loading.set(false);
+        }),
+      )
       .subscribe({
-        next: ({ materials, lessons }) => {
+        next: ({ subjects, materials, lessons }) => {
+          this.subjects.set(subjects ?? []);
+
           this.materials.set(materials ?? []);
 
           this.lessons.set(lessons ?? []);
         },
 
         error: (error) => {
-          console.error(error);
+          console.error('Ошибка загрузки материалов', error);
 
-          this.error.set('Не удалось загрузить материалы');
+          this.error.set('Не удалось загрузить данные');
         },
       });
   }
