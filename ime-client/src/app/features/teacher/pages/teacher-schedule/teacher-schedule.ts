@@ -137,42 +137,60 @@ export class TeacherSchedule {
   }
 
   lessonType(type: string): string {
-    switch (type) {
-      case 'LECTURE':
-        return 'Лекция';
+  switch (type) {
+    case 'LECTURE':
+      return 'Лекция';
 
-      case 'PRACTICE':
-        return 'Практическое занятие';
+    case 'PRACTICE':
+      return 'Практическое занятие';
 
-      case 'SEMINAR':
-        return 'Семинар';
+    case 'SEMINAR':
+      return 'Семинар';
 
-      case 'LAB':
-        return 'Лабораторная работа';
+    case 'LAB':
+      return 'Лабораторная работа';
 
-      default:
-        return 'Занятие';
-    }
+    case 'CONSULTATION':
+      return 'Консультация';
+
+    case 'CREDIT':
+      return 'Зачёт';
+
+    case 'EXAM':
+      return 'Экзамен';
+
+    default:
+      return 'Занятие';
   }
+}
 
   lessonTypeClass(type: string): string {
-    switch (type) {
-      case 'LECTURE':
-        return 'lecture';
+  switch (type) {
+    case 'LECTURE':
+      return 'Лекция';
 
-      case 'PRACTICE':
-        return 'practice';
+    case 'PRACTICE':
+      return 'Практическое занятие';
 
-      case 'SEMINAR':
-        return 'seminar';
+    case 'SEMINAR':
+      return 'Семинар';
 
-      case 'LAB':
-        return 'lab';
+    case 'LAB':
+      return 'Лабораторная работа';
 
-      default:
-        return 'default';
-    }
+    case 'CONSULTATION':
+      return 'Консультация';
+
+    case 'CREDIT':
+      return 'Зачёт';
+
+    case 'EXAM':
+      return 'Экзамен';
+
+    default:
+      return 'Занятие';
   }
+}
 
   isToday(date: Date): boolean {
     return this.isSameDay(date, new Date());

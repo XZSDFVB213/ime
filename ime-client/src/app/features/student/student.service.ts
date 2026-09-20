@@ -59,15 +59,15 @@ getSubjects() {
   getHomework(id: string) {
     return this.http.get<any>(`${environment.api}/homeworks/my-homeworks/${id}`);
   }
-
+  getSubjectMaterials(subjectId: string) {
+    return this.http.get<any[]>(`${environment.api}/materials/student/by-subject/${subjectId}`);
+  }
   submitHomework(homeworkId: string, content: string) {
     return this.http.post<any>(`${environment.api}/homeworks/${homeworkId}/pass`, {
       content,
     });
   }
   getMaterials() {
-  return this.http.get<any[]>(
-    `${environment.api}/materials/my-materials`,
-  );
-}
+    return this.http.get<any[]>(`${environment.api}/materials/my-materials`);
+  }
 }

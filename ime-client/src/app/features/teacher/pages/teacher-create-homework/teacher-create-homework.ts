@@ -1,37 +1,22 @@
-import {
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import {
-  ActivatedRoute,
-  Router,
-  RouterLink,
-} from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { DatePipe } from '@angular/common';
 
 import { MatIconModule } from '@angular/material/icon';
+
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {
-  MatSnackBar,
-  MatSnackBarModule,
-} from '@angular/material/snack-bar';
+
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { TeacherService } from '../../services/teacher.service';
 
-
 @Component({
   selector: 'app-create-homework',
+
   standalone: true,
 
   imports: [
@@ -44,117 +29,79 @@ import { TeacherService } from '../../services/teacher.service';
   ],
 
   templateUrl: './teacher-create-homework.html',
+
   styleUrl: './teacher-create-homework.scss',
 })
 export class TeacherCreateHomework {
-  private readonly route =
-    inject(ActivatedRoute);
+  private readonly route = inject(ActivatedRoute);
 
-  private readonly router =
-    inject(Router);
+  private readonly router = inject(Router);
 
-  private readonly teacherService =
-    inject(TeacherService);
+  private readonly teacherService = inject(TeacherService);
 
-  private readonly snackBar =
-    inject(MatSnackBar);
+  private readonly snackBar = inject(MatSnackBar);
 
+  readonly lessons = signal<any[]>([]);
 
-  readonly lessons =
-    signal<any[]>([]);
+  readonly loading = signal(true);
 
-  readonly loading =
-    signal(true);
+  readonly submitting = signal(false);
 
-  readonly submitting =
-    signal(false);
-
-  readonly error =
-    signal<string | null>(null);
-
+  readonly error = signal<string | null>(null);
 
   readonly form = new FormGroup({
-  lessonId: new FormControl('', {
-    nonNullable: true,
-    validators: [
-      Validators.required,
-    ],
-  }),
+    lessonId: new FormControl('', {
+      nonNullable: true,
 
-  title: new FormControl('', {
-    nonNullable: true,
-    validators: [
-      Validators.required,
-      Validators.minLength(3),
-      Validators.maxLength(150),
-    ],
-  }),
+      validators: [Validators.required],
+    }),
 
-  description: new FormControl('', {
-    nonNullable: true,
-    validators: [
-      Validators.required,
-      Validators.minLength(5),
-    ],
-  }),
+    title: new FormControl('', {
+      nonNullable: true,
 
-  deadline: new FormControl('', {
-    nonNullable: true,
-    validators: [
-      Validators.required,
-    ],
-  }),
+      validators: [Validators.required, Validators.minLength(3), Validators.maxLength(150)],
+    }),
 
-  maxScore: new FormControl(100, {
-    nonNullable: true,
-    validators: [
-      Validators.required,
-      Validators.min(1),
-      Validators.max(1000),
-    ],
-  }),
-});
-selectedLesson(): any | null {
-  const lessonId =
-    this.form.controls.lessonId.value;
+    description: new FormControl('', {
+      nonNullable: true,
 
-  if (!lessonId) {
-    return null;
-  }
+      validators: [Validators.required, Validators.minLength(5)],
+    }),
 
-  return (
-    this.lessons().find(
-      (lesson) =>
-        lesson.id === lessonId,
-    ) ?? null
-  );
-}
+    deadline: new FormControl('', {
+      nonNullable: true,
 
+      validators: [Validators.required],
+    }),
+
+    maxScore: new FormControl(100, {
+      nonNullable: true,
+
+      validators: [Validators.required, Validators.min(1), Validators.max(1000)],
+    }),
+  });
 
   constructor() {
     this.loadLessons();
   }
 
+  selectedLesson(): any | null {
+    const lessonId = this.form.controls.lessonId.value;
 
-  lessonEndTime(
-    lesson: any,
-  ): Date {
-    const start =
-      new Date(lesson.date);
+    if (!lessonId) {
+      return null;
+    }
 
-    return new Date(
-      start.getTime() +
-        Number(
-          lesson.duration ?? 90,
-        ) *
-          60_000,
-    );
+    return this.lessons().find((lesson) => lesson.id === lessonId) ?? null;
   }
 
+  lessonEndTime(lesson: any): Date {
+    const start = new Date(lesson.date);
 
-  lessonType(
-    type: string,
-  ): string {
+    return new Date(start.getTime() + Number(lesson.duration ?? 90) * 60_000);
+  }
+
+  lessonType(type: string): string {
     switch (type) {
       case 'LECTURE':
         return 'Лекция';
@@ -168,144 +115,91 @@ selectedLesson(): any | null {
       case 'LAB':
         return 'Лабораторная работа';
 
+      case 'CONSULTATION':
+        return 'Консультация';
+
+      case 'CREDIT':
+        return 'Зачёт';
+
+      case 'EXAM':
+        return 'Экзамен';
+
       default:
         return 'Занятие';
     }
   }
 
-
   submit(): void {
-    if (
-      this.form.invalid ||
-      this.submitting()
-    ) {
+    if (this.form.invalid || this.submitting()) {
       this.form.markAllAsTouched();
 
       return;
     }
 
+    const { lessonId, title, description, deadline, maxScore } = this.form.getRawValue();
 
-    const {
-      lessonId,
-      title,
-      description,
-      deadline,
-      maxScore,
-    } = this.form.getRawValue();
-
-
-    const lesson =
-      this.lessons().find(
-        (item) =>
-          item.id === lessonId,
-      );
-
+    const lesson = this.lessons().find((item) => item.id === lessonId);
 
     if (!lesson) {
-      this.snackBar.open(
-        'Выберите занятие',
-        'Закрыть',
-        {
-          duration: 3000,
-        },
-      );
+      this.snackBar.open('Выберите занятие', 'Закрыть', {
+        duration: 3000,
+      });
 
       return;
     }
 
+    const deadlineDate = new Date(deadline);
 
-    const deadlineDate =
-      new Date(deadline);
-
-
-    if (
-      Number.isNaN(
-        deadlineDate.getTime(),
-      )
-    ) {
-      this.snackBar.open(
-        'Укажите корректный срок сдачи',
-        'Закрыть',
-        {
-          duration: 3000,
-        },
-      );
+    if (Number.isNaN(deadlineDate.getTime())) {
+      this.snackBar.open('Укажите корректный срок сдачи', 'Закрыть', {
+        duration: 3000,
+      });
 
       return;
     }
 
-
-    if (
-      deadlineDate.getTime() <=
-      Date.now()
-    ) {
-      this.snackBar.open(
-        'Срок сдачи должен быть в будущем',
-        'Закрыть',
-        {
-          duration: 3500,
-        },
-      );
+    if (deadlineDate.getTime() <= Date.now()) {
+      this.snackBar.open('Срок сдачи должен быть в будущем', 'Закрыть', {
+        duration: 3500,
+      });
 
       return;
     }
-
 
     this.submitting.set(true);
 
-
     this.teacherService
       .createHomework({
-        lessonId:
-          lesson.id,
+        lessonId: lesson.id,
 
-        subjectId:
-          lesson.subject.id,
+        subjectId: lesson.subject.id,
 
-        title:
-          title.trim(),
+        title: title.trim(),
 
-        description:
-          description.trim(),
+        description: description.trim(),
 
-        deadline:
-          deadlineDate.toISOString(),
+        deadline: deadlineDate.toISOString(),
 
         maxScore,
       })
       .subscribe({
         next: (homework) => {
-          this.submitting.set(
-            false,
-          );
+          this.submitting.set(false);
 
-          this.snackBar.open(
-            'Домашнее задание создано',
-            'Закрыть',
-            {
-              duration: 2500,
-            },
-          );
+          this.snackBar.open('Домашнее задание создано', 'Закрыть', {
+            duration: 2500,
+          });
 
-          this.router.navigate([
-            '/teacher/homeworks',
-            homework.id,
-          ]);
+          this.router.navigate(['/teacher/homeworks', homework.id]);
         },
 
         error: (error) => {
-          console.error(
-            'Ошибка создания задания',
-            error,
-          );
+          console.error('Ошибка создания задания', error);
 
-          this.submitting.set(
-            false,
-          );
+          this.submitting.set(false);
 
           this.snackBar.open(
-            error.error?.message ??
-              'Не удалось создать домашнее задание',
+            error.error?.message ?? 'Не удалось создать домашнее задание',
             'Закрыть',
             {
               duration: 4000,
@@ -315,63 +209,35 @@ selectedLesson(): any | null {
       });
   }
 
-
   private loadLessons(): void {
     this.loading.set(true);
     this.error.set(null);
 
+    this.teacherService.getLessons().subscribe({
+      next: (lessons) => {
+        this.lessons.set(lessons ?? []);
 
-    this.teacherService
-      .getLessons()
-      .subscribe({
-        next: (lessons) => {
-          this.lessons.set(
-            lessons ?? [],
-          );
+        /*
+         * Если пришли со страницы
+         * конкретного занятия —
+         * выбираем его автоматически.
+         */
+        const lessonId = this.route.snapshot.paramMap.get('lessonId');
 
+        if (lessonId && lessons.some((lesson) => lesson.id === lessonId)) {
+          this.form.controls.lessonId.setValue(lessonId);
+        }
 
-          /*
-           * Если пришли со страницы
-           * конкретного занятия,
-           * выбираем его автоматически.
-           */
-          const lessonId =
-            this.route.snapshot
-              .paramMap
-              .get('lessonId');
+        this.loading.set(false);
+      },
 
+      error: (error) => {
+        console.error(error);
 
-          if (
-            lessonId &&
-            lessons.some(
-              (lesson) =>
-                lesson.id ===
-                lessonId,
-            )
-          ) {
-            this.form.controls
-              .lessonId
-              .setValue(
-                lessonId,
-              );
-          }
+        this.error.set(error.error?.message ?? 'Не удалось загрузить занятия');
 
-
-          this.loading.set(false);
-        },
-
-        error: (error) => {
-          console.error(
-            error,
-          );
-
-          this.error.set(
-            error.error?.message ??
-              'Не удалось загрузить занятия',
-          );
-
-          this.loading.set(false);
-        },
-      });
+        this.loading.set(false);
+      },
+    });
   }
 }

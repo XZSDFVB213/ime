@@ -292,23 +292,32 @@ readonly subject =
   }
 
   lessonType(type: string): string {
-    switch (type) {
-      case 'LECTURE':
-        return 'Лекция';
+  switch (type) {
+    case 'LECTURE':
+      return 'Лекция';
 
-      case 'PRACTICE':
-        return 'Практика';
+    case 'PRACTICE':
+      return 'Практическое занятие';
 
-      case 'SEMINAR':
-        return 'Семинар';
+    case 'SEMINAR':
+      return 'Семинар';
 
-      case 'LAB':
-        return 'Лабораторная';
+    case 'LAB':
+      return 'Лабораторная работа';
 
-      default:
-        return 'Занятие';
-    }
+    case 'CONSULTATION':
+      return 'Консультация';
+
+    case 'CREDIT':
+      return 'Зачёт';
+
+    case 'EXAM':
+      return 'Экзамен';
+
+    default:
+      return 'Занятие';
   }
+}
 
   homeworkPendingCount(homework: any): number {
     return (
