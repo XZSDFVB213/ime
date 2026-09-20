@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   Controller,
   Get,
@@ -19,13 +21,12 @@ import { SaveLessonAssessmentsDto } from './dto/save-lesson-assessments.dto';
 @Controller('lessons')
 export class LessonsController {
   constructor(private readonly lessonsService: LessonsService) {}
-@Get('teacher/semesters')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.TEACHER)
-getSemesters() {
-  return this.lessonsService
-    .getSemesters();
-}
+  @Get('teacher/semesters')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TEACHER)
+  getSemesters() {
+    return this.lessonsService.getSemesters();
+  }
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)

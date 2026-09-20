@@ -345,57 +345,45 @@ export class AdminService {
     });
   }
 
-  async createAcademicYear(
-  dto: CreateAcademicYearDto,
-) {
-  const existing =
-    await this.prisma.academicYear
-      .findUnique({
-        where: {
+  async createAcademicYear(dto: CreateAcademicYearDto) {
+    const existing = await this.prisma.academicYear.findUnique({
+      where: {
+        year: dto.year,
+      },
+
+      select: {
+        id: true,
+      },
+    });
+
+    if (existing) {
+      throw new ConflictException(
+        `Учебный год ${dto.year}/${dto.year + 1} уже существует`,
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const academicYear = await tx.academicYear.create({
+        data: {
           year: dto.year,
         },
-
-        select: {
-          id: true,
-        },
       });
-
-
-  if (existing) {
-    throw new ConflictException(
-      `Учебный год ${dto.year}/${dto.year + 1} уже существует`,
-    );
-  }
-
-
-  return this.prisma.$transaction(
-    async (tx) => {
-      const academicYear =
-        await tx.academicYear.create({
-          data: {
-            year: dto.year,
-          },
-        });
-
 
       await tx.semester.createMany({
         data: [
           {
             name: '1 семестр',
             number: 1,
-            academicYearId:
-              academicYear.id,
+            academicYearId: academicYear.id,
           },
 
           {
             name: '2 семестр',
             number: 2,
-            academicYearId:
-              academicYear.id,
+            academicYearId: academicYear.id,
           },
         ],
       });
-
 
       return tx.academicYear.findUnique({
         where: {
@@ -410,45 +398,43 @@ export class AdminService {
           },
         },
       });
-    },
-  );
-}
+    });
+  }
 
+  getAcademicYears() {
+    return this.prisma.academicYear.findMany({
+      include: {
+        semesters: {
+          orderBy: {
+            number: 'asc',
+          },
+        },
+      },
 
-getAcademicYears() {
-  return this.prisma.academicYear.findMany({
-    include: {
-      semesters: {
-        orderBy: {
+      orderBy: {
+        year: 'desc',
+      },
+    });
+  }
+  getSemesters() {
+    return this.prisma.semester.findMany({
+      include: {
+        academicYear: true,
+      },
+
+      orderBy: [
+        {
+          academicYear: {
+            year: 'desc',
+          },
+        },
+        {
           number: 'asc',
         },
-      },
-    },
+      ],
+    });
+  }
 
-    orderBy: {
-      year: 'desc',
-    },
-  });
-}
- getSemesters() {
-  return this.prisma.semester.findMany({
-    include: {
-      academicYear: true,
-    },
-
-    orderBy: [
-      {
-        academicYear: {
-          year: 'desc',
-        },
-      },
-      {
-        number: 'asc',
-      },
-    ],
-  });
-}
-  
   // ==========================================
   // CREATE STUDENT
   // ==========================================
