@@ -11,6 +11,7 @@ import {
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 
 import { Role } from '@prisma/client';
@@ -52,32 +53,28 @@ import { CreateAcademicYearDto } from './dto/create-academic-year.dto';
 @Roles(Role.ADMIN)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
-@Post('academic-years')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
-createAcademicYear(
-  @Body()
-  dto: CreateAcademicYearDto,
-) {
-  return this.adminService
-    .createAcademicYear(dto);
-}
+  @Post('academic-years')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  createAcademicYear(
+    @Body()
+    dto: CreateAcademicYearDto,
+  ) {
+    return this.adminService.createAcademicYear(dto);
+  }
 
-
-@Get('academic-years')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
-getAcademicYears() {
-  return this.adminService
-    .getAcademicYears();
-}
-@Get('semesters')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
-getSemesters() {
-  return this.adminService
-    .getSemesters();
-}
+  @Get('academic-years')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  getAcademicYears() {
+    return this.adminService.getAcademicYears();
+  }
+  @Get('semesters')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  getSemesters() {
+    return this.adminService.getSemesters();
+  }
   @Get('disciplines')
   getDisciplines() {
     return this.adminService.getDisciplines();
@@ -199,8 +196,7 @@ getSemesters() {
 
   @Post('materials/link')
   createLinkMaterial(
-    @CurrentUser('id')
-    userId: string,
+    @Req() req: any,
 
     @Body()
     dto: {
@@ -210,7 +206,7 @@ getSemesters() {
       url: string;
     },
   ) {
-    return this.adminService.createLinkMaterial(userId, dto);
+    return this.adminService.createLinkMaterial(req.user.id, dto);
   }
 
   @Post('materials/file')
@@ -219,7 +215,7 @@ getSemesters() {
       storage: diskStorage({
         destination: './uploads/materials',
 
-        filename: (request, file, callback) => {
+        filename: (_request, file, callback) => {
           const extension = extname(file.originalname);
 
           callback(null, `${randomUUID()}${extension}`);
@@ -228,8 +224,7 @@ getSemesters() {
     }),
   )
   createFileMaterial(
-    @CurrentUser('id')
-    userId: string,
+    @Req() req: any,
 
     @Body()
     dto: {
@@ -245,7 +240,7 @@ getSemesters() {
       throw new BadRequestException('Файл не передан');
     }
 
-    return this.adminService.createFileMaterial(userId, dto, file);
+    return this.adminService.createFileMaterial(req.user.id, dto, file);
   }
 
   @Delete('materials/:materialId')
