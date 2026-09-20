@@ -140,28 +140,29 @@ model Material {
   title       String
   description String?
   type        MaterialType
-  url         String
 
+  url      String
   fileName String?
   mimeType String?
   size     Int?
 
-  subjectId String
-  lessonId  String?
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+
+  lessonId String?
+  lesson   Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
 
   teacherId String?
-  teacher   Teacher? @relation(fields: [teacherId], references: [id])
+  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
 
   uploadedByUserId String?
-  uploadedByUser   User?   @relation("MaterialUploadedBy", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
 
-  subject Subject @relation(fields: [subjectId], references: [id])
-  lesson  Lesson? @relation(fields: [lessonId], references: [id])
+  uploadedByUser User? @relation("MaterialUploadedBy", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    String?
+  Group     Group?   @relation(fields: [groupId], references: [id])
+  groupId   String?
 }
 
 // ====================== USERS ======================
@@ -189,7 +190,6 @@ model User {
   conferenceMembers  ConferenceMember[]
   notifications      Notification[]
   attachments        MessageAttachment[]
-  materials          Material[]
   uploadedMaterials  Material[]          @relation("MaterialUploadedBy")
 
   @@index([email])
@@ -265,6 +265,7 @@ model Group {
   subjects                GroupSubject[]
   lessons                 Lesson[]
   teacherDisciplineGroups TeacherDisciplineGroup[]
+  materials               Material[]
 
   @@unique([name, departmentId])
   @@map("groups")
