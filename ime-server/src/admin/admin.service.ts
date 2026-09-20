@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { Role, UserStatus } from '@prisma/client';
+import { MaterialType, Role, UserStatus } from '@prisma/client';
 
 import * as bcrypt from 'bcrypt';
 
@@ -25,6 +25,7 @@ import { CreateFacultyDto } from './dto/create-faculty.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { CreateAcademicYearDto } from './dto/create-academic-year.dto';
+import { CreateLinkMaterialDto } from 'src/materials/dto/create-link-material.dto';
 
 @Injectable()
 export class AdminService {
@@ -973,24 +974,17 @@ export class AdminService {
     });
   }
 
-  async createLinkMaterial(
-    adminUserId: string,
+  async createLinkMaterial(adminUserId: string, dto: CreateLinkMaterialDto) {
+    if (dto.subjectId) {
+      const subject = await this.prisma.subject.findUnique({
+        where: {
+          id: dto.subjectId,
+        },
+      });
 
-    dto: {
-      title: string;
-      description?: string;
-      subjectId: string;
-      url: string;
-    },
-  ) {
-    const subject = await this.prisma.subject.findUnique({
-      where: {
-        id: dto.subjectId,
-      },
-    });
-
-    if (!subject) {
-      throw new NotFoundException('Дисциплина не найдена');
+      if (!subject) {
+        throw new NotFoundException('Дисциплина не найдена');
+      }
     }
 
     return this.prisma.material.create({
@@ -999,28 +993,22 @@ export class AdminService {
 
         description: dto.description?.trim() || null,
 
-        type: 'LINK',
+        type: MaterialType.LINK,
 
         url: dto.url.trim(),
 
-        subjectId: dto.subjectId,
-
-        lessonId: null,
+        subjectId: dto.subjectId ?? null,
 
         teacherId: null,
+
+        lessonId: null,
 
         uploadedByUserId: adminUserId,
       },
 
       include: {
         subject: true,
-
-        uploadedByUser: {
-          select: {
-            id: true,
-            fullName: true,
-          },
-        },
+        uploadedByUser: true,
       },
     });
   }
@@ -1035,23 +1023,25 @@ export class AdminService {
 
     file: Express.Multer.File,
   ) {
-    const subject = await this.prisma.subject.findUnique({
-      where: {
-        id: dto.subjectId,
-      },
-    });
+    if (dto.subjectId) {
+      const subject = await this.prisma.subject.findUnique({
+        where: {
+          id: dto.subjectId,
+        },
+      });
 
-    if (!subject) {
-      throw new NotFoundException('Дисциплина не найдена');
+      if (!subject) {
+        throw new NotFoundException('Дисциплина не найдена');
+      }
     }
 
-    return this.prisma.material.create({
+    const material = await this.prisma.material.create({
       data: {
         title: dto.title.trim(),
 
         description: dto.description?.trim() || null,
 
-        type: 'FILE',
+        type: MaterialType.FILE,
 
         url: `/uploads/materials/${file.filename}`,
 
@@ -1061,11 +1051,11 @@ export class AdminService {
 
         size: file.size,
 
-        subjectId: dto.subjectId,
-
-        lessonId: null,
+        subjectId: dto.subjectId ?? null,
 
         teacherId: null,
+
+        lessonId: null,
 
         uploadedByUserId: adminUserId,
       },
@@ -1073,14 +1063,17 @@ export class AdminService {
       include: {
         subject: true,
 
-        uploadedByUser: {
-          select: {
-            id: true,
-            fullName: true,
+        teacher: {
+          include: {
+            user: true,
           },
         },
+
+        uploadedByUser: true,
       },
     });
+
+    return material;
   }
   async updateStudent(studentId: string, dto: UpdateStudentDto) {
     const student = await this.prisma.student.findUnique({
