@@ -134,74 +134,104 @@ export class TeacherCreateHomework {
   submit(): void {
     if (this.form.invalid || this.submitting()) {
       this.form.markAllAsTouched();
-
+  
       return;
     }
-
-    const { lessonId, title, description, deadline, maxScore } = this.form.getRawValue();
-
-    const lesson = this.lessons().find((item) => item.id === lessonId);
-
+  
+    const {
+      lessonId,
+      title,
+      description,
+      deadline,
+      maxScore,
+    } = this.form.getRawValue();
+  
+    const lesson =
+      this.lessons().find(
+        (item) => item.id === lessonId,
+      );
+  
     if (!lesson) {
-      this.snackBar.open('Выберите занятие', 'Закрыть', {
-        duration: 3000,
-      });
-
+      this.snackBar.open(
+        'Выберите занятие',
+        'Закрыть',
+        {
+          duration: 3000,
+        },
+      );
+  
       return;
     }
-
-    const deadlineDate = new Date(deadline);
-
-    if (Number.isNaN(deadlineDate.getTime())) {
-      this.snackBar.open('Укажите корректный срок сдачи', 'Закрыть', {
-        duration: 3000,
-      });
-
+  
+    const deadlineDate =
+      new Date(deadline);
+  
+    if (
+      Number.isNaN(
+        deadlineDate.getTime(),
+      )
+    ) {
+      this.snackBar.open(
+        'Укажите корректный срок сдачи',
+        'Закрыть',
+        {
+          duration: 3000,
+        },
+      );
+  
       return;
     }
-
-    if (deadlineDate.getTime() <= Date.now()) {
-      this.snackBar.open('Срок сдачи должен быть в будущем', 'Закрыть', {
-        duration: 3500,
-      });
-
-      return;
-    }
-
+  
     this.submitting.set(true);
-
+  
     this.teacherService
       .createHomework({
-        lessonId: lesson.id,
-
-        subjectId: lesson.subject.id,
-
-        title: title.trim(),
-
-        description: description.trim(),
-
-        deadline: deadlineDate.toISOString(),
-
+        lessonId:
+          lesson.id,
+  
+        subjectId:
+          lesson.subject.id,
+  
+        title:
+          title.trim(),
+  
+        description:
+          description.trim(),
+  
+        deadline:
+          deadlineDate.toISOString(),
+  
         maxScore,
       })
       .subscribe({
         next: (homework) => {
           this.submitting.set(false);
-
-          this.snackBar.open('Домашнее задание создано', 'Закрыть', {
-            duration: 2500,
-          });
-
-          this.router.navigate(['/teacher/homeworks', homework.id]);
-        },
-
-        error: (error) => {
-          console.error('Ошибка создания задания', error);
-
-          this.submitting.set(false);
-
+  
           this.snackBar.open(
-            error.error?.message ?? 'Не удалось создать домашнее задание',
+            'Домашнее задание создано',
+            'Закрыть',
+            {
+              duration: 2500,
+            },
+          );
+  
+          this.router.navigate([
+            '/teacher/homeworks',
+            homework.id,
+          ]);
+        },
+  
+        error: (error) => {
+          console.error(
+            'Ошибка создания задания',
+            error,
+          );
+  
+          this.submitting.set(false);
+  
+          this.snackBar.open(
+            error.error?.message ??
+              'Не удалось создать домашнее задание',
             'Закрыть',
             {
               duration: 4000,
@@ -210,7 +240,6 @@ export class TeacherCreateHomework {
         },
       });
   }
-
   private loadLessons(): void {
     this.loading.set(true);
     this.error.set(null);
